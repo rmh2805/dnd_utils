@@ -1,8 +1,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "charData.h"
+
 int main() {
-    printf("foo bar baz\n");
-    return EXIT_SUCCESS;    
+    printf("%lu\n", sizeof(character_t));
+    return EXIT_SUCCESS;
 }
 
