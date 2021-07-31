@@ -24,14 +24,23 @@ typedef struct character_s {
     // Stat tracking
     unsigned int inspiration;       // Tracks inspiration
     unsigned int exp;               // Tracks current experience
-
-    unsigned char abilityScores[6]; // Tracks ability scores
-                                    // Order: Str, Dex, Con, Int, Wis, Cha
+    unsigned int armorClass;        // Tracks current armor class
+    unsigned int speed;             // Tracks current speed
     
     // HP tracking
     unsigned int maxHp;             // Max HP
     unsigned int curHp;             // Current HP
     unsigned int tempHp;            // Temporary HP
+
+    // Misc tracking
+    unsigned int moneyTrack[5];     // Order: CP, SP, EP, GP, PP
+    unsigned int passiveWis;        // Tracks passive wisdom
+    int          initiativeMod;     // Tracks initiative modifier
+
+    // Tracking for stat definition
+    unsigned char abilityScores[6]; // Tracks ability scores
+                                    // Order: Str, Dex, Con, Int, Wis, Cha
+    unsigned int profBonus;         // Tracks proficiency bonus
 
     // Hit dice tracking (order: d4, d6, d8, d10, d12, d20)
     unsigned int maxHitDice[6];     // Max number of hit dice of each type
