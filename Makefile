@@ -29,7 +29,7 @@ all: charCreator
 #
 #	Executables
 #
-charCreator: charCreator.o charData.o
+charCreator: charCreator.o charData.o fs_unix.o
 	$(CC) $(CFLAGS) $(CDEBUGFLAGS) -o $@ $^ $(CLIBS)
 	$(ECHO)
 
