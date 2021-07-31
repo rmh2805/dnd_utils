@@ -11,28 +11,33 @@ typedef enum alignment_e {
 } alignment_t;
 
 typedef struct character_s {
-    // Basic Biographical info
-    char * name;
-    char * playerName;
+    char * savePath;                // The path of this character's save dir
+    
+    // Basic info
+    char * name;                    // This character's name
+    char * playerName;              // This character's player's name
 
     // Core progression info
-    char * class;
-    char * race;
-    char * background;
+    char * race;                    // Character race
+    char * background;              // Character background
 
     // Stat tracking
-    unsigned int inspiration;
-    unsigned int exp;
-    unsigned char abilityScores[6];
+    unsigned int inspiration;       // Tracks inspiration
+    unsigned int exp;               // Tracks current experience
+
+    unsigned char abilityScores[6]; // Tracks ability scores
+                                    // Order: Str, Dex, Con, Int, Wis, Cha
     
     // HP tracking
-    unsigned int maxHp;
-    unsigned int curHp;
-    unsigned int tempHp;
-    unsigned int hitDice;
-    unsigned int hitDieType;
+    unsigned int maxHp;             // Max HP
+    unsigned int curHp;             // Current HP
+    unsigned int tempHp;            // Temporary HP
 
-    // Saving Throw Proficiencies
+    // Hit dice tracking (order: d4, d6, d8, d10, d12, d20)
+    unsigned int maxHitDice[6];     // Max number of hit dice of each type
+    unsigned int usedHitDice[6];    // Nr hit dice used of each type
+
+    // Saving Throw Proficiencies (boolean fields)
     unsigned char PStr: 1;
     unsigned char PDex: 1;
     unsigned char PCon: 1;
@@ -40,7 +45,7 @@ typedef struct character_s {
     unsigned char PWis: 1;
     unsigned char PCha: 1;
 
-    // Skill Proficiencies
+    // Skill Proficiencies (boolean fields)
     unsigned char PAcrobatics:1;
     unsigned char PAnimalHandling:1;
     unsigned char PArcana:1;
@@ -57,12 +62,6 @@ typedef struct character_s {
     unsigned char PSleightOfHand:1;
     unsigned char PStealth:1;
     unsigned char PSurvival:1;
-
-    // RP info
-    alignment_t alignment;
-    char * inventory;
-    char * spells;
-    char * info;
 
 } character_t;
 
