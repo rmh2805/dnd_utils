@@ -27,7 +27,13 @@ character_t mkBlankCharacter() {
  * @return An exit status (0 on success, <0 on failure)
  */
 int freeCharacterData(character_t character) {
-    return -1;
+    if(character.savePath != NULL) free(character.savePath);
+    if(character.name != NULL) free(character.name);
+    if(character.playerName != NULL) free(character.playerName);
+    if(character.race != NULL) free(character.race);
+    if(character.background != NULL) free(character.background);
+
+    return 0;
 }
 
 /**
