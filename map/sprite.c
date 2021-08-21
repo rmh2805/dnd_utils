@@ -2,8 +2,8 @@
 
 #define kEmptySprite (sprite_t) {0, 0, 0, 0, 0, NULL}
 
-sprite_t mkSprite(unsigned char width, unsigned char height, unsigned char xOff, unsigned char yOff) {
-    sprite_t sprite = {0, width, height, xOff, yOff, NULL};
+sprite_t mkSprite(int palette, unsigned char width, unsigned char height, unsigned char xOff, unsigned char yOff) {
+    sprite_t sprite = {palette, width, height, xOff, yOff, NULL};
 
     sprite.data = calloc(height, sizeof(char *));
     
@@ -62,8 +62,7 @@ sprite_t readSprite(FILE* file) {
     }
 
     // Create the basic struct
-    sprite_t sprite = mkSprite(width, height, xOff, yOff);
-    sprite.palette = palette;
+    sprite_t sprite = mkSprite(palette, width, height, xOff, yOff);
 
     //Read in the data from file
     for(int row = 0; row < sprite.height; row++) {
@@ -113,7 +112,7 @@ int writeSprite(FILE* file, sprite_t sprite) {
                 sprite.height, sprite.xOff, sprite.yOff);
     
     for(int row = 0; row < sprite.height; row++) {
-        for(int col = 0; row < sprite.width; col++) {
+        for(int col = 0; col < sprite.width; col++) {
             switch(sprite.data[row][col]) {
                 case 0:
                     fprintf(file, "\\0");   // prints as "\0"

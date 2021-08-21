@@ -19,17 +19,21 @@ CFLAGS=-Wall -std=c99 -Wextra -pedantic -ggdb
 #
 #	Main Target
 #
-main: sprite.o
+main: testSprite
 
 #
 #	Multiple Targets
 #
-all:
+all: tests
+
+tests: testSprite
 
 #
 #	Executables
 #
-
+testSprite: testSprite.o sprite.o
+	$(CC) $(CFLAGS) $(CDEBUGFLAGS) -o $@ $^ $(CLIBS)
+	$(ECHO)
 
 #
 #	Object Files
@@ -47,4 +51,5 @@ clean:
 	-rm *.o > /dev/null
 
 realclean: clean
+	-rm testSprite
 

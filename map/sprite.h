@@ -22,7 +22,7 @@ typedef struct sprite_s {
  * 
  * @return The allocated and initialized sprite
  */
-sprite_t mkSprite(unsigned char width, unsigned char height, unsigned char xOff, unsigned char yOff);
+sprite_t mkSprite(int palette, unsigned char width, unsigned char height, unsigned char xOff, unsigned char yOff);
 
 /**
  * Frees all data allocated for the sprite

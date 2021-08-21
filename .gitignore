@@ -1,3 +1,4 @@
 *.o
-charCreator
 .vscode
+character/charCreator
+map/testSprite
