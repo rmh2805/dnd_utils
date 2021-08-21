@@ -1,10 +1,5 @@
 #include "charData.h"
 
-// OS specific FS stuff
-#ifdef __unix__
-#include "fs_unix.h"
-#endif
-
 /**
  * Generates a null-initialized character
  * 

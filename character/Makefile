@@ -40,6 +40,8 @@ charCreator: charCreator.o charData.o fs_unix.o genUtils.o
 %.o: %.c
 	$(CC) $(CFLAGS) $(CDEBUGFLAGS) -c -o $@ $^
 
+fs_unix.o:
+	$(CC) $(CFLAGS) $(CDEBUGFLAGS) -c -o fs_unix.o ../common/fs_unix.c
 #
 #	Utils
 # 

@@ -1,5 +1,17 @@
 #include "fs_unix.h"
 
+bool checkDir(const char * path) {
+    struct stat st = {0};
+
+    // Return false on failure to read path
+    if(stat(path, &st) == -1) {
+        return false;
+    }
+
+    // Otherwise return true iff this is a directory
+    return S_ISDIR(st.st_mode);
+}
+
 int createDir(const char * path) {
     struct stat st = {0};
 

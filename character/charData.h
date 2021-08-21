@@ -4,10 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-// OS specific FS stuff
-#ifdef __unix__
-#include "fs_unix.h"
-#endif
+#include "../common/fs.h"
 
 typedef enum alignment_e {
     LawfulGood,    NeutralGood, ChaoticGood,

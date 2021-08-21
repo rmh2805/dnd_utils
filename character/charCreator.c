@@ -5,11 +5,7 @@
 
 #include "charData.h"
 #include "genUtils.h"
-
-// OS specific FS stuff
-#ifdef __unix__
-#include "fs_unix.h"
-#endif
+#include "../common/fs.h"
 
 // Input Values
 #define kReviewChar 'R'
