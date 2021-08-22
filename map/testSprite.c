@@ -66,28 +66,17 @@ int main() {
     // Test reading sprites from file
     fp = fopen(kOutFile, "r");
 
-    sprite = readSprite(fp);
-    if(sprite.data == NULL) {
-        fprintf(stderr, "*ERROR* in main: failed read first sprite from file\n");
-    }
-    
-    printf("First sprite read: \n\n");
-    printSprite(sprite);
-    printf("\n");
+    int i = 0;
+    for(sprite = readSprite(fp); sprite.data != NULL; sprite = readSprite(fp)) {
+        printf("Read in sprite number %d:\n\n", ++i);
+        printSprite(sprite);
+        printf("\n");
 
-    rmSprite(sprite);
-    sprite = readSprite(fp);
-    if(sprite.data == NULL) {
-        fprintf(stderr, "*ERROR* in main: failed read second sprite from file\n");
+        rmSprite(sprite);
     }
-    
-    printf("Second sprite read: \n\n");
-    printSprite(sprite);
-    printf("\n");
-
-    rmSprite(sprite);
-    fclose(fp);
+    printf("Read %d sprites total\n", i);
 
     //Cleanup and exit
+    fclose(fp);
     return EXIT_SUCCESS;
 }
