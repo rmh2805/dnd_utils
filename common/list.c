@@ -66,6 +66,8 @@ list_t mkList() {
  * @param freeFxn A function used to free all list elements
  */
 void rmList(list_t list, freeFxn_t freeFxn) {
+    if(list == NULL) return;
+    
     rmNodes(list->start, freeFxn);
     free(list);
 }
