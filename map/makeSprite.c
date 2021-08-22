@@ -15,14 +15,16 @@ typedef enum mode_e {menu, sel, new, edit, view, load, save, quit} mode_t;
 const char * menuItems[] = {
     "1. Edit Sprite",
     "2. View Sprites",
-    "3. Load Sprite Sheet",
-    "4. Save Sprite Sheet",
-    "5. Exit Program"
+    "3. New Sprite Sheet"
+    "4. Load Sprite Sheet",
+    "5. Save Sprite Sheet",
+    "6. Exit Program"
 };
 
 const mode_t menuModes[] = {
     sel,
     view,
+    new,
     load,
     save,
     quit
@@ -36,7 +38,7 @@ void dispMenu(unsigned int selected) {
     printText(kBlackPalette, "Sprite Editor", 0, 0);
 
     for(unsigned int i = 0; i < menuSize; i++) {
-        printText((i == selected) ? kBlackPalette : kWhitePalette, menuItems[i], 2 + i, 0);
+        printText((i == selected) ? kWhitePalette : kBlackPalette, menuItems[i], 2 + i, 0);
     }
 }
 
@@ -71,12 +73,45 @@ FILE* getSpriteFile(bool loadFile) {
     return fp;
 }
 
+bool resizeAction(sprite_t * sprite, int ch, bool isTile) {
+    if(sprite == NULL) return false;
+    if(ch == '\n' || ch == KEY_ENTER) return true;
+
+    short palette = sprite->palette;
+    unsigned char height = sprite->height, width = sprite->width;
+    unsigned char xOff = sprite->xOff, yOff = sprite->yOff;
+
+    rmSprite(*sprite);
+    switch(ch) {
+        case KEY_UP:
+            height = (height <= 1) ? 1 : height - 1;
+            break;
+        case KEY_DOWN:
+            ++height;
+            break;
+        case KEY_LEFT:
+            width = (width <= 1) ? 1 : width - 1;
+            break;
+        case KEY_RIGHT:
+            ++width;
+    }
+    if(isTile)
+        *sprite = mkBlankTile(palette, width, height);
+    else
+        *sprite = mkSprite(palette, width, height, xOff, yOff);
+    return false;
+}
+
+#define printError(msg) clear();printText(kRedPalette, msg, 0, 0); getch()
+
 //==============================<Main Execution>==============================//
 int main() {
+    // Basic definitions
     int ret, ch;
     FILE* fp;
-    sprite_t tile, sprite;
-    list_t spriteList = mkList();
+    sprite_t sprite;
+    sprite_t * entry = NULL;
+    list_t spriteList = NULL;
 
     if(spriteList == NULL) {
         fprintf(stderr, "*ERROR* in main: Failed to allocate sprite list\n");
@@ -92,11 +127,11 @@ int main() {
     }
 
     // Main loop
-    unsigned int selX = 0, selY = 0;
+    unsigned int selY = 0;
     mode_t mode = menu;
     while(mode != quit) {
         switch(mode) {
-            case menu:
+            case menu: // Main menu
                 dispMenu(selY);
 
                 ch = getch();
@@ -110,7 +145,6 @@ int main() {
                     case '\n':
                     case ' ':
                         mode = menuModes[selY];
-                        selX = 0;
                         selY = 0;
                         break;
                     case KEY_UP:
@@ -122,114 +156,82 @@ int main() {
                 }
                 break;
             
-            case view:
-                if(listLen(spriteList) == 0) { // Exit if no sprites to display
-                    selY = 0;
+            case sel: // Select entries from the current sheet
+                if(spriteList == NULL) {    // Can only be used w/ a sheet
                     mode = menu;
                     break;
-                }
-
-                // Display the currently selected sprite
-                sprite = *(sprite_t *) listGet(spriteList, selY);
-                clear();
-                drawSprite(data, sprite, data.screenRows/2-sprite.height/2,
-                    data.screenCols/2 - sprite.width/2);
-
-                ch = getch();
-                switch(ch) {
-                    case KEY_HOME:
-                    case '`':
-                        selY = 0;
-                        mode = menu;
-                        break;
-
-                    case KEY_UP:
-                        selY -= (selY == 0) ? 0 : 1;
-                        break;
-                    case KEY_DOWN:
-                        selY += (selY + 1 == listLen(spriteList)) ? 0 : 1;
-                        break;
-                }
-                break;
-
-
-
-            case load:
-                //Attempt to open the file to read sprites
-                fp = getSpriteFile(true);
-
-                if(fp == NULL) {
-                    mode = menu;
-                    break;
-                }
-
-                // Create a new list to store the sprites from file
-                rmList(spriteList, freeSpriteEntry);
-                spriteList = mkList();
-                if(spriteList == NULL) {
-                    printText(kDefPalette, "*ERROR* Unable to create a new sprite list", 4, 0);
-                    getch();
-
-                    fclose(fp);
-                    mode = quit;
-                    break;
-                }
-
-                // Load sprites from file
-                sprite_t sprite;
-                bool failed = false;
-
-                for(sprite = readSprite(fp); sprite.data != NULL && !failed; sprite = readSprite(fp)) {
-                    sprite_t * entry = mkSpriteEntry(sprite);
-                    if(entry == NULL) {
-                        failed = true;
-                        continue;
-                    }
-                    listAppend(spriteList, entry);
-                }
-
-                fclose(fp);
-                if(failed) {
-                    printText(kDefPalette, "*ERROR* Unable to fully read to sprite list", 4, 0);
-                    getch();
-
-                    mode = quit;
-                } else {
-                    mode = menu;
-                }
-                break;
-            
-            case save:
-                if(listLen(spriteList) == 0) {
-                    mode = menu;
-                    break;
-                }
-
-                // Attempt to open a file to write out
-                fp = getSpriteFile(false);
-
-                if(fp == NULL) {
-                    mode = menu;
-                    break;
-                }
-
-                for(unsigned i = 0; i < listLen(spriteList); i++) {
-                    writeSprite(fp, *(sprite_t *)listGet(spriteList, i));
                 }
 
                 mode = menu;
-                fclose(fp);
+                break;
+            
+            case new:   // Create new sprite entries (and potentially new lists)
+                mode = menu;
                 break;
 
-            default:
-                mode = quit;
+            case edit:  // Actually edit an element from the sheet
+                mode = menu;
+                break;
 
+            case view:  // View through loaded sprites
+                if(spriteList == NULL) {    // Can only be used w/ a sheet
+                    mode = menu;
+                    break;
+                }
+                
+                mode = menu;
+                break;
+
+            case load:
+                // Create the new sprite list
+                rmList(spriteList, freeSpriteEntry);
+                spriteList = mkList();
+                if(spriteList == NULL) {
+                    printError("*FATAL ERROR* Unable to allocate new sprite list");
+                    mode = quit;
+                    break;
+                }
+
+                // Open the sprite sheet
+                fp = getSpriteFile(true);
+                if(fp == NULL) {
+                    printError("Failed to open specified file");
+                    mode = menu;
+                    break;
+                }
+
+                // For each sprite in the sheet
+                for(sprite = readSprite(fp); sprite.data != NULL; sprite = readSprite(fp)) {
+                    entry = mkSpriteEntry(sprite);
+
+                    
+                    if(entry == NULL) { // On failure to place sprite in heap...
+                        // Clear out the existing menu items
+                        rmList(spriteList, freeSpriteEntry);
+                        spriteList = NULL;
+
+                        // Inform the user and drop back to menu
+                        printError("*ERROR* File size too large");
+                        break;
+                    } else {    // On success in placing sprite in heap...
+                        listAppend(spriteList, entry);  // Add sprite to list
+                    }
+                }
+                
+                mode = menu; // Regardless, of success, return to menu
+                break;
+
+            case save:
+                mode = menu;
+                break;
+            
+            case quit:
+                break;
         }
     }
 
     // Cleanup and exit
     closeDisp();
-    if(spriteList != NULL) rmList(spriteList, freeSpriteEntry);
-
+    rmList(spriteList, freeSpriteEntry);
     return EXIT_SUCCESS;
 }
