@@ -119,7 +119,32 @@ void getText(int row, int col, char* buf, unsigned int nBuf) {
     wmove(stdscr, row, col);
     wclrtoeol(stdscr);
     wmove(stdscr, row, col);
-    wgetnstr(stdscr, buf, nBuf);
+
+    unsigned i;
+    for(i = 0; i < nBuf - 1; i++) {
+        int ch = wgetch(stdscr);
+
+        if(ch == KEY_ENTER || ch == '\n') {
+            break; 
+        } else if (ch == 27) {  // For some reason, delete gets sent as 27
+            if(i != 0) {
+                --i;            // Roll back to the previous entry
+                buf[i] = 0;     // Remove the character from the out buffer
+
+                // Erase the displayed character and retarget cursor
+                wmove(stdscr, row, col + i);
+                waddch(stdscr, ' ');
+                wmove(stdscr, row, col + i);
+                refresh();
+
+                // Decrement i again to account for the loop increment
+                --i;
+            }
+        } else {
+            buf[i] = ch;
+        }
+    }
+    buf[i] = 0;
 
     curs_set(0);
     noecho();

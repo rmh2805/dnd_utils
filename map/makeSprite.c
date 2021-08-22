@@ -10,19 +10,21 @@
 #include "../common/list.h"
 
 //==============================<Menu Handling>===============================//
-typedef enum mode_e {menu, sel, edit, load, save, quit} mode_t;
+typedef enum mode_e {menu, sel, new, edit, view, load, save, quit} mode_t;
 
 const char * menuItems[] = {
     "1. Edit Sprite",
-    "2. Save Sprite Sheet",
+    "2. View Sprites",
     "3. Load Sprite Sheet",
-    "4. Exit Program"
+    "4. Save Sprite Sheet",
+    "5. Exit Program"
 };
 
 const mode_t menuModes[] = {
     sel,
-    save,
+    view,
     load,
+    save,
     quit
 };
 
@@ -71,8 +73,9 @@ FILE* getSpriteFile(bool loadFile) {
 
 //==============================<Main Execution>==============================//
 int main() {
-    int ret;
+    int ret, ch;
     FILE* fp;
+    sprite_t tile, sprite;
     list_t spriteList = mkList();
 
     if(spriteList == NULL) {
@@ -96,7 +99,7 @@ int main() {
             case menu:
                 dispMenu(selY);
 
-                int ch = getch();
+                ch = getch();
                 if(ch > '0' && ch <= '0' + menuSize) {
                     mode = menuModes[ch - '1'];
                     break;
@@ -118,6 +121,38 @@ int main() {
                         break;
                 }
                 break;
+            
+            case view:
+                if(listLen(spriteList) == 0) { // Exit if no sprites to display
+                    selY = 0;
+                    mode = menu;
+                    break;
+                }
+
+                // Display the currently selected sprite
+                sprite = *(sprite_t *) listGet(spriteList, selY);
+                clear();
+                drawSprite(data, sprite, data.screenRows/2-sprite.height/2,
+                    data.screenCols/2 - sprite.width/2);
+
+                ch = getch();
+                switch(ch) {
+                    case KEY_HOME:
+                    case '`':
+                        selY = 0;
+                        mode = menu;
+                        break;
+
+                    case KEY_UP:
+                        selY -= (selY == 0) ? 0 : 1;
+                        break;
+                    case KEY_DOWN:
+                        selY += (selY + 1 == listLen(spriteList)) ? 0 : 1;
+                        break;
+                }
+                break;
+
+
 
             case load:
                 //Attempt to open the file to read sprites
@@ -178,7 +213,7 @@ int main() {
                     break;
                 }
 
-                for(int i = 0; i < listLen(spriteList); i++) {
+                for(unsigned i = 0; i < listLen(spriteList); i++) {
                     writeSprite(fp, *(sprite_t *)listGet(spriteList, i));
                 }
 
