@@ -10,25 +10,23 @@
 #include "../common/list.h"
 
 //==============================<Menu Handling>===============================//
-typedef enum mode_e {menu, tile, sprite, load, save, quit} mode_t;
+typedef enum mode_e {menu, sel, edit, load, save, quit} mode_t;
 
 const char * menuItems[] = {
-    "1. Edit Tile",
-    "2. Edit Sprite",
-    "3. Save Sprite Sheet",
-    "4. Load Sprite Sheet",
-    "5. Exit Program"
+    "1. Edit Sprite",
+    "2. Save Sprite Sheet",
+    "3. Load Sprite Sheet",
+    "4. Exit Program"
 };
 
 const mode_t menuModes[] = {
-    tile,
-    sprite,
+    sel,
     save,
     load,
     quit
 };
 
-const unsigned int menuSize = sizeof(menuItems) / sizeof(menuItems[0]);
+const unsigned char menuSize = sizeof(menuItems) / sizeof(menuItems[0]);
 
 void dispMenu(unsigned int selected) {
     clear();
@@ -54,10 +52,27 @@ void freeSpriteEntry(void * data) {
     free(data);
 }
 
+FILE* getSpriteFile(bool loadFile) {
+    char buf[128];
+
+    clear();
+    printText(kDefPalette, (loadFile) ? "Enter the sprite sheet path" : "Enter the save path", 0, 0);
+    getText(2, 0, buf, 128);
+
+    FILE* fp = fopen(buf, (loadFile) ? "r" : "w");
+
+    if(fp == NULL) {
+        printText(kDefPalette, "*ERROR* Unable to open specified file", 4, 0);
+        getch();
+    }
+
+    return fp;
+}
+
 //==============================<Main Execution>==============================//
 int main() {
-    char buf[128];
     int ret;
+    FILE* fp;
     list_t spriteList = mkList();
 
     if(spriteList == NULL) {
@@ -103,30 +118,74 @@ int main() {
                         break;
                 }
                 break;
-            
-            case load:
-                clear();
-                printText(kDefPalette, "Enter the path of the sprite sheet", 0, 0);
-                getText(2, 0, buf, 128);
 
+            case load:
                 //Attempt to open the file to read sprites
-                FILE* fp = fopen(buf, "r");
+                fp = getSpriteFile(true);
 
                 if(fp == NULL) {
-                    printText(kDefPalette, "*ERROR* Unable to open specified file", 4, 0);
-                    getch();
-
                     mode = menu;
                     break;
                 }
 
-                // todo Clear old sprite list and allocate new one
-                // todo Load sprites from file
+                // Create a new list to store the sprites from file
+                rmList(spriteList, freeSpriteEntry);
+                spriteList = mkList();
+                if(spriteList == NULL) {
+                    printText(kDefPalette, "*ERROR* Unable to create a new sprite list", 4, 0);
+                    getch();
+
+                    fclose(fp);
+                    mode = quit;
+                    break;
+                }
+
+                // Load sprites from file
+                sprite_t sprite;
+                bool failed = false;
+
+                for(sprite = readSprite(fp); sprite.data != NULL && !failed; sprite = readSprite(fp)) {
+                    sprite_t * entry = mkSpriteEntry(sprite);
+                    if(entry == NULL) {
+                        failed = true;
+                        continue;
+                    }
+                    listAppend(spriteList, entry);
+                }
 
                 fclose(fp);
-                mode = menu;
+                if(failed) {
+                    printText(kDefPalette, "*ERROR* Unable to fully read to sprite list", 4, 0);
+                    getch();
+
+                    mode = quit;
+                } else {
+                    mode = menu;
+                }
                 break;
             
+            case save:
+                if(listLen(spriteList) == 0) {
+                    mode = menu;
+                    break;
+                }
+
+                // Attempt to open a file to write out
+                fp = getSpriteFile(false);
+
+                if(fp == NULL) {
+                    mode = menu;
+                    break;
+                }
+
+                for(int i = 0; i < listLen(spriteList); i++) {
+                    writeSprite(fp, *(sprite_t *)listGet(spriteList, i));
+                }
+
+                mode = menu;
+                fclose(fp);
+                break;
+
             default:
                 mode = quit;
 
@@ -135,7 +194,7 @@ int main() {
 
     // Cleanup and exit
     closeDisp();
-    rmList(spriteList, freeSpriteEntry);
+    if(spriteList != NULL) rmList(spriteList, freeSpriteEntry);
 
     return EXIT_SUCCESS;
 }
