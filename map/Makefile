@@ -19,18 +19,22 @@ CFLAGS=-Wall -std=c99 -Wextra -pedantic -ggdb
 #
 #	Main Target
 #
-main: testSprite
+main: makeSprite
 
 #
 #	Multiple Targets
 #
-all: tests
+all: tests makeSprite
 
 tests: testSprite
 
 #
 #	Executables
 #
+makeSprite: makeSprite.o sprite.o dispBase.o list.o
+	$(CC) $(CFLAGS) $(CDEBUGFLAGS) -o $@ $^ $(CLIBS)
+	$(ECHO)
+
 testSprite: testSprite.o sprite.o
 	$(CC) $(CFLAGS) $(CDEBUGFLAGS) -o $@ $^ $(CLIBS)
 	$(ECHO)
@@ -41,8 +45,11 @@ testSprite: testSprite.o sprite.o
 %.o: %.c
 	$(CC) $(CFLAGS) $(CDEBUGFLAGS) -c -o $@ $^
 
-fs_unix.o:
-	$(CC) $(CFLAGS) $(CDEBUGFLAGS) -c -o fs_unix.o ../common/fs_unix.c
+fs_unix.o: ../common/fs_unix.c
+	$(CC) $(CFLAGS) $(CDEBUGFLAGS) -c -o $@ $^
+
+list.o: ../common/list.c
+	$(CC) $(CFLAGS) $(CDEBUGFLAGS) -c -o $@ $^
 
 #
 #	Utils
@@ -52,4 +59,5 @@ clean:
 
 realclean: clean
 	-rm testSprite
+	-rm makeSprite
 

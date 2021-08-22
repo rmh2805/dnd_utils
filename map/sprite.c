@@ -2,7 +2,15 @@
 
 #define kEmptySprite (sprite_t) {0, 0, 0, 0, 0, NULL}
 
-sprite_t mkSprite(int palette, unsigned char width, unsigned char height, unsigned char xOff, unsigned char yOff) {
+/**
+ * Allocates data for a sprite with the specified dimensions
+ * 
+ * @param width The width of the sprite (in characters)
+ * @param height The height of the sprite (in characters)
+ * 
+ * @return The allocated and initialized sprite
+ */
+sprite_t mkSprite(short palette, unsigned char width, unsigned char height, unsigned char xOff, unsigned char yOff) {
     sprite_t sprite = {palette, width, height, xOff, yOff, NULL};
 
     sprite.data = calloc(height, sizeof(char *));
@@ -22,6 +30,33 @@ sprite_t mkSprite(int palette, unsigned char width, unsigned char height, unsign
 
     return sprite;
 }
+
+
+/**
+ * Allocates data for a tile with the specified dimensions and initializes it as
+ * opaque and blank
+ * 
+ * @param palette The color palette of the tile
+ * @param width The width of the tile (in characters)
+ * @param height The height of the tile (in characters)
+ * 
+ * @return The allocated and initialized sprite
+ */
+sprite_t mkBlankTile(short palette, unsigned char width, unsigned char height) {
+    sprite_t sprite = mkSprite(palette, width, height, 0, 0);
+    if(sprite.data == NULL) {
+        return kEmptySprite;
+    }
+
+    for(int row = 0; row < height; row++) {
+        for(int col = 0; col < width; col++) {
+            sprite.data[row][col] = ' ';
+        }
+    }
+
+    return sprite;
+}
+
 
 /**
  * Frees all data allocated for the sprite
@@ -49,14 +84,14 @@ void rmSprite(sprite_t sprite) {
  * @return The sprite read from file
  */
 sprite_t readSprite(FILE* file) {
-    int palette;
+    short palette;
     unsigned char width, height;
     unsigned char xOff, yOff;
 
     int ret;
 
     // Get the components from the line
-    ret = fscanf(file, "%d %hhu %hhu %hhu %hhu |", &palette, &width, &height, &xOff, &yOff);
+    ret = fscanf(file, "%hd %hhu %hhu %hhu %hhu |", &palette, &width, &height, &xOff, &yOff);
     if(ret != 5) {
         return kEmptySprite;
     }
@@ -108,7 +143,7 @@ sprite_t readSprite(FILE* file) {
  * @return 0 iff successful
  */
 int writeSprite(FILE* file, sprite_t sprite) {
-    fprintf(file, "%d %hhu %hhu %hhu %hhu |", sprite.palette, sprite.width,
+    fprintf(file, "%hd %hhu %hhu %hhu %hhu |", sprite.palette, sprite.width,
                 sprite.height, sprite.xOff, sprite.yOff);
     
     for(int row = 0; row < sprite.height; row++) {

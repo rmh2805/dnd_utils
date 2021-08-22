@@ -6,7 +6,7 @@
 
 
 typedef struct sprite_s {
-    int palette;
+    short palette;
 
     unsigned char width, height;    // Width and height of the sprite
     unsigned char xOff, yOff;       // X and Y offsets from top left of tile
@@ -17,12 +17,27 @@ typedef struct sprite_s {
 /**
  * Allocates data for a sprite with the specified dimensions
  * 
+ * @param palette The color palette to draw with
  * @param width The width of the sprite (in characters)
  * @param height The height of the sprite (in characters)
+ * @param xOff The x offset of the sprite (in characters)
+ * @param yOff The y offset of the sprite (in characters)
  * 
  * @return The allocated and initialized sprite
  */
-sprite_t mkSprite(int palette, unsigned char width, unsigned char height, unsigned char xOff, unsigned char yOff);
+sprite_t mkSprite(short palette, unsigned char width, unsigned char height, unsigned char xOff, unsigned char yOff);
+
+/**
+ * Allocates data for a tile with the specified dimensions and initializes it as
+ * opaque and blank
+ * 
+ * @param palette The color palette of the tile
+ * @param width The width of the tile (in characters)
+ * @param height The height of the tile (in characters)
+ * 
+ * @return The allocated and initialized sprite
+ */
+sprite_t mkBlankTile(short palette, unsigned char width, unsigned char height);
 
 /**
  * Frees all data allocated for the sprite
