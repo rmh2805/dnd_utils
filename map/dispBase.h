@@ -60,4 +60,14 @@ void drawSprite(dispData_t data, sprite_t sprite, int screenRow, int screenCol);
  */
 void printText(short palette, const char * text, int row, int col);
 
+/**
+ * Gets text from the terminal
+ * 
+ * @param row The starting row for the cursor
+ * @param col The starting col for the cursor
+ * @param buf The string return buffer
+ * @param nBuf The length of the return buffer
+ */
+void getText(int row, int col, char* buf, unsigned int nBuf);
+
 #endif

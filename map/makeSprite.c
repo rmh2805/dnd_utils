@@ -1,11 +1,15 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
+
 #include <curses.h>
 
 #include "sprite.h"
 #include "dispBase.h"
 
+#include "../common/list.h"
+
+//==============================<Menu Handling>===============================//
 typedef enum mode_e {menu, tile, sprite, load, save, quit} mode_t;
 
 const char * menuItems[] = {
@@ -36,8 +40,30 @@ void dispMenu(unsigned int selected) {
     }
 }
 
+//===============================<Misc Helpers>===============================//
+sprite_t * mkSpriteEntry(sprite_t sprite) {
+    sprite_t * ptr = malloc(sizeof(sprite_t));
+    if(ptr == NULL) return NULL;
+    *ptr = sprite;
+    return ptr;
+}
+
+void freeSpriteEntry(void * data) {
+    if(data == NULL) return;
+    rmSprite(*(sprite_t *) data);
+    free(data);
+}
+
+//==============================<Main Execution>==============================//
 int main() {
+    char buf[128];
     int ret;
+    list_t spriteList = mkList();
+
+    if(spriteList == NULL) {
+        fprintf(stderr, "*ERROR* in main: Failed to allocate sprite list\n");
+        return EXIT_FAILURE;
+    }
 
     // Initialize the display
     dispData_t data;
@@ -78,6 +104,29 @@ int main() {
                 }
                 break;
             
+            case load:
+                clear();
+                printText(kDefPalette, "Enter the path of the sprite sheet", 0, 0);
+                getText(2, 0, buf, 128);
+
+                //Attempt to open the file to read sprites
+                FILE* fp = fopen(buf, "r");
+
+                if(fp == NULL) {
+                    printText(kDefPalette, "*ERROR* Unable to open specified file", 4, 0);
+                    getch();
+
+                    mode = menu;
+                    break;
+                }
+
+                // todo Clear old sprite list and allocate new one
+                // todo Load sprites from file
+
+                fclose(fp);
+                mode = menu;
+                break;
+            
             default:
                 mode = quit;
 
@@ -86,6 +135,7 @@ int main() {
 
     // Cleanup and exit
     closeDisp();
+    rmList(spriteList, freeSpriteEntry);
 
     return EXIT_SUCCESS;
 }

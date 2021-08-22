@@ -103,3 +103,24 @@ void printText(short palette, const char * text, int row, int col) {
     refresh();
     wattroff(stdscr, COLOR_PAIR(palette));
 }
+
+/**
+ * Gets text from the terminal
+ * 
+ * @param row The starting row for the cursor
+ * @param col The starting col for the cursor
+ * @param buf The string return buffer
+ * @param nBuf The length of the return buffer
+ */
+void getText(int row, int col, char* buf, unsigned int nBuf) {
+    curs_set(1);
+    echo();
+
+    wmove(stdscr, row, col);
+    wclrtoeol(stdscr);
+    wmove(stdscr, row, col);
+    wgetnstr(stdscr, buf, nBuf);
+
+    curs_set(0);
+    noecho();
+}
