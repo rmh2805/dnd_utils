@@ -47,6 +47,10 @@ int main() {
         return EXIT_FAILURE;
     }
 
+    sprite_t tile = mkBlankTile(4, 8, 5);
+    writeSprite(fp, tile);
+    rmSprite(tile);
+
     writeSprite(fp, sprite);
 
     printf("First sprite written: \n\n");
