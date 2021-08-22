@@ -15,7 +15,7 @@ typedef enum mode_e {menu, sel, new, edit, view, load, save, quit} mode_t;
 const char * menuItems[] = {
     "1. Edit Sprite",
     "2. View Sprites",
-    "3. New Sprite Sheet"
+    "3. New Sprite Sheet",
     "4. Load Sprite Sheet",
     "5. Save Sprite Sheet",
     "6. Exit Program"
@@ -64,12 +64,6 @@ FILE* getSpriteFile(bool loadFile) {
     getText(2, 0, buf, 128);
 
     FILE* fp = fopen(buf, (loadFile) ? "r" : "w");
-
-    if(fp == NULL) {
-        printText(kDefPalette, "*ERROR* Unable to open specified file", 4, 0);
-        getch();
-    }
-
     return fp;
 }
 
@@ -108,15 +102,10 @@ bool resizeAction(sprite_t * sprite, int ch, bool isTile) {
 int main() {
     // Basic definitions
     int ret, ch;
-    FILE* fp;
+    FILE* fp = NULL;
     sprite_t sprite;
     sprite_t * entry = NULL;
     list_t spriteList = NULL;
-
-    if(spriteList == NULL) {
-        fprintf(stderr, "*ERROR* in main: Failed to allocate sprite list\n");
-        return EXIT_FAILURE;
-    }
 
     // Initialize the display
     dispData_t data;
@@ -131,12 +120,15 @@ int main() {
     mode_t mode = menu;
     while(mode != quit) {
         switch(mode) {
-            case menu: // Main menu
+            case menu:  // Main menu
                 dispMenu(selY);
 
                 ch = getch();
                 if(ch > '0' && ch <= '0' + menuSize) {
                     mode = menuModes[ch - '1'];
+                    break;
+                } else if (ch == KEY_HOME) {
+                    mode = quit;
                     break;
                 }
 
@@ -156,7 +148,7 @@ int main() {
                 }
                 break;
             
-            case sel: // Select entries from the current sheet
+            case sel:   // Select entries from the current sheet
                 if(spriteList == NULL) {    // Can only be used w/ a sheet
                     mode = menu;
                     break;
@@ -165,7 +157,7 @@ int main() {
                 mode = menu;
                 break;
             
-            case new:   // Create new sprite entries (and potentially new lists)
+            case new:   // Create new sprite entries (potentially a new sheet)
                 mode = menu;
                 break;
 
@@ -178,11 +170,39 @@ int main() {
                     mode = menu;
                     break;
                 }
+
+                // Grab the proper sprite
+                entry = listGet(spriteList, selY);
+                if(entry == NULL) {
+                    printError("*FATAL ERROR* Unexpected dead entry in sprite list");
+                    mode = quit;
+                    break;
+                }
+
+                // Update the display itself
+                clear();
+                printText(kDefPalette, "Use left and right arrows to navigate, and home to escape", 0, 0);
+                drawSprite(data, *entry, data.screenRows/2 - entry->height/2,
+                    data.screenCols/2 - entry->width/2);
                 
-                mode = menu;
+                // Handle input
+                ch = getch();
+                switch(ch) {
+                    case KEY_HOME:
+                    case 'q':
+                        mode = menu;
+                        break;
+                    case KEY_LEFT:
+                        ret = listLen(spriteList);
+                        selY = ((selY == 0) ? (unsigned)ret : selY) - 1;
+                        break;
+                    case KEY_RIGHT:
+                        selY = (selY + 1) % listLen(spriteList);
+                        break;
+                }
                 break;
 
-            case load:
+            case load:  // Load a sprite sheet from file
                 // Create the new sprite list
                 rmList(spriteList, freeSpriteEntry);
                 spriteList = mkList();
@@ -218,14 +238,17 @@ int main() {
                     }
                 }
                 
-                mode = menu; // Regardless, of success, return to menu
+                // Regargless of success, clean up and return to menu
+                fclose(fp);
+                fp = NULL;
+                mode = menu;
                 break;
 
-            case save:
+            case save:  // Write the current sprite sheet out to file
                 mode = menu;
                 break;
             
-            case quit:
+            case quit:  // Nothing to do but wait for the loop to finish
                 break;
         }
     }
