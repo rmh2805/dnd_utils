@@ -86,3 +86,20 @@ void drawSprite(dispData_t data, sprite_t sprite, int screenRow, int screenCol) 
     refresh();
     wattroff(stdscr, COLOR_PAIR(sprite.palette));
 }
+
+
+/**
+ * Prints the provided text to terminal
+ * 
+ * @param palette The pallette to print the text in
+ * @param text The text to print to screen
+ * @param row The starting row for text
+ * @param col The starting col for text
+ */
+void printText(short palette, const char * text, int row, int col) {
+    wmove(stdscr, row, col);
+    wattron(stdscr, COLOR_PAIR(palette));
+    wprintw(stdscr, text, row, col);
+    refresh();
+    wattroff(stdscr, COLOR_PAIR(palette));
+}

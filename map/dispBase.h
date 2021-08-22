@@ -50,4 +50,14 @@ int closeDisp();
  */
 void drawSprite(dispData_t data, sprite_t sprite, int screenRow, int screenCol);
 
+/**
+ * Prints the provided text to terminal
+ * 
+ * @param palette The pallette to print the text in
+ * @param text The text to print to screen
+ * @param row The starting row for text
+ * @param col The starting col for text
+ */
+void printText(short palette, const char * text, int row, int col);
+
 #endif
