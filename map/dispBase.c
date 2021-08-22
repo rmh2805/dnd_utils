@@ -126,7 +126,7 @@ void getText(int row, int col, char* buf, unsigned int nBuf) {
 
         if(ch == KEY_ENTER || ch == '\n') {
             break; 
-        } else if (ch == 27) {  // For some reason, delete gets sent as 27
+        } else if (ch == KEY_DC || ch == 27) {  // For some reason, delete gets sent as 27
             if(i != 0) {
                 --i;            // Roll back to the previous entry
                 buf[i] = 0;     // Remove the character from the out buffer

@@ -190,6 +190,7 @@ int main() {
                 switch(ch) {
                     case KEY_HOME:
                     case 'q':
+                        entry = NULL;   // Clean up after myself
                         mode = menu;
                         break;
                     case KEY_LEFT:
@@ -203,20 +204,21 @@ int main() {
                 break;
 
             case load:  // Load a sprite sheet from file
-                // Create the new sprite list
-                rmList(spriteList, freeSpriteEntry);
-                spriteList = mkList();
-                if(spriteList == NULL) {
-                    printError("*FATAL ERROR* Unable to allocate new sprite list");
-                    mode = quit;
-                    break;
-                }
-
                 // Open the sprite sheet
                 fp = getSpriteFile(true);
                 if(fp == NULL) {
                     printError("Failed to open specified file");
                     mode = menu;
+                    break;
+                }
+
+                // Create the new sprite list
+                rmList(spriteList, freeSpriteEntry);
+
+                spriteList = mkList();
+                if(spriteList == NULL) {
+                    printError("*FATAL ERROR* Unable to allocate new sprite list");
+                    mode = quit;
                     break;
                 }
 
@@ -241,10 +243,27 @@ int main() {
                 // Regargless of success, clean up and return to menu
                 fclose(fp);
                 fp = NULL;
+                entry = NULL;
                 mode = menu;
                 break;
 
             case save:  // Write the current sprite sheet out to file
+                if(spriteList == NULL) {    // Can only be used w/ a sheet
+                    mode = menu;
+                    break;
+                }
+
+                // Open the save file
+                fp = getSpriteFile(false);
+
+                // Write out all sprites
+                for(unsigned i = 0; i < listLen(spriteList); i++) {
+                    writeSprite(fp, *(sprite_t *)listGet(spriteList, i));
+                }
+
+                // Clean up and return to main menu
+                fclose(fp);
+                fp = NULL;
                 mode = menu;
                 break;
             
