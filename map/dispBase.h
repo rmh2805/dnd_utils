@@ -17,7 +17,7 @@
 #define kMagentaPalette 7
 #define kCyanPalette 8
 
-#define kDefPalette kBlackPalette
+#define kDefPalette kWhitePalette
 
 // Define a persistent data structure
 typedef struct dispData_s {

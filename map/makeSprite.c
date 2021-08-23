@@ -10,7 +10,7 @@
 #include "../common/list.h"
 
 //==============================<Menu Handling>===============================//
-typedef enum mode_e {menu, sel, new, edit, view, load, save, quit} mode_t;
+typedef enum mode_e {menu, sel, new, dim, edit, view, load, save, quit} mode_t;
 
 const char * menuItems[] = {
     "1. Edit Sprite",
@@ -60,7 +60,7 @@ FILE* getSpriteFile(bool loadFile) {
     char buf[128];
 
     clear();
-    printText(kDefPalette, (loadFile) ? "Enter the sprite sheet path" : "Enter the save path", 0, 0);
+    printText(kBlackPalette, (loadFile) ? "Enter the sprite sheet path" : "Enter the save path", 0, 0);
     getText(2, 0, buf, 128);
 
     FILE* fp = fopen(buf, (loadFile) ? "r" : "w");
@@ -157,7 +157,40 @@ int main() {
                 mode = menu;
                 break;
             
-            case new:   // Create new sprite entries (potentially a new sheet)
+            case new:   // Create a new sprite sheet
+                // Free the old sprite list and create a new one
+                rmList(spriteList, freeSpriteEntry);
+                spriteList = mkList();
+                if(spriteList == NULL) {
+                    printError("*FATAL ERROR* Failed to allocate new sprite list");
+                    mode = quit;
+                    break;
+                }
+
+                // Create a new basic tile to resize
+                entry = mkSpriteEntry(mkBlankTile(kDefPalette, 8, 5));
+                if(entry == NULL || entry->data == NULL) {
+                    printError("*FATAL ERROR* Failed to allocate a new tile");
+                    mode = quit;
+                    break;
+                }
+
+                // Insert the new tile at the start of the list
+                if(listAppend(spriteList, entry) < 0) {
+                    printError("*FATAL ERROR* Failed to insert blank tile at start of list");
+                    mode = quit;
+                }
+                
+                // Switch mode to dimension setting and continue loop
+                mode = dim;
+                break;
+
+            case dim:   // Set the dimensions of a sprite
+                if(spriteList == NULL || entry == NULL) {    // Can only be used w/ a sheet & entry
+                    mode = menu;
+                    break;
+                }
+
                 mode = menu;
                 break;
 
@@ -181,7 +214,7 @@ int main() {
 
                 // Update the display itself
                 clear();
-                printText(kDefPalette, "Use left and right arrows to navigate, and home to escape", 0, 0);
+                printText(kBlackPalette, "Use left and right arrows to navigate, and home to escape", 0, 0);
                 drawSprite(data, *entry, data.screenRows/2 - entry->height/2,
                     data.screenCols/2 - entry->width/2);
                 
@@ -258,12 +291,15 @@ int main() {
 
                 // Write out all sprites
                 for(unsigned i = 0; i < listLen(spriteList); i++) {
-                    writeSprite(fp, *(sprite_t *)listGet(spriteList, i));
+                    entry = listGet(spriteList, i);
+                    if(entry == NULL) continue;
+                    writeSprite(fp, *entry);
                 }
 
                 // Clean up and return to main menu
                 fclose(fp);
                 fp = NULL;
+                entry = NULL;
                 mode = menu;
                 break;
             
@@ -275,5 +311,6 @@ int main() {
     // Cleanup and exit
     closeDisp();
     rmList(spriteList, freeSpriteEntry);
+    freeSpriteEntry(entry);
     return EXIT_SUCCESS;
 }
