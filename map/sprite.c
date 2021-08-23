@@ -143,6 +143,8 @@ sprite_t readSprite(FILE* file) {
  * @return 0 iff successful
  */
 int writeSprite(FILE* file, sprite_t sprite) {
+    if(file == NULL || sprite.data == NULL) return -1;
+
     fprintf(file, "%hd %hhu %hhu %hhu %hhu |", sprite.palette, sprite.width,
                 sprite.height, sprite.xOff, sprite.yOff);
     
