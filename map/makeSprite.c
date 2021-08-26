@@ -191,7 +191,56 @@ int main() {
                     break;
                 }
 
-                mode = menu;
+                // Print the current size of the sprite
+                clear();
+                printText(kBlackPalette, "Use arrows to resize, and enter to confirm", 0, 0);
+                drawSprite(data, *entry, data.screenRows/2 - entry->height/2, data.screenCols/2 - entry->width/2);
+
+                // todo Handle input 
+                unsigned char height = entry->height, width = entry->width;
+                ch = getch();
+                switch(ch) {
+                    case KEY_UP:
+                        height = (height <= 1) ? 1 : height - 1;
+                        break;
+                    case KEY_DOWN:
+                        height += 1;
+                        break;
+                    case KEY_LEFT:
+                        width = (width <= 1) ? 1 : width - 1;
+                        break;
+                    case KEY_RIGHT:
+                        width += 1;
+                        break;
+                    case KEY_ENTER:
+                    case '\n':
+                        // Break out the transition cases
+                        switch(listLen(spriteList)) {
+                            case 0: // Error out on empty list (undefined behaviour)
+                                printError("*FATAL ERROR* Tried to set entry in an empty tile list");
+                                mode = quit;
+                                break;
+                            case 1: // Return to menu if this is a tile
+                                mode = menu;
+                                entry = NULL;
+                                selY = 0;
+                                break;
+                            default: // Otherwise go on to edit
+                                mode = edit;
+                                break;
+                        }
+                        continue;
+                }
+
+                rmSprite(*entry);
+                *entry = mkBlankTile(kDefPalette, width, height);
+                if(entry == NULL) {
+                    //todo make this more graceful
+                    printError("*FATAL ERROR* Failed to allocate memory for resize");
+                    mode = quit;
+                    break;
+                }
+
                 break;
 
             case edit:  // Actually edit an element from the sheet
