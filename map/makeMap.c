@@ -194,6 +194,19 @@ int main() {
                 }
                 break;
             case load:  // Loads a saved map from file
+                if(mapLoaded) {
+                    rmMap(map);
+                    mapLoaded = false;
+                }
+                
+                fp = getMapFile(true);
+                if(loadMap(&map, fp) < 0) {
+                    printError("*ERROR* Unable to read map from file");
+                } else {
+                    mapLoaded = true;
+                }
+                fclose(fp);
+
                 mode = menu;
                 break;
 

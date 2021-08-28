@@ -126,7 +126,10 @@ int loadMap(map_t* map, FILE* fp) {
     for(int row = 0; row < rows; row++) {
         for(int col = 0; col < cols; col++) {
             ret = readTile(&map->data[row][col], fp);
-            if(ret < 0) return -2;
+            if(ret < 0) {
+                rmMap(*map);
+                return -2;
+            }
         }
     } 
 
