@@ -6,3 +6,6 @@ map/makeSprite
 map/makeMap
 map/spriteSheets/*
 !map/spriteSheets/sprites.out
+map/maps/*
+!map/maps/FirstDungeon*.out
+!map/maps/room.out
