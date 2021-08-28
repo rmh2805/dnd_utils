@@ -72,6 +72,44 @@ FILE* getMapFile(bool loadFile) {
     return fp;
 }
 
+#define helpPrinter(msg, row) printText(kBlackPalette, msg, row, 0)
+
+void printHelp(mode_t mode) {
+    clear();
+    printText(kBlackPalette, "Help Prompt", 0, 0);
+    int newRow = 2;
+    switch(mode) {
+        case menu:
+            helpPrinter("Use the arrow keys and enter to select an option", 2);
+            helpPrinter("Alternatively, you can select the numbered options with their keys", 3);
+
+            helpPrinter("New Map will prompt you to select dimensions for a new map", 5);
+            helpPrinter("Load Map will prompt you for a file to load a map from", 6);
+            helpPrinter("Save Map will prmopt you for a filename to save out the current map", 7);
+            helpPrinter("Edit map will allow you to edit the loaded map", 8);
+            helpPrinter("Make Printable will generate a map to be printed as plaintext", 9);
+            helpPrinter("Quit... quits (real original, I know)", 10);
+
+            helpPrinter("Worth noting, attempting to backspace in text entry currently results in corruption.", 12);
+            helpPrinter("Instead, the delete key currently fills its role", 14);
+            newRow = 16;
+            break;
+        case nav:
+            printText(kBlackPalette, "Use the Arrow keys to select a tile to modify", 2, 0);
+            printText(kBlackPalette, "Enter or 'e' will mark the tile as habitable", 3, 0);
+            printText(kBlackPalette, "Delete or 'q' will mark the tile as uninhabitable", 4, 0);
+            printText(kBlackPalette, "WASD cycles the walls on each side of the cell b/n empty, solid, and door", 5, 0);
+            printText(kBlackPalette, "Home or '`' will return you to the main menu", 6, 0);
+            newRow = 8;
+            break;
+        default:
+            newRow = 2;
+    }
+    printText(kBlackPalette, "Press enter to continue...", newRow, 0);
+    getch();
+
+}
+
 //================================<Main Code>=================================//
 
 int main() {
@@ -123,6 +161,9 @@ int main() {
                 }
 
                 switch(ch) {
+                    case '?':
+                        printHelp(menu);
+                        break;
                     case KEY_UP:
                         if(y > 0) --y;
                         break;
@@ -311,6 +352,10 @@ int main() {
                     case 27:
                     case 'q':
                         map.data[y][x].isEmpty = true;;
+                        break;
+                    
+                    case '?':
+                        printHelp(mode);
                         break;
                 }
                 break;
