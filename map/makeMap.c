@@ -183,13 +183,12 @@ int main() {
                         if(mkMap(y, x, &map) < 0) {
                             printError("*ERROR* Unable to allocate new map");
                             mode = menu;
-                            break;
+                        } else {
+                            mapLoaded = true;
+                            mode = nav;
                         }
-                        mapLoaded = true;
-
                         x = 0; 
                         y = 0;
-                        mode = nav;
                         break;
                 }
                 break;
