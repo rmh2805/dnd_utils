@@ -1,4 +1,4 @@
-#DnD Utils Mapping Tool
+# DnD Utils Mapping Tool
 
 Currently, the primary tool in this module is `makeMap`. While I do intend to 
 further incorporate spritesets into the mapping util, at the moment the only 
