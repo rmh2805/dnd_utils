@@ -5,7 +5,6 @@
 #include "dispBase.h"
 
 typedef struct tile_s {
-    int x, y;           // The grid position of this tile
     short bgPalette;    // Palette overrides for this tile
 
     // For each: 0 is no wall, 1 is wall, >1 is door
@@ -38,20 +37,15 @@ typedef struct tileData_s {
 /** 
  * Makes a blank tile with no walls or sprite and default palettes
  * 
- * @param x The grid position x value
- * @param y The grid position y value
- * @return A blank tile with the provided positions
+ * @return A blank tile
  */
-tile_t mkTile(int x, int y);
-
+tile_t mkTile();
 /** 
  * Makes an empty tile with default palettes
  * 
- * @param x The grid position x value
- * @param y The grid position y value
- * @return A blank tile with the provided positions
+ * @return An empty tile 
  */
-tile_t mkEmptyTile(int x, int y);
+tile_t mkEmptyTile();
 
 /**
  * Loads a tile data struct's sprites from file
@@ -89,6 +83,8 @@ int readTile(tile_t * tile, FILE* fp);
  */
 int writeTile(tile_t tile, FILE* fp);
 
+
+
 /**
  * Draws the provided tile in the proper place on screen
  * 
@@ -96,10 +92,22 @@ int writeTile(tile_t tile, FILE* fp);
  * @param tile The tile to draw to screen
  * @param scrX The x value of the tiles at the left of the screen
  * @param scrY The y value of the tiles at the top of the screen
+ * @param x The x value of the tile in the map
+ * @param y The y value of the tile in the map
  */
-void drawTile(tileData_t data, tile_t tile, int scrX, int scrY);
+void drawTile(tileData_t data, tile_t tile, int scrX, int scrY, int x, int y);
 
-void drawWalls(tileData_t data, tile_t tile, int scrX, int scrY);
+/**
+ * Draws the walls of the provided tile in the proper place on screen
+ * 
+ * @param data The data structure defining the sprites to draw
+ * @param tile The tile to draw to screen
+ * @param scrX The x value of the tiles at the left of the screen
+ * @param scrY The y value of the tiles at the top of the screen
+ * @param x The x value of the tile in the map
+ * @param y The y value of the tile in the map
+ */
+void drawWalls(tileData_t data, tile_t tile, int scrX, int scrY, int x, int y);
 
 /**
  * Calculates the width and height of the screen in tiles

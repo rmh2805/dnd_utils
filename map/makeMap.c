@@ -250,7 +250,7 @@ int main() {
                     case '\n':
                     case 'e':
                         if(map.data[y][x].isEmpty) {
-                            map.data[y][x] = mkTile(x, y);
+                            map.data[y][x] = mkTile();
                         }
                         break;
                     
@@ -290,7 +290,7 @@ int main() {
                     case KEY_DC:    // If delete is pressed...
                     case 27:
                     case 'q':
-                        map.data[y][x] = mkEmptyTile(x, y);
+                        map.data[y][x] = mkEmptyTile();
                         break;
                 }
                 break;

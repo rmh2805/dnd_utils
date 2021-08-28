@@ -166,7 +166,7 @@ int drawMap(tileData_t data, map_t map, int x, int y) {
         int row = dRow + scrY;
         for(int dCol = 0; dCol < width && dCol + scrX < map.nCols; dCol++) {
             int col = dCol + scrX;
-            drawTile(data, map.data[row][col], scrX, scrY);
+            drawTile(data, map.data[row][col], scrX, scrY, col, row);
         }
     }
 
@@ -175,7 +175,7 @@ int drawMap(tileData_t data, map_t map, int x, int y) {
         int row = dRow + scrY;
         for(int dCol = 0; dCol < width && dCol + scrX < map.nCols; dCol++) {
             int col = dCol + scrX;
-            drawWalls(data, map.data[row][col], scrX, scrY);
+            drawWalls(data, map.data[row][col], scrX, scrY, col, row);
         }
     }
 

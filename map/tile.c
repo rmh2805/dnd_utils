@@ -7,8 +7,8 @@
  * @param y The grid position y value
  * @return A blank tile with the provided positions
  */
-tile_t mkTile(int x, int y) {
-    return (tile_t) {x, y, kDefPalette, 0, 0, 0, 0, 0};
+tile_t mkTile() {
+    return (tile_t) {kDefPalette, 0, 0, 0, 0, 0};
 }
 
 /** 
@@ -18,8 +18,8 @@ tile_t mkTile(int x, int y) {
  * @param y The grid position y value
  * @return A blank tile with the provided positions
  */
-tile_t mkEmptyTile(int x, int y) {
-    return (tile_t) {x, y, kDefPalette, 0, 0, 0, 0, -1};
+tile_t mkEmptyTile() {
+    return (tile_t) {kDefPalette, 0, 0, 0, 0, -1};
 }
 
 
@@ -82,9 +82,8 @@ int readTile(tile_t * tile, FILE* fp) {
     unsigned char walls;
 
     // Read in the raw data from the next line
-    int ret = fscanf(fp, "%d %d %hd %hhu %hhd",
-                        &tile->x, &tile->y, &tile->bgPalette, 
-                        &walls, &tile->isEmpty);
+    int ret = fscanf(fp, "%hd %hhu %hhd", &tile->bgPalette, &walls, 
+                        &tile->isEmpty);
     
     // If any field was missed, return failure
     if(ret != 5) {
@@ -114,8 +113,7 @@ int writeTile(tile_t tile, FILE* fp) {
     unsigned char walls = (tile.lWall << 6) | (tile.rWall << 4) | 
                             (tile.uWall << 2) | (tile.dWall);
 
-    fprintf(fp, "%d %d %hd %hhu %hhd\n", 
-                tile.x, tile.y, tile.bgPalette, walls, tile.isEmpty);
+    fprintf(fp, "%hd %hhu %hhd\n", tile.bgPalette, walls, tile.isEmpty);
     return 0;
 }
 
@@ -126,46 +124,48 @@ int writeTile(tile_t tile, FILE* fp) {
  * @param tile The tile to draw to screen
  * @param scrX The x value of the tiles at the left of the screen
  * @param scrY The y value of the tiles at the top of the screen
+ * @param x The x value of the tile in the map
+ * @param y The y value of the tile in the map
  */
-void drawTile(tileData_t data, tile_t tile, int scrX, int scrY) {
+void drawTile(tileData_t data, tile_t tile, int scrX, int scrY, int x, int y) {
     // First calculate the screen position of the tile
     unsigned char tileWidth = data.tileBase.width;
     unsigned char tileHeight = data.tileBase.height;
 
     // Adjust grid coordinates to the view of the screen
-    int dX = tile.x - scrX, dY = tile.y - scrY;
+    int dX = x - scrX, dY = y - scrY;
     if(dX < 0 || dY < 0) return;    // Nothing to draw above or left of screen
 
     // Calculate the character position of the tile (and ensure it is onscreen)
-    int x = dX * tileWidth, y = dY * tileHeight;
-    if(x >= data.dispData.screenCols || y >= data.dispData.screenRows) return;
+    int col = dX * tileWidth, row = dY * tileHeight;
+    if(col >= data.dispData.screenCols || row >= data.dispData.screenRows) return;
     
 
     // If the tile is empty, draw the empty tile and be done with it
     if(tile.isEmpty) {
-        drawSprite(data.dispData, data.emptyBase, y, x);
+        drawSprite(data.dispData, data.emptyBase, row, col);
         return;
     }
 
     // First draw the Base tile
     short tmp = data.tileBase.palette;
     if(tile.bgPalette != kDefPalette) data.tileBase.palette = tile.bgPalette;
-    drawSprite(data.dispData, data.tileBase, y, x);
+    drawSprite(data.dispData, data.tileBase, row, col);
     data.tileBase.palette = tmp;
 }
 
-void drawWalls(tileData_t data, tile_t tile, int scrX, int scrY) {
+void drawWalls(tileData_t data, tile_t tile, int scrX, int scrY, int x, int y) {
     // First calculate the screen position of the tile
     unsigned char tileWidth = data.tileBase.width;
     unsigned char tileHeight = data.tileBase.height;
 
     // Adjust grid coordinates to the view of the screen
-    int dX = tile.x - scrX, dY = tile.y - scrY;
+    int dX = x - scrX, dY = y - scrY;
     if(dX < 0 || dY < 0) return;    // Nothing to draw above or left of screen
 
     // Calculate the character position of the tile (and ensure it is onscreen)
-    int x = dX * tileWidth, y = dY * tileHeight;
-    if(x >= data.dispData.screenCols || y >= data.dispData.screenRows) return;
+    int col = dX * tileWidth, row = dY * tileHeight;
+    if(col >= data.dispData.screenCols || row >= data.dispData.screenRows) return;
 
     sprite_t sprite = kEmptySprite;
     switch(tile.lWall) {
@@ -177,7 +177,7 @@ void drawWalls(tileData_t data, tile_t tile, int scrX, int scrY) {
         default:
             sprite = data.lDoor;
     }
-    drawSprite(data.dispData, sprite, y, x);
+    drawSprite(data.dispData, sprite, row, col);
     
     switch(tile.rWall) {
         case 0:
@@ -188,7 +188,7 @@ void drawWalls(tileData_t data, tile_t tile, int scrX, int scrY) {
         default:
             sprite = data.rDoor;
     }
-    drawSprite(data.dispData, sprite, y, x);
+    drawSprite(data.dispData, sprite, row, col);
     
     switch(tile.uWall) {
         case 0:
@@ -199,7 +199,7 @@ void drawWalls(tileData_t data, tile_t tile, int scrX, int scrY) {
         default:
             sprite = data.uDoor;
     }
-    drawSprite(data.dispData, sprite, y, x);
+    drawSprite(data.dispData, sprite, row, col);
     
     switch(tile.dWall) {
         case 0:
@@ -210,7 +210,7 @@ void drawWalls(tileData_t data, tile_t tile, int scrX, int scrY) {
         default:
             sprite = data.dDoor;
     }
-    drawSprite(data.dispData, sprite, y, x);
+    drawSprite(data.dispData, sprite, row, col);
 
 }
 
