@@ -99,4 +99,13 @@ int writeTile(tile_t tile, FILE* fp);
  */
 void drawTile(tileData_t data, tile_t tile, int scrX, int scrY);
 
+/**
+ * Calculates the width and height of the screen in tiles
+ * 
+ * @param data The data struct defining screen tiles
+ * @param width A return pointer for the width of the screen in tiles
+ * @param height A return pointer for the height of the scren in tiles
+ */
+void getScreenTileDim(tileData_t data, int * width, int * height);
+
 #endif

@@ -135,3 +135,43 @@ int loadMap(map_t* map, FILE* fp) {
 
     return 0;
 }
+
+#define min(a, b) ((a < b) ? a : b)
+#define max(a, b) ((a > b) ? a : b)
+
+/**
+ * Draw the section of the map in view, with focus on the tile at position (x,y)
+ * 
+ * @param data The tile data struct to use for display
+ * @param map The map to display
+ * @param x The x coordinate of the selected tile
+ * @param y The y coordinate of the selected cell
+ * 
+ * @return 0 on success, <0 on failure
+ */
+int drawMap(tileData_t data, map_t map, int x, int y) {
+    // Determine the position of the screen
+    int width, height;  // Width and height of the screen in tiles
+    getScreenTileDim(data, &width, &height);
+
+    // X & Y coords of the top-left tile
+    int scrX = max(min(x - width/2, map.nCols-width), 0);
+    int scrY = max(min(y - height/2, map.nRows-height), 0);
+
+    // X and Y offsets of the selected tile from the top-left of the screen
+    int dX = x - scrX, dY = y-scrY;
+    
+    // Draw all tiles on the screen
+    for(int dRow = 0; dRow < height && dRow + scrY < map.nRows; dRow++) {
+        int row = dRow + scrY;
+        for(int dCol = 0; dCol < width && dCol + scrX < map.nCols; dCol++) {
+            int col = dCol + scrX;
+            drawTile(data, map.data[row][col], dRow, dCol);
+        }
+    }
+
+    // Retarget the selected tile
+    move(dY * data.emptyBase.height, dX * data.emptyBase.width);
+
+    return 0;
+}

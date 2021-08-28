@@ -199,3 +199,8 @@ void drawTile(tileData_t data, tile_t tile, int scrX, int scrY) {
     drawSprite(data.dispData, sprite, y, x);
 
 }
+
+void getScreenTileDim(tileData_t data, int * width, int * height) {
+    if(width != NULL) *width = data.dispData.screenCols / data.emptyBase.width;
+    if(height != NULL) *height = data.dispData.screenRows / data.emptyBase.height;
+}

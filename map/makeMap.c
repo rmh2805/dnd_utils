@@ -15,8 +15,8 @@
 #define kTileFile "walls.out"
 
 // global allocation of large arrays (let the compiler sort this one out)
-#define kDefMapRows 30
-#define kDefMapCols 30
+#define kDefMapRows 6
+#define kDefMapCols 6
 
 //===============================<Menu Helpers>===============================//
 typedef enum mode_e {
@@ -55,6 +55,8 @@ void printMenu(int selection) {
 
 #define printError(msg) clear();printText(kRedPalette, msg, 0, 0); getch()
 
+#define min(a, b) ((a < b) ? a : b)
+#define max(a, b) ((a > b) ? a : b)
 
 
 FILE* getMapFile(bool loadFile) {
@@ -223,8 +225,41 @@ int main() {
 
                 mode = menu;
                 break;
+
             case nav:   // Navigate around the map
-                mode = menu;
+                if(!mapLoaded) {
+                    x = 0;
+                    y = 0;
+                    mode = menu;
+                }
+
+                clear();
+                drawMap(data, map, x, y);
+
+                ch = getch();
+                switch(ch) {
+                    // Mode changes
+                    case KEY_HOME:
+                    case 'q':
+                        x = 0; 
+                        y = 0;
+                        mode = menu;
+                        break;
+                    
+                    // Cursor Control
+                    case KEY_UP:
+                        y = max(y-1, 0);
+                        break;
+                    case KEY_DOWN:
+                        y = min(y+1, map.nRows-1);
+                        break;
+                    case KEY_LEFT:
+                        x = max(x-1, 0);
+                        break;
+                    case KEY_RIGHT:
+                        x = min(x+1, map.nCols-1);
+                        break;
+                }
                 break;
             case edit:  // Edit an individual tile
                 mode = menu;
