@@ -31,7 +31,7 @@ tests: testSprite
 #
 #	Executables
 #
-makeMap: makeMap.o sprite.o dispBase.o tile.o
+makeMap: makeMap.o sprite.o dispBase.o tile.o map.o
 	$(CC) $(CFLAGS) $(CDEBUGFLAGS) -o $@ $^ $(CLIBS)
 	$(ECHO)
 

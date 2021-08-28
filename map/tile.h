@@ -5,8 +5,6 @@
 #include "dispBase.h"
 
 typedef struct tile_s {
-    sprite_t * sprite;  // The sprite on top of this tile
-
     int x, y;           // The grid position of this tile
     short bgPalette;    // Palette overrides for this tile
 

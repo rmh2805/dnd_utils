@@ -58,6 +58,8 @@ void printMenu(int selection) {
 
 int main() {
     tileData_t data;
+    int ch;
+    int y = 0;
 
     // Initialize the display
     if(initDisp(&data.dispData) != 0) {
@@ -83,9 +85,36 @@ int main() {
     mode_t mode = menu;
     while(mode != quit) {
         switch(mode) {
-            case menu:
-                mode = quit;
+            case menu:  // Main menu selection mode
+                curs_set(1);
+                printMenu(y);
+
+                ch = getch();
+                if(ch > '0' && ch <= '0' + menuSize) {
+                    mode = menuModes[ch - '1'];
+                    break;
+                }
+
+                switch(ch) {
+                    case KEY_UP:
+                        if(y > 0) --y;
+                        break;
+                    case KEY_DOWN:
+                        if(y + 1 < menuSize) ++y;
+                        break;
+                    
+                    case KEY_ENTER:
+                    case '\n':
+                        mode = menuModes[y];
+                        break;
+                }
                 break;
+
+            case new:
+            case load:
+            case save:
+            case nav:
+            case edit:
             default:
                 mode = quit;
                 break;

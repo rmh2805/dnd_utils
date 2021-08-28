@@ -8,7 +8,7 @@
  * @return A blank tile with the provided positions
  */
 tile_t mkTile(int x, int y) {
-    return (tile_t) {NULL, x, y, kDefPalette, 0, 0, 0, 0, 0};
+    return (tile_t) {x, y, kDefPalette, 0, 0, 0, 0, 0};
 }
 
 /** 
@@ -19,7 +19,7 @@ tile_t mkTile(int x, int y) {
  * @return A blank tile with the provided positions
  */
 tile_t mkEmptyTile(int x, int y) {
-    return (tile_t) {NULL, x, y, kDefPalette, 0, 0, 0, 0, -1};
+    return (tile_t) {x, y, kDefPalette, 0, 0, 0, 0, -1};
 }
 
 
@@ -146,8 +146,5 @@ void drawTile(tileData_t data, tile_t tile, int scrX, int scrY) {
             sprite = data.dDoor;
     }
     drawSprite(data.dispData, sprite, y, x);
-
-    // Finally, draw the sprite itself
-    drawSprite(data.dispData, *tile.sprite, y, x);
 
 }
