@@ -91,8 +91,8 @@ void printHelp(mode_t mode) {
             helpPrinter("Quit... quits (real original, I know)", 10);
 
             helpPrinter("Worth noting, attempting to backspace in text entry currently results in corruption.", 12);
-            helpPrinter("Instead, the delete key currently fills its role", 14);
-            newRow = 16;
+            helpPrinter("Instead, the delete key currently fills its role", 13);
+            newRow = 15;
             break;
         case nav:
             printText(kBlackPalette, "Use the Arrow keys to select a tile to modify", 2, 0);
