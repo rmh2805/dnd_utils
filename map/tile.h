@@ -14,7 +14,7 @@ typedef struct tile_s {
     unsigned char uWall : 2;
     unsigned char dWall : 2;
 
-    unsigned char isEmpty;
+    signed char isEmpty;
 
 } tile_t;
 
@@ -64,8 +64,30 @@ int loadTileData(FILE* fp, tileData_t * data);
 
 /**
  * Frees all of the allocated data from the tileData struct
+ * 
+ * @param tileData The tileData struct to free from
  */
 void rmTileData(tileData_t tileData);
+
+/**
+ * Reads a tile written to the current line of the file
+ * 
+ * @param tile A return pointer for the tile read in
+ * @param fp The file pointer to read from
+ * 
+ * @return 0 on success, < 0 on failure
+ */
+int readTile(tile_t * tile, FILE* fp);
+
+/**
+ * Writes a tile to a line in the provided file
+ * 
+ * @param tile The tile to write out
+ * @param fp The file pointer to write to
+ * 
+ * @return 0 on success, < 0 on failure
+ */
+int writeTile(tile_t tile, FILE* fp);
 
 /**
  * Draws the provided tile in the proper place on screen

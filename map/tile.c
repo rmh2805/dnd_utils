@@ -54,6 +54,8 @@ loadTileDataFail:
 
 /**
  * Frees all of the allocated data from the tileData struct
+ * 
+ * @param tileData The tileData struct to free from
  */
 void rmTileData(tileData_t data) {
     rmSprite(data.emptyBase);
@@ -66,6 +68,55 @@ void rmTileData(tileData_t data) {
     rmSprite(data.rDoor);
     rmSprite(data.uDoor);
     rmSprite(data.dDoor);
+}
+
+/**
+ * Reads a tile written to the current line of the file
+ * 
+ * @param tile A return pointer for the tile read in
+ * @param fp The file pointer to read from
+ * 
+ * @return 0 on success, < 0 on failure
+ */
+int readTile(tile_t * tile, FILE* fp) {
+    unsigned char walls;
+
+    // Read in the raw data from the next line
+    int ret = fscanf(fp, "%d %d %hd %hhu %hhd",
+                        &tile->x, &tile->y, &tile->bgPalette, 
+                        &walls, &tile->isEmpty);
+    
+    // If any field was missed, return failure
+    if(ret != 5) {
+        return -1;
+    }
+
+    // Since all were decoded properly, extract walls
+    tile->lWall = (walls >> 6) & 0x03;
+    tile->rWall = (walls >> 4) & 0x03;
+    tile->uWall = (walls >> 2) & 0x03;
+    tile->dWall = walls & 0x03;
+
+    return 0;
+}
+
+/**
+ * Writes a tile to a line in the provided file
+ * 
+ * @param tile The tile to write out
+ * @param fp The file pointer to write to
+ * 
+ * @return 0 on success, < 0 on failure
+ */
+int writeTile(tile_t tile, FILE* fp) {
+    if(fp == NULL) return -1;
+
+    unsigned char walls = (tile.lWall << 6) | (tile.rWall << 4) | 
+                            (tile.uWall << 2) | (tile.dWall);
+
+    fprintf(fp, "%d %d %hd %hhu %hhd\n", 
+                tile.x, tile.y, tile.bgPalette, walls, tile.isEmpty);
+    return 0;
 }
 
 /**

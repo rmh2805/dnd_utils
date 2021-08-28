@@ -12,7 +12,7 @@ typedef struct map_s {
 } map_t;
 
 
-//============================<Memory Management>=============================//
+//=========================<Initialization & Cleanup>=========================//
 /**
  * Allocates and initializes a map with the provided dimensions
  * 
@@ -37,10 +37,35 @@ int mkMap(int nRows, int nCols, map_t * map);
 int initMap(tile_t ** data, int nRows, int nCols, map_t * map);
 
 /**
- * Cleans up the sprites in the map without freeing its tile buffer
+ * Frees the tile buffers allocated by mkMap
  * 
  * @param map The map to clean
  */
 void rmMap(map_t map);
+
+//==============================<Serialization>===============================//
+
+/**
+ * Write a map out to file
+ * 
+ * @param map The map to write to file
+ * @param fp The file to write out to
+ * 
+ * @return 0 on success, < 0 on failure
+ */
+int writeMap(map_t map, FILE* fp);
+
+/**
+ * Load a map from a file
+ * 
+ * @param map A return pointer for the map read from file
+ * @param fp The file to read from
+ * 
+ * @return 0 on success, < 0 on failure
+ *          -1 on null param, 
+ *          -2 on failure to read from file,
+ *          -3 if map is too small to hold the map read from file
+ */
+int loadMap(map_t* map, FILE* fp);
 
 #endif
