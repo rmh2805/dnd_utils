@@ -67,35 +67,6 @@ FILE* getSpriteFile(bool loadFile) {
     return fp;
 }
 
-bool resizeAction(sprite_t * sprite, int ch, bool isTile) {
-    if(sprite == NULL) return false;
-    if(ch == '\n' || ch == KEY_ENTER) return true;
-
-    short palette = sprite->palette;
-    unsigned char height = sprite->height, width = sprite->width;
-    unsigned char xOff = sprite->xOff, yOff = sprite->yOff;
-
-    rmSprite(*sprite);
-    switch(ch) {
-        case KEY_UP:
-            height = (height <= 1) ? 1 : height - 1;
-            break;
-        case KEY_DOWN:
-            ++height;
-            break;
-        case KEY_LEFT:
-            width = (width <= 1) ? 1 : width - 1;
-            break;
-        case KEY_RIGHT:
-            ++width;
-    }
-    if(isTile)
-        *sprite = mkBlankTile(palette, width, height);
-    else
-        *sprite = mkSprite(palette, width, height, xOff, yOff);
-    return false;
-}
-
 #define printError(msg) clear();printText(kRedPalette, msg, 0, 0); getch()
 
 //==============================<Main Execution>==============================//
