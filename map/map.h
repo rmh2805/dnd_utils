@@ -64,7 +64,7 @@ int writeMap(map_t map, FILE* fp);
  * @return 0 on success, < 0 on failure
  *          -1 on null param, 
  *          -2 on failure to read from file,
- *          -3 if map is too small to hold the map read from file
+ *          -3 if unable to allocate the new map
  */
 int loadMap(map_t* map, FILE* fp);
 

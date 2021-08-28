@@ -111,7 +111,7 @@ int writeMap(map_t map, FILE* fp) {
  * @return 0 on success, < 0 on failure
  *          -1 on null param, 
  *          -2 on failure to read from file,
- *          -3 if map is too small to hold the map read from file
+ *          -3 if unable to allocate the new map
  */
 int loadMap(map_t* map, FILE* fp) {
     if(fp == NULL || map == NULL) return -1;
@@ -120,7 +120,8 @@ int loadMap(map_t* map, FILE* fp) {
     int ret = fscanf(fp, "%d %d", &rows, &cols);
 
     if(ret != 2) return -2;
-    if(rows < map->nRows || cols < map->nCols) return -3;
+
+    if(mkMap(rows, cols, map) < 0) return -3;
 
     for(int row = 0; row < rows; row++) {
         for(int col = 0; col < cols; col++) {
