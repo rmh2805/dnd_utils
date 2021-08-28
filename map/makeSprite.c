@@ -69,13 +69,39 @@ FILE* getSpriteFile(bool loadFile) {
 
 #define printError(msg) clear();printText(kRedPalette, msg, 0, 0); getch()
 
+int doSelSprite(dispData_t data, list_t spriteList, int selection, const char * prompt) {
+    if(spriteList == NULL) {
+        return -1;
+    }
+
+    // Grab the proper sprite
+    sprite_t * entry = listGet(spriteList, selection);
+    if(entry == NULL) {
+        printError("*FATAL ERROR* Unexpected dead entry in sprite list");
+        return -1;
+    }
+
+    // Update the display itself
+    clear();
+    printText(kBlackPalette, prompt, 0, 0);
+    drawSprite(data, *entry, data.screenRows/2 - entry->height/2,
+        data.screenCols/2 - entry->width/2);
+    
+    return 0;
+}
+
+
+#define kSelPrompt "Use left and right arrows to navigate, enter to select, and home to escape"
+#define kViewPrompt "Use left and right arrows to navigate and home to escape"
+
+
 //==============================<Main Execution>==============================//
 int main() {
     // Basic definitions
     int ret, ch;
     FILE* fp = NULL;
     sprite_t sprite;
-    sprite_t * entry = NULL;
+    sprite_t * tile = NULL, * entry = NULL;
     list_t spriteList = NULL;
 
     // Initialize the display
@@ -125,7 +151,64 @@ int main() {
                     break;
                 }
 
-                mode = menu;
+                // Display the currently selected sprite
+                if(selY == 0) {
+                    // Prompt to create a new sprite
+                    clear();
+                    printText(kBlackPalette, kSelPrompt, 0, 0);
+                    printText(kBlackPalette, "New Sprite", data.screenRows/2, data.screenCols/2-5);
+                } else if(doSelSprite(data, spriteList, selY, kSelPrompt) < 0) {
+                    mode = quit;
+                    break;
+                }
+
+
+                ch = getch();
+                switch(ch) {
+                    case KEY_ENTER:
+                    case '\n':
+                        entry = listGet(spriteList, selY);
+                        if(selY == 0) {
+                            // Make a new sprite with the same size as the basic tile
+                            sprite = mkBlankTile(kDefPalette, entry->width, entry->height);
+                            if(sprite.data == NULL) {
+                                printError("*ERROR* Failed to allocate data for new sprite");
+                                mode = menu;
+                                break;
+                            }
+
+                            // Wrap the new sprite into an entry
+                            entry = mkSpriteEntry(sprite);
+                            if(entry == NULL) {
+                                rmSprite(sprite);
+                                printError("*ERROR* Failed to allocate data for new sprite entry");
+                                mode = menu;
+                                break;
+                            }
+
+                            // Append the entry to list and shift to resize mode
+                            if(listAppend(spriteList, entry) < 0) {
+                                freeSpriteEntry(entry);
+                                printError("*ERROR* Failed to put new sprite on list");
+                                mode = menu;
+                                break;
+                            }
+                            mode = dim;
+                        } else {
+                            mode = edit;
+                        }
+                        break;
+                    case KEY_HOME:
+                    case 'q':
+                        mode = menu;
+                        break;
+                    case KEY_LEFT:
+                        selY = (selY == 0) ? listLen(spriteList) : selY-1;
+                        break;
+                    case KEY_RIGHT:
+                        selY = (selY + 1 == listLen(spriteList)) ? 0 : selY+1;
+                        break;
+                }
                 break;
             
             case new:   // Create a new sprite sheet
@@ -215,6 +298,9 @@ int main() {
                 break;
 
             case edit:  // Actually edit an element from the sheet
+                printError("EDIT MODE");
+
+                entry = NULL;
                 mode = menu;
                 break;
 
@@ -225,25 +311,17 @@ int main() {
                 }
 
                 // Grab the proper sprite
-                entry = listGet(spriteList, selY);
-                if(entry == NULL) {
-                    printError("*FATAL ERROR* Unexpected dead entry in sprite list");
+                ret = doSelSprite(data, spriteList, selY, kViewPrompt);
+                if(ret < 0) {
                     mode = quit;
                     break;
                 }
-
-                // Update the display itself
-                clear();
-                printText(kBlackPalette, "Use left and right arrows to navigate, and home to escape", 0, 0);
-                drawSprite(data, *entry, data.screenRows/2 - entry->height/2,
-                    data.screenCols/2 - entry->width/2);
                 
                 // Handle input
                 ch = getch();
                 switch(ch) {
                     case KEY_HOME:
                     case 'q':
-                        entry = NULL;   // Clean up after myself
                         mode = menu;
                         break;
                     case KEY_LEFT:
@@ -332,5 +410,6 @@ int main() {
     closeDisp();
     rmList(spriteList, freeSpriteEntry);
     freeSpriteEntry(entry);
+    freeSpriteEntry(tile);
     return EXIT_SUCCESS;
 }
