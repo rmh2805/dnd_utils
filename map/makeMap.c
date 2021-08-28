@@ -76,7 +76,7 @@ FILE* getMapFile(bool loadFile) {
 
 int main() {
     tileData_t data;
-    int ch;
+    int ret, ch;
     int x = 0, y = 0;
     char buf[80];
 
@@ -330,8 +330,10 @@ int main() {
                     y = 0;
                     break;
                 }
-                if(mapToFile(data, map, fp) < 0) {
-                    break;
+                ret = mapToSections(data, map, fp, 80, 64);
+                if(ret < 0) {
+                    sprintf(buf, "*ERROR* Failed to write out to file (%d)", ret);
+                    printError(buf);
                 }
                 fclose(fp);
                 mode = menu;

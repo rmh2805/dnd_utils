@@ -189,18 +189,53 @@ int drawMap(tileData_t data, map_t map, int x, int y) {
 
 #define printError(msg) clear();printText(kRedPalette, msg, 0, 0); getch()
 
-int mapToFile(tileData_t data, map_t map, FILE* file){
-    char buf[128];
-    
+int mapSectionToFile(tileData_t data, map_t map, FILE* file, 
+        int startRow, int startCol, int endRow, int endCol);
+
+int mapToFile(tileData_t data, map_t map, FILE* file) {
+    return mapSectionToFile(data, map, file, 0, 0, 0, 0);
+}
+
+int mapToSections(tileData_t data, map_t map, FILE* file, int pgWidth, int pgHeight) {
     if(file == NULL) return -1;
 
-    for(int row = 0; row < map.nRows; row++) {
-        /*
-        sprintf(buf, "Row %d of %d started", row, map.nRows);
-        printError(buf);
-        */
+    // Determine the number of rows and columns per page (and extra lines needed)
+    int pgRows = pgHeight/data.emptyBase.height;
+    if(pgRows == 0) return -2;
+    int pgCols = pgWidth/data.emptyBase.width;
+    if(pgCols == 0) return -2;
+    int pgExcess = pgHeight - pgRows*data.emptyBase.height;
+
+    // Iterate through all of the page groups
+    for(int pgRank = 0; pgRank * pgRows < map.nRows; pgRank++) {
+        for(int pgFile = 0; pgFile * pgCols < map.nCols; pgFile++) {
+            int ret = mapSectionToFile(data, map, file, 
+                    pgRank * pgRows, pgFile * pgCols,
+                    (pgRank+1) * pgRows, (pgFile+1) * pgCols); 
+            if( ret < 0) {
+                return ret - 2;
+            }
+            for(int i = 0; i < pgExcess; i++) {
+                fprintf(file, "\n");
+            }
+        }
+    }
+
+    return 0;
+}
+
+int mapSectionToFile(tileData_t data, map_t map, FILE* file, 
+        int startRow, int startCol, int endRow, int endCol) {
+    if(file == NULL) return -1;
+    if(startRow > endRow || startCol > endCol) return -2;
+    if(startRow > map.nRows || startCol > map.nCols) return 1;
+
+    if(endRow == 0 || endRow > map.nRows) endRow = map.nRows;
+    if(endCol == 0 || endCol > map.nCols) endCol = map.nCols;
+
+    for(int row = startRow; row < endRow; row++) {
         for(int line = 0; line < data.emptyBase.height; line++) {
-            for(int col = 0; col < map.nCols; col++) {
+            for(int col = startCol; col < endCol; col++) {
                 for(int i = 0; i < data.emptyBase.width; i++) {
                     int ch = ' ';
                     if(map.data[row][col].uWall == 1 && line < data.uWall.height && data.uWall.data[line][i]) {
