@@ -249,9 +249,7 @@ int main() {
                     case KEY_ENTER:
                     case '\n':
                     case 'e':
-                        if(map.data[y][x].isEmpty) {
-                            map.data[y][x] = mkTile();
-                        }
+                        map.data[y][x].isEmpty = false;
                         break;
                     
                     // Cursor Control
@@ -275,7 +273,11 @@ int main() {
                         break;
                     case 'd':
                     case 'D':
-                        map.data[y][x].rWall = (map.data[y][x].rWall+1)%3;
+                        if(x == map.nCols - 1) {
+                            map.data[y][x].rWall=(map.data[y][x].rWall+1)%3;
+                        } else {
+                            map.data[y][x+1].lWall=(map.data[y][x+1].lWall+1)%3;
+                        }
                         break;
                     case 'w':
                     case 'W':
@@ -283,14 +285,18 @@ int main() {
                         break;
                     case 's':
                     case 'S':
-                        map.data[y][x].dWall = (map.data[y][x].dWall+1)%3;
+                        if(y == map.nRows - 1) {
+                            map.data[y][x].dWall=(map.data[y][x].dWall+1)%3;
+                        } else {
+                            map.data[y+1][x].uWall=(map.data[y+1][x].uWall+1)%3;
+                        }
                         break;
                     
                     // Misc Controls
                     case KEY_DC:    // If delete is pressed...
                     case 27:
                     case 'q':
-                        map.data[y][x] = mkEmptyTile();
+                        map.data[y][x].isEmpty = true;;
                         break;
                 }
                 break;
