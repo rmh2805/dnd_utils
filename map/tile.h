@@ -99,6 +99,8 @@ int writeTile(tile_t tile, FILE* fp);
  */
 void drawTile(tileData_t data, tile_t tile, int scrX, int scrY);
 
+void drawWalls(tileData_t data, tile_t tile, int scrX, int scrY);
+
 /**
  * Calculates the width and height of the screen in tiles
  * 

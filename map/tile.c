@@ -140,6 +140,7 @@ void drawTile(tileData_t data, tile_t tile, int scrX, int scrY) {
     int x = dX * tileWidth, y = dY * tileHeight;
     if(x >= data.dispData.screenCols || y >= data.dispData.screenRows) return;
     
+
     // If the tile is empty, draw the empty tile and be done with it
     if(tile.isEmpty) {
         drawSprite(data.dispData, data.emptyBase, y, x);
@@ -151,8 +152,21 @@ void drawTile(tileData_t data, tile_t tile, int scrX, int scrY) {
     if(tile.bgPalette != kDefPalette) data.tileBase.palette = tile.bgPalette;
     drawSprite(data.dispData, data.tileBase, y, x);
     data.tileBase.palette = tmp;
+}
 
-    // Next draw each of the walls
+void drawWalls(tileData_t data, tile_t tile, int scrX, int scrY) {
+    // First calculate the screen position of the tile
+    unsigned char tileWidth = data.tileBase.width;
+    unsigned char tileHeight = data.tileBase.height;
+
+    // Adjust grid coordinates to the view of the screen
+    int dX = tile.x - scrX, dY = tile.y - scrY;
+    if(dX < 0 || dY < 0) return;    // Nothing to draw above or left of screen
+
+    // Calculate the character position of the tile (and ensure it is onscreen)
+    int x = dX * tileWidth, y = dY * tileHeight;
+    if(x >= data.dispData.screenCols || y >= data.dispData.screenRows) return;
+
     sprite_t sprite = kEmptySprite;
     switch(tile.lWall) {
         case 0:

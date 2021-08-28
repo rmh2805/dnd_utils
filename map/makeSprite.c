@@ -323,8 +323,8 @@ int main() {
                 // todo Print some kind of prompt here
                 drawSprite(data, *tile, data.screenRows/2-tile->height/2, 
                                         data.screenCols/2-tile->width/2);
-                drawSprite(data, *entry, data.screenRows/2-tile->height/2+entry->yOff, 
-                                          data.screenCols/2-tile->width/2+entry->xOff);
+                drawSprite(data, *entry, data.screenRows/2-tile->height/2, 
+                                          data.screenCols/2-tile->width/2);
                 move(data.screenRows/2 - tile->height/2 + entry->yOff + selY, 
                      data.screenCols/2 - tile->width/2 + entry->xOff + selX);
 

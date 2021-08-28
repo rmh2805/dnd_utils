@@ -59,6 +59,8 @@ int closeDisp() {
  * @param screenCol The left column to draw in
  */
 void drawSprite(dispData_t data, sprite_t sprite, int screenRow, int screenCol) {
+    screenRow = screenRow + sprite.yOff;
+    screenCol = screenCol + sprite.xOff;
     if (sprite.data == NULL || 
             screenRow + sprite.height <= 0 || screenCol + sprite.width <= 0 ||
             screenRow >= data.screenRows || screenCol >= data.screenCols) {

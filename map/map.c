@@ -166,9 +166,19 @@ int drawMap(tileData_t data, map_t map, int x, int y) {
         int row = dRow + scrY;
         for(int dCol = 0; dCol < width && dCol + scrX < map.nCols; dCol++) {
             int col = dCol + scrX;
-            drawTile(data, map.data[row][col], dRow, dCol);
+            drawTile(data, map.data[row][col], scrX, scrY);
         }
     }
+
+    // And then draw all of the walls
+    for(int dRow = 0; dRow < height && dRow + scrY < map.nRows; dRow++) {
+        int row = dRow + scrY;
+        for(int dCol = 0; dCol < width && dCol + scrX < map.nCols; dCol++) {
+            int col = dCol + scrX;
+            drawWalls(data, map.data[row][col], scrX, scrY);
+        }
+    }
+
 
     // Retarget the selected tile
     move(dY * data.emptyBase.height, dX * data.emptyBase.width);

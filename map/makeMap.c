@@ -20,7 +20,7 @@
 
 //===============================<Menu Helpers>===============================//
 typedef enum mode_e {
-    menu, quit, new, load, save, nav, edit
+    menu, quit, new, load, save, nav
 } mode_t;
 
 const char * menuItems[] = {
@@ -151,7 +151,7 @@ int main() {
                 // Update the display
                 clear();
                 curs_set(1);
-                printText(kBlackPalette, "Use Arrow keys to resize the map and enter to confirm (home to quit)", 
+                printText(kBlackPalette, "Use Arrow keys to resize the map and enter to confirm (home or '`' to quit)", 
                             data.dispData.screenRows/3, data.dispData.screenCols/2-34);
                 
                 sprintf(buf, "rows: %2d     cols: %2d", y, x);
@@ -174,7 +174,7 @@ int main() {
                         break;
 
                     case KEY_HOME:
-                    case 'q':
+                    case '`':
                         x = 0; 
                         y = 0;
                         mode = menu;
@@ -240,10 +240,18 @@ int main() {
                 switch(ch) {
                     // Mode changes
                     case KEY_HOME:
-                    case 'q':
+                    case '`':
                         x = 0; 
                         y = 0;
                         mode = menu;
+                        break;
+
+                    case KEY_ENTER:
+                    case '\n':
+                    case 'e':
+                        if(map.data[y][x].isEmpty) {
+                            map.data[y][x] = mkTile(x, y);
+                        }
                         break;
                     
                     // Cursor Control
@@ -259,10 +267,32 @@ int main() {
                     case KEY_RIGHT:
                         x = min(x+1, map.nCols-1);
                         break;
+                    
+                    // Set walls
+                    case 'a':
+                    case 'A':
+                        map.data[y][x].lWall = (map.data[y][x].lWall+1)%3;
+                        break;
+                    case 'd':
+                    case 'D':
+                        map.data[y][x].rWall = (map.data[y][x].rWall+1)%3;
+                        break;
+                    case 'w':
+                    case 'W':
+                        map.data[y][x].uWall = (map.data[y][x].uWall+1)%3;
+                        break;
+                    case 's':
+                    case 'S':
+                        map.data[y][x].dWall = (map.data[y][x].dWall+1)%3;
+                        break;
+                    
+                    // Misc Controls
+                    case KEY_DC:    // If delete is pressed...
+                    case 27:
+                    case 'q':
+                        map.data[y][x] = mkEmptyTile(x, y);
+                        break;
                 }
-                break;
-            case edit:  // Edit an individual tile
-                mode = menu;
                 break;
             default:    // All other modes should simply quit
                 mode = quit;
