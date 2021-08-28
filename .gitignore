@@ -3,5 +3,6 @@
 character/charCreator
 map/testSprite
 map/makeSprite
+map/makeMap
 map/spriteSheets/*
 !map/spriteSheets/sprites.out

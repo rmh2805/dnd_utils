@@ -16,11 +16,14 @@ typedef struct tile_s {
     unsigned char uWall : 2;
     unsigned char dWall : 2;
 
+    unsigned char isEmpty;
+
 } tile_t;
 
 typedef struct tileData_s {
     dispData_t dispData;    // The underlying dispBase data store
     
+    sprite_t emptyBase;     // The empty tile background sprite
     sprite_t tileBase;      // The basic tile background sprite
 
     sprite_t lWall;         // The left wall sprite
@@ -42,6 +45,29 @@ typedef struct tileData_s {
  * @return A blank tile with the provided positions
  */
 tile_t mkTile(int x, int y);
+
+/** 
+ * Makes an empty tile with default palettes
+ * 
+ * @param x The grid position x value
+ * @param y The grid position y value
+ * @return A blank tile with the provided positions
+ */
+tile_t mkEmptyTile(int x, int y);
+
+/**
+ * Loads a tile data struct's sprites from file
+ * 
+ * @param fileName The sprite file to load tiles from
+ * @param data A return pointer for the tile data struct
+ * @return 0 on success, <0 on failure
+ */
+int loadTileData(FILE* fp, tileData_t * data);
+
+/**
+ * Frees all of the allocated data from the tileData struct
+ */
+void rmTileData(tileData_t tileData);
 
 /**
  * Draws the provided tile in the proper place on screen
