@@ -86,7 +86,7 @@ int readTile(tile_t * tile, FILE* fp) {
                         &tile->isEmpty);
     
     // If any field was missed, return failure
-    if(ret != 5) {
+    if(ret != 3) {
         return -1;
     }
 
