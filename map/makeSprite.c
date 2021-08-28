@@ -205,7 +205,7 @@ int main() {
                         mode = menu;
                         break;
                     case KEY_LEFT:
-                        selY = (selY == 0) ? listLen(spriteList) : selY-1;
+                        selY = (selY == 0) ? listLen(spriteList)-1 : selY-1;
                         break;
                     case KEY_RIGHT:
                         selY = (selY + 1 == listLen(spriteList)) ? 0 : selY+1;
@@ -302,6 +302,7 @@ int main() {
                 break;
 
             case edit:  // Actually edit an element from the sheet
+                curs_set(1);
                 if(spriteList == NULL || entry == NULL) {   // Can only be used w/ a sheet & entry
                     mode = menu;
                     break;

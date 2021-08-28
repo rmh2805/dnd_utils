@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-
 typedef struct sprite_s {
     short palette;
 
@@ -13,6 +12,8 @@ typedef struct sprite_s {
     char** data;                    // The actual characters to display as text
 
 } sprite_t;
+
+#define kEmptySprite (sprite_t) {0, 0, 0, 0, 0, NULL}
 
 /**
  * Allocates data for a sprite with the specified dimensions

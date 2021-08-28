@@ -1,6 +1,5 @@
 #include "sprite.h"
 
-#define kEmptySprite (sprite_t) {0, 0, 0, 0, 0, NULL}
 
 /**
  * Allocates data for a sprite with the specified dimensions
