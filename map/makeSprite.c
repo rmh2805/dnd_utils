@@ -113,7 +113,7 @@ int main() {
     }
 
     // Main loop
-    unsigned int selY = 0;
+    unsigned int selX = 0, selY = 0;
     mode_t mode = menu;
     while(mode != quit) {
         switch(mode) {
@@ -195,6 +195,8 @@ int main() {
                             }
                             mode = dim;
                         } else {
+                            selX = 0;
+                            selY = 0;
                             mode = edit;
                         }
                         break;
@@ -280,6 +282,8 @@ int main() {
                                 selY = 0;
                                 break;
                             default: // Otherwise go on to edit
+                                selX = 0;
+                                selY = 0;
                                 mode = edit;
                                 break;
                         }
@@ -298,10 +302,93 @@ int main() {
                 break;
 
             case edit:  // Actually edit an element from the sheet
-                printError("EDIT MODE");
+                if(spriteList == NULL || entry == NULL) {   // Can only be used w/ a sheet & entry
+                    mode = menu;
+                    break;
+                }
 
-                entry = NULL;
-                mode = menu;
+                // Ensure that the tile is loaded for a background
+                if(tile == NULL) {
+                    tile = listGet(spriteList, 0);
+                    if(tile == NULL) {
+                        printError("*FATAL ERROR* Failed to extract blank tile from list");
+                        mode = quit;
+                        break;
+                    }
+                }
+
+                // Update the display
+                clear();
+                // todo Print some kind of prompt here
+                drawSprite(data, *tile, data.screenRows/2-tile->height/2, 
+                                        data.screenCols/2-tile->width/2);
+                drawSprite(data, *entry, data.screenRows/2-tile->height/2+entry->yOff, 
+                                          data.screenCols/2-tile->width/2+entry->xOff);
+                move(data.screenRows/2 - tile->height/2 + entry->yOff + selY, 
+                     data.screenCols/2 - tile->width/2 + entry->xOff + selX);
+
+                // Handle input
+                ch = getch();
+                switch(ch) {
+                    // Finalize keys
+                    case KEY_ENTER:
+                    case '\n':
+                        tile = NULL;
+                        entry = NULL;
+                        selY = 0;
+                        mode = menu;
+                        break;
+                    
+                    // Cursor keys
+                    case KEY_UP:
+                        if(selY > 0) --selY;
+                        break;
+                    case KEY_DOWN:
+                        ++selY;
+                        if(selY == entry->height) --selY;
+                        break;
+                    case KEY_LEFT:
+                        if(selX > 0) --selX;
+                        break;
+                    case KEY_RIGHT:
+                        ++selX;
+                        if(selX == entry->width) --selX;
+                        break;
+
+                    // Offset keys
+                    case KEY_HOME:
+                        entry->yOff += 1;
+                        if(entry->height + entry->yOff > tile->height) entry->yOff -= 1;
+                        break;
+                    case KEY_SHOME:
+                        if(entry->yOff > 0) entry->yOff -= 1;
+                        break;
+                    case KEY_END:
+                        entry->xOff += 1;
+                        if(entry->width + entry->xOff > tile->width) entry->xOff -= 1;
+                        break;
+                    case KEY_SEND:
+                        if(entry->xOff > 0) entry->xOff -= 1;
+                        break;
+                            
+                    // Palette swap keys
+                    case KEY_PPAGE: // Entry palette swap
+                        entry->palette += 1;
+                        if(entry->palette > kMaxPalette) entry->palette = kMinPalette;
+                        break;
+                    
+                    // Data entry keys
+                    case KEY_DC:
+                    case 27:
+                        entry->data[selY][selX] = 0;
+                        break;
+                    
+                    default:
+                        if(ch < 0x20 || ch > 0x7e) { // If char is non-visible
+                            break;
+                        }
+                        entry->data[selY][selX] = ch;
+                }
                 break;
 
             case view:  // View through loaded sprites
