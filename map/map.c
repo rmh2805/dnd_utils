@@ -185,3 +185,64 @@ int drawMap(tileData_t data, map_t map, int x, int y) {
 
     return 0;
 }
+
+
+#define printError(msg) clear();printText(kRedPalette, msg, 0, 0); getch()
+
+int mapToFile(tileData_t data, map_t map, FILE* file){
+    char buf[128];
+    
+    if(file == NULL) return -1;
+
+    for(int row = 0; row < map.nRows; row++) {
+        /*
+        sprintf(buf, "Row %d of %d started", row, map.nRows);
+        printError(buf);
+        */
+        for(int line = 0; line < data.emptyBase.height; line++) {
+            for(int col = 0; col < map.nCols; col++) {
+                for(int i = 0; i < data.emptyBase.width; i++) {
+                    int ch = ' ';
+                    if(map.data[row][col].uWall == 1 && line < data.uWall.height && data.uWall.data[line][i]) {
+                        // Check for characters in the upper wall
+                        ch = data.uWall.data[line][i];
+                    } else if(map.data[row][col].uWall == 2 && line < data.uDoor.height && data.uDoor.data[line][i]) {
+                        // Check for characters in the upper door
+                        ch = data.uDoor.data[line][i];
+                    } else if(map.data[row][col].lWall == 1 && i < data.lWall.width && data.lWall.data[line][i]) {
+                        // Check for characters in the left wall
+                        ch = data.lWall.data[line][i];
+                    } else if(map.data[row][col].lWall == 2 && i < data.lDoor.width && data.lDoor.data[line][i]) {
+                        // Check for characters in the left door
+                        ch = data.lDoor.data[line][i];
+                    } else if(map.data[row][col].dWall == 1 && line >= data.emptyBase.height - data.dWall.height 
+                                && data.dWall.data[line - (data.emptyBase.height - data.dWall.height)][i]) {
+                        // Check for characters in the lower wall
+                        ch = data.dWall.data[line - (data.emptyBase.height - data.dWall.height)][i];
+                    } else if(map.data[row][col].dWall == 2 && line >= data.emptyBase.height - data.dDoor.height 
+                                && data.dDoor.data[line - (data.emptyBase.height - data.dDoor.height)][i]) {
+                        // Check for characters in the lower door
+                        ch = data.dDoor.data[line - (data.emptyBase.height - data.dDoor.height)][i];
+                    } else if(map.data[row][col].rWall == 1 && i >= data.emptyBase.width - data.rWall.width 
+                                && data.rWall.data[line][i - (data.emptyBase.width - data.rWall.width)]) {
+                        // Check for characters in the right wall
+                        ch = data.rWall.data[line][i - (data.emptyBase.width - data.rWall.width)];
+                    } else if(map.data[row][col].rWall == 2 && i >= data.emptyBase.width - data.rDoor.width 
+                                && data.rDoor.data[line][i - (data.emptyBase.width - data.rDoor.width)]) {
+                        // Check for characters in the right wall
+                        ch = data.rDoor.data[line][i - (data.emptyBase.width - data.rDoor.width)];
+                    } else if(!map.data[row][col].isEmpty && data.tileBase.data[line][i]) {
+                        // Check for characters in the base tile
+                        ch = data.tileBase.data[line][i];
+                    }
+                    
+                    fprintf(file, "%c", ch);
+
+                }
+            }
+            fprintf(file, "\n");
+        }
+    }
+
+    return 0;
+}

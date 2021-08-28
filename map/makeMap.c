@@ -20,7 +20,7 @@
 
 //===============================<Menu Helpers>===============================//
 typedef enum mode_e {
-    menu, quit, new, load, save, nav
+    menu, quit, new, load, save, nav, file
 } mode_t;
 
 const char * menuItems[] = {
@@ -28,14 +28,16 @@ const char * menuItems[] = {
     "2. Load Map",
     "3. Save Map",
     "4. Edit Map",
-    "5. Quit"
+    "5. Make Printable",
+    "6. Quit"
 };
 
 mode_t menuModes[] = {
     new,
     load,
     save,
-    nav, 
+    nav,
+    file,
     quit
 };
 
@@ -201,6 +203,12 @@ int main() {
                 }
                 
                 fp = getMapFile(true);
+                if(fp == NULL) {
+                    printError("*ERROR* Unable to open map file");
+                    y = 0;
+                    mode = menu;
+                    break;
+                }
                 if(loadMap(&map, fp) < 0) {
                     printError("*ERROR* Unable to read map from file");
                 } else {
@@ -218,6 +226,12 @@ int main() {
                 }
                 
                 fp = getMapFile(false);
+                if(fp == NULL) {
+                    printError("*ERROR* Unable to open map file");
+                    y = 0;
+                    mode = menu;
+                    break;
+                }
                 if(writeMap(map, fp) < 0) {
                     printError("*ERROR* Unable to write map to file");
                 }
@@ -299,6 +313,28 @@ int main() {
                         map.data[y][x].isEmpty = true;;
                         break;
                 }
+                break;
+            
+            case file:
+                if(!mapLoaded) {
+                    x = 0;
+                    y = 0;
+                    mode = menu;
+                    break;
+                }
+
+                fp = getMapFile(false);
+                if(fp == NULL) {
+                    printError("*ERROR* Unable to open output file");
+                    mode = menu;
+                    y = 0;
+                    break;
+                }
+                if(mapToFile(data, map, fp) < 0) {
+                    break;
+                }
+                fclose(fp);
+                mode = menu;
                 break;
             default:    // All other modes should simply quit
                 mode = quit;

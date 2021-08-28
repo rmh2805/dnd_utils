@@ -81,4 +81,6 @@ int loadMap(map_t* map, FILE* fp);
  */
 int drawMap(tileData_t data, map_t map, int x, int y);
 
+int mapToFile(tileData_t data, map_t map, FILE* file);
+
 #endif
