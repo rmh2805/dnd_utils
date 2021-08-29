@@ -8,7 +8,7 @@
  * @return A blank tile with the provided positions
  */
 tile_t mkTile() {
-    return (tile_t) {kDefPalette, 0, 0, 0, 0, 0};
+    return (tile_t) {0, 0, 0, 0, 0, 0};
 }
 
 /** 
@@ -19,7 +19,7 @@ tile_t mkTile() {
  * @return A blank tile with the provided positions
  */
 tile_t mkEmptyTile() {
-    return (tile_t) {kDefPalette, 0, 0, 0, 0, -1};
+    return (tile_t) {0, 0, 0, 0, 0, -1};
 }
 
 
@@ -149,7 +149,7 @@ void drawTile(tileData_t data, tile_t tile, int scrX, int scrY, int x, int y) {
 
     // First draw the Base tile
     short tmp = data.tileBase.palette;
-    if(tile.bgPalette != kDefPalette) data.tileBase.palette = tile.bgPalette;
+    if(tile.bgPalette != 0) data.tileBase.palette = tile.bgPalette;
     drawSprite(data.dispData, data.tileBase, row, col);
     data.tileBase.palette = tmp;
 }

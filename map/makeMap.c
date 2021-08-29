@@ -354,7 +354,19 @@ int main() {
                         map.data[y][x].isEmpty = true;;
                         break;
                     
-                    case '?':
+                    case 'c':
+                    case 'C':
+                        if(map.data[y][x].bgPalette == 0) {
+                            map.data[y][x].bgPalette = kDefPalette;
+                        }
+
+                        map.data[y][x].bgPalette += 1;
+                        if(map.data[y][x].bgPalette >= kMaxPalette) {
+                            map.data[y][x].bgPalette = kMinPalette;
+                        }
+                        break;
+
+                    case '?':       // Display the help text
                         printHelp(mode);
                         break;
                 }
