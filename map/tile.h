@@ -3,8 +3,13 @@
 
 #include "sprite.h"
 #include "dispBase.h"
+#include "../common/list.h"
+
+#define kNoSprite -1
+#define writeCharSprite(palette, ch) (-1 * (palette << 8 | ch))
 
 typedef struct tile_s {
+    int sprite;         // The index of the sprite used on this tile
     short bgPalette;    // Palette overrides for this tile
 
     // For each: 0 is no wall, 1 is wall, >1 is door
@@ -32,6 +37,8 @@ typedef struct tileData_s {
     sprite_t rDoor;         // The right door sprite
     sprite_t uDoor;         // The top door sprite
     sprite_t dDoor;         // The bottom door sprite
+
+    list_t spriteList;
 } tileData_t;
 
 /** 
@@ -117,5 +124,15 @@ void drawWalls(tileData_t data, tile_t tile, int scrX, int scrY, int x, int y);
  * @param height A return pointer for the height of the scren in tiles
  */
 void getScreenTileDim(tileData_t data, int * width, int * height);
+
+#define markCharSprite(palette, ch) (-1 * ((palette << 8) | ch))
+
+/**
+ * Generates a sprite based on a recovered value
+ * 
+ * @param val The value to recover from
+ * @return The sprite recovered from the val (an empty sprite if none recovered)
+ */
+sprite_t mkCharSprite(int val);
 
 #endif

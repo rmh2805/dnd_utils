@@ -8,7 +8,7 @@
  * @return A blank tile with the provided positions
  */
 tile_t mkTile() {
-    return (tile_t) {0, 0, 0, 0, 0, 0};
+    return (tile_t) {kNoSprite, 0, 0, 0, 0, 0, 0};
 }
 
 /** 
@@ -19,7 +19,7 @@ tile_t mkTile() {
  * @return A blank tile with the provided positions
  */
 tile_t mkEmptyTile() {
-    return (tile_t) {0, 0, 0, 0, 0, -1};
+    return (tile_t) {kNoSprite, 0, 0, 0, 0, 0, -1};
 }
 
 
@@ -82,11 +82,13 @@ int readTile(tile_t * tile, FILE* fp) {
     unsigned char walls;
 
     // Read in the raw data from the next line
-    int ret = fscanf(fp, "%hd %hhu %hhd", &tile->bgPalette, &walls, 
-                        &tile->isEmpty);
+    int ret = fscanf(fp, "%hd %hhu %hhd %d", &tile->bgPalette, &walls, 
+                        &tile->isEmpty, &tile->sprite);
     
     // If any field was missed, return failure
-    if(ret != 3) {
+    if(ret == 3) {
+        tile->sprite = -1;
+    } else if (ret < 3) {
         return -1;
     }
 
@@ -113,7 +115,7 @@ int writeTile(tile_t tile, FILE* fp) {
     unsigned char walls = (tile.lWall << 6) | (tile.rWall << 4) | 
                             (tile.uWall << 2) | (tile.dWall);
 
-    fprintf(fp, "%hd %hhu %hhd\n", tile.bgPalette, walls, tile.isEmpty);
+    fprintf(fp, "%hd %hhu %hhd %d\n", tile.bgPalette, walls, tile.isEmpty, tile.sprite);
     return 0;
 }
 
@@ -217,4 +219,28 @@ void drawWalls(tileData_t data, tile_t tile, int scrX, int scrY, int x, int y) {
 void getScreenTileDim(tileData_t data, int * width, int * height) {
     if(width != NULL) *width = data.dispData.screenCols / data.emptyBase.width;
     if(height != NULL) *height = data.dispData.screenRows / data.emptyBase.height;
+}
+
+/**
+ * Generates a sprite based on a recovered value
+ * 
+ * @param val The value to recover from
+ * @return The sprite recovered from the val (an empty sprite if none recovered)
+ */
+sprite_t mkCharSprite(int val) {
+    if(val >= 0) {
+        return kEmptySprite;
+    }
+
+    val = val * -1;
+    char ch = val & 0xFF;
+    short palette = (val >> 8) & 0xFFFF;
+
+    if(ch < 0x20 || ch > 0x7e) { // If char is non-visible...
+        return kEmptySprite;
+    }
+
+    sprite_t sprite = mkBlankTile(palette, 3, 3);
+    sprite.data[1][1] = ch;
+    return sprite;
 }
