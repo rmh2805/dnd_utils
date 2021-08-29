@@ -181,7 +181,8 @@ int drawMap(tileData_t data, map_t map, int x, int y) {
 
 
     // Retarget the selected tile
-    move(dY * data.emptyBase.height, dX * data.emptyBase.width);
+    move(dY * data.emptyBase.height + data.emptyBase.height/2, 
+            dX * data.emptyBase.width + data.emptyBase.width/2);
 
     return 0;
 }
