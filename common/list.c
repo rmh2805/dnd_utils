@@ -194,3 +194,25 @@ unsigned int listLen(list_t list) {
     if(list == NULL) return 0;
     return list->length;
 }
+
+/**
+ * Returns the index of the first occurence of `obj` in the list
+ * 
+ * @param list The list to search in
+ * @param obj The item to search for
+ * 
+ * @return The index of obj's first occurence in the list (<0 on failure)
+ */
+int listFind(list_t list, void* obj) {
+    if(list == NULL) return -1;
+    
+    int i = 0;
+    node_t node = list->start;
+    while(node != NULL && node->data != obj) {
+        ++i;
+        node = node->next;
+    }
+
+    if(node == NULL) return -1;
+    return i;
+}

@@ -84,5 +84,15 @@ void * listRm(list_t list, unsigned int idx);
  */
 unsigned int listLen(list_t list);
 
+/**
+ * Returns the index of the first occurence of `obj` in the list
+ * 
+ * @param list The list to search in
+ * @param obj The item to search for
+ * 
+ * @return The index of obj's first occurence in the list (<0 on failure)
+ */
+int listFind(list_t list, void* obj);
+
 
 #endif
