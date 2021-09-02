@@ -25,9 +25,11 @@ typedef struct tile_s {
 typedef struct tileData_s {
     dispData_t dispData;    // The underlying dispBase data store
     
+    // Base Layer Definitions
     sprite_t emptyBase;     // The empty tile background sprite
     sprite_t tileBase;      // The basic tile background sprite
 
+    // Wall layer definitions
     sprite_t lWall;         // The left wall sprite
     sprite_t rWall;         // The right wall sprite
     sprite_t uWall;         // The top wall sprite
@@ -38,7 +40,9 @@ typedef struct tileData_s {
     sprite_t uDoor;         // The top door sprite
     sprite_t dDoor;         // The bottom door sprite
 
-    list_t spriteList;
+    // Sprite Layer definitions
+    list_t spriteList;      // The list of sprites to use
+    sprite_t charSprite;    // The basic character sprite
 } tileData_t;
 
 /** 
@@ -124,15 +128,5 @@ void drawWalls(tileData_t data, tile_t tile, int scrX, int scrY, int x, int y);
  * @param height A return pointer for the height of the scren in tiles
  */
 void getScreenTileDim(tileData_t data, int * width, int * height);
-
-#define markCharSprite(palette, ch) (-1 * ((palette << 8) | ch))
-
-/**
- * Generates a sprite based on a recovered value
- * 
- * @param val The value to recover from
- * @return The sprite recovered from the val (an empty sprite if none recovered)
- */
-sprite_t mkCharSprite(int val);
 
 #endif

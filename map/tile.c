@@ -1,5 +1,7 @@
 #include "tile.h"
 
+
+//=============================<Data Allocation>==============================//
 /** 
  * Makes a blank tile with no walls or sprite and default palettes
  * 
@@ -45,6 +47,26 @@ int loadTileData(FILE* fp, tileData_t * data) {
     loadTileDataHelp(rDoor);
     loadTileDataHelp(uDoor);
     loadTileDataHelp(dDoor);
+
+    // Allocate the character sprite
+    data->charSprite = mkBlankTile(kWhitePalette, 3, 3);
+    if(data->charSprite.data == NULL) goto loadTileDataFail;
+
+    // Set the offsets on the char sprite to the middle
+    data->charSprite.xOff = (data->emptyBase.width/2 - 1);
+    data->charSprite.yOff = (data->emptyBase.height/2 - 1);
+
+    // Set the border of the sprite
+    data->charSprite.data[0][0] = '+';
+    data->charSprite.data[0][2] = '+';
+    data->charSprite.data[2][0] = '+';
+    data->charSprite.data[2][2] = '+';
+
+    data->charSprite.data[0][1] = '-';
+    data->charSprite.data[2][1] = '-';
+    data->charSprite.data[1][0] = '|';
+    data->charSprite.data[1][2] = '|';
+
     return 0;
 
 loadTileDataFail:
@@ -53,8 +75,54 @@ loadTileDataFail:
 }
 
 /**
- * Frees all of the allocated data from the tileData struct (besides the sprite
- *  list)
+ * (Internal Helper) Free function for sprite list entries
+ * 
+ * @param data The sprite entry to free
+ */
+void freeSpriteEntry(void * data) {
+    if(data == NULL) return;
+    rmSprite(*(sprite_t *) data);
+    free(data);
+}
+
+
+/**
+ * Loads a sprite list from file
+ * 
+ * @param fp The file to read from
+ * @param data The tile data to load into
+ * 
+ * @return 0 on success, < 0 on failure
+ */
+int loadSpriteList(FILE* fp, tileData_t data) {
+    if(fp == NULL || data.spriteList != NULL) return -1;
+
+    data.spriteList = mkList();
+    if(data.spriteList == NULL) return -1;
+
+    sprite_t sprite, * entry;
+
+    for(sprite = readSprite(fp); sprite.data != NULL; sprite = readSprite(fp)) {
+        entry = malloc(sizeof(sprite_t));
+        
+        if(entry == NULL) { // On failure to place sprite in heap...
+            // Clear out the existing menu items
+            rmList(data.spriteList, freeSpriteEntry);
+            data.spriteList = NULL;
+
+            // Inform the user and drop back to menu
+            return -1;
+        } else {    // On success in placing sprite in heap...
+            *entry = sprite;
+            listAppend(data.spriteList, entry);  // Add sprite to list
+        }
+    }
+
+    return 0;
+}
+
+/**
+ * Frees all of the allocated data from the tileData struct
  * 
  * @param tileData The tileData struct to free from
  */
@@ -69,6 +137,10 @@ void rmTileData(tileData_t data) {
     rmSprite(data.rDoor);
     rmSprite(data.uDoor);
     rmSprite(data.dDoor);
+
+    rmList(data.spriteList, freeSpriteEntry);
+
+    rmSprite(data.charSprite);
 }
 
 /**
@@ -120,6 +192,7 @@ int writeTile(tile_t tile, FILE* fp) {
     return 0;
 }
 
+//===============================<Draw Helpers>===============================//
 /**
  * Draws the provided tile in the proper place on screen
  * 
@@ -157,6 +230,16 @@ void drawTile(tileData_t data, tile_t tile, int scrX, int scrY, int x, int y) {
     data.tileBase.palette = tmp;
 }
 
+/**
+ * Draws the walls of the provided tile in the proper place on screen
+ * 
+ * @param data The data structure defining the sprites to draw
+ * @param tile The tile to draw to screen
+ * @param scrX The x value of the tiles at the left of the screen
+ * @param scrY The y value of the tiles at the top of the screen
+ * @param x The x value of the tile in the map
+ * @param y The y value of the tile in the map
+ */
 void drawWalls(tileData_t data, tile_t tile, int scrX, int scrY, int x, int y) {
     // First calculate the screen position of the tile
     unsigned char tileWidth = data.tileBase.width;
@@ -217,31 +300,15 @@ void drawWalls(tileData_t data, tile_t tile, int scrX, int scrY, int x, int y) {
 
 }
 
+//===============================<Misc Helpers>===============================//
+/**
+ * Calculates the width and height of the screen in tiles
+ * 
+ * @param data The data struct defining screen tiles
+ * @param width A return pointer for the width of the screen in tiles
+ * @param height A return pointer for the height of the scren in tiles
+ */
 void getScreenTileDim(tileData_t data, int * width, int * height) {
     if(width != NULL) *width = data.dispData.screenCols / data.emptyBase.width;
     if(height != NULL) *height = data.dispData.screenRows / data.emptyBase.height;
-}
-
-/**
- * Generates a sprite based on a recovered value
- * 
- * @param val The value to recover from
- * @return The sprite recovered from the val (an empty sprite if none recovered)
- */
-sprite_t mkCharSprite(int val) {
-    if(val >= 0) {
-        return kEmptySprite;
-    }
-
-    val = val * -1;
-    char ch = val & 0xFF;
-    short palette = (val >> 8) & 0xFFFF;
-
-    if(ch < 0x20 || ch > 0x7e) { // If char is non-visible...
-        return kEmptySprite;
-    }
-
-    sprite_t sprite = mkBlankTile(palette, 3, 3);
-    sprite.data[1][1] = ch;
-    return sprite;
 }
