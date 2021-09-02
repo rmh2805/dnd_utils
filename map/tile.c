@@ -10,7 +10,7 @@
  * @return A blank tile with the provided positions
  */
 tile_t mkTile() {
-    return (tile_t) {kNoSprite, 0, 0, 0, 0, 0, 0};
+    return (tile_t) {kNoSprite, 0, 0, 0, 0, 0, 0, 0};
 }
 
 /** 
@@ -21,7 +21,7 @@ tile_t mkTile() {
  * @return A blank tile with the provided positions
  */
 tile_t mkEmptyTile() {
-    return (tile_t) {kNoSprite, 0, 0, 0, 0, 0, -1};
+    return (tile_t) {kNoSprite, 0, 0, 0, 0, 0, 0, -1};
 }
 
 
@@ -155,14 +155,19 @@ int readTile(tile_t * tile, FILE* fp) {
     unsigned char walls;
 
     // Read in the raw data from the next line
-    int ret = fscanf(fp, "%hd %hhu %hhd %d", &tile->bgPalette, &walls, 
-                        &tile->isEmpty, &tile->sprite);
+    int ret = fscanf(fp, "%hd %hhu %hhd %d %hd", &tile->bgPalette, &walls, 
+                        &tile->isEmpty, &tile->sprite, &tile->spritePalette);
     
     // If any field was missed, return failure
-    if(ret == 3) {
-        tile->sprite = -1;
-    } else if (ret < 3) {
+    if(ret < 3) {
         return -1;
+    }
+
+    if(ret < 4) {
+        tile->sprite = kNoSprite;
+    } 
+    if (ret < 5) {
+        tile->spritePalette = 0;
     }
 
     // Since all were decoded properly, extract walls
@@ -188,7 +193,8 @@ int writeTile(tile_t tile, FILE* fp) {
     unsigned char walls = (tile.lWall << 6) | (tile.rWall << 4) | 
                             (tile.uWall << 2) | (tile.dWall);
 
-    fprintf(fp, "%hd %hhu %hhd %d\n", tile.bgPalette, walls, tile.isEmpty, tile.sprite);
+    fprintf(fp, "%hd %hhu %hhd %d %hd\n", tile.bgPalette, walls, tile.isEmpty, 
+                tile.sprite, tile.spritePalette);
     return 0;
 }
 
@@ -299,6 +305,52 @@ void drawWalls(tileData_t data, tile_t tile, int scrX, int scrY, int x, int y) {
     drawSprite(data.dispData, sprite, row, col);
 
 }
+
+/**
+ * Draws the sprite of the provided tile in the proper place on screen
+ * 
+ * @param data The data structure defining the sprites to draw
+ * @param tile The tile to draw to screen
+ * @param scrX The x value of the tiles at the left of the screen
+ * @param scrY The y value of the tiles at the top of the screen
+ * @param x The x value of the tile in the map
+ * @param y The y value of the tile in the map
+ */
+void drawTileSprite(tileData_t data, tile_t tile, int scrX, int scrY, int x, int y) {
+    if(tile.sprite == kNoSprite || tile.sprite >= 0 && (data.spriteList == NULL 
+            || tile.sprite >= listLen(data.spriteList))) {
+        return;
+    }
+    
+    // First calculate the screen position of the tile
+    unsigned char tileWidth = data.tileBase.width;
+    unsigned char tileHeight = data.tileBase.height;
+
+    // Adjust grid coordinates to the view of the screen
+    int dX = x - scrX, dY = y - scrY;
+    if(dX < 0 || dY < 0) return;    // Nothing to draw above or left of screen
+
+    // Calculate the character position of the tile (and ensure it is onscreen)
+    int col = dX * tileWidth, row = dY * tileHeight;
+    if(col >= data.dispData.screenCols || row >= data.dispData.screenRows) return;
+    
+
+    // Get the sprite to draw
+    sprite_t sprite;
+    if(tile.sprite < 0) {
+        //todo parse character sprites
+        return;
+    } else {
+        sprite = *(sprite_t *) listGet(data.spriteList, tile.sprite);
+    }
+
+    // First draw the Base tile
+    short tmp = sprite.palette;
+    if(tile.spritePalette != 0) data.tileBase.palette = tile.spritePalette;
+    drawSprite(data.dispData, sprite, row, col);
+    sprite.palette = tmp;
+}
+
 
 //===============================<Misc Helpers>===============================//
 /**

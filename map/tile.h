@@ -9,8 +9,9 @@
 #define writeCharSprite(palette, ch) (-1 * (palette << 8 | ch))
 
 typedef struct tile_s {
-    int sprite;         // The index of the sprite used on this tile
-    short bgPalette;    // Palette overrides for this tile
+    int sprite;             // The index of the sprite used on this tile
+    short bgPalette;        // Palette overrides for this tile
+    short spritePalette;    // Pallette override for this sprite
 
     // For each: 0 is no wall, 1 is wall, >1 is door
     unsigned char lWall : 2;
@@ -18,8 +19,8 @@ typedef struct tile_s {
     unsigned char uWall : 2;
     unsigned char dWall : 2;
 
+    // Controls sprite emptyness
     signed char isEmpty;
-
 } tile_t;
 
 typedef struct tileData_s {
