@@ -53,7 +53,8 @@ loadTileDataFail:
 }
 
 /**
- * Frees all of the allocated data from the tileData struct
+ * Frees all of the allocated data from the tileData struct (besides the sprite
+ *  list)
  * 
  * @param tileData The tileData struct to free from
  */
