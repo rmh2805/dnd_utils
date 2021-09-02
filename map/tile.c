@@ -1,6 +1,4 @@
 #include "tile.h"
-
-
 //=============================<Data Allocation>==============================//
 /** 
  * Makes a blank tile with no walls or sprite and default palettes
@@ -10,7 +8,7 @@
  * @return A blank tile with the provided positions
  */
 tile_t mkTile() {
-    return (tile_t) {kNoSprite, 0, 0, 0, 0, 0, 0, 0};
+    return (tile_t) {kNoSprite, 0, 0, 0, 0, 0, 0, 0};;
 }
 
 /** 
@@ -317,8 +315,8 @@ void drawWalls(tileData_t data, tile_t tile, int scrX, int scrY, int x, int y) {
  * @param y The y value of the tile in the map
  */
 void drawTileSprite(tileData_t data, tile_t tile, int scrX, int scrY, int x, int y) {
-    if(tile.sprite == kNoSprite || tile.sprite >= 0 && (data.spriteList == NULL 
-            || tile.sprite >= listLen(data.spriteList))) {
+    if(tile.sprite == kNoSprite || (tile.sprite >= 0 && (data.spriteList == NULL 
+            || (unsigned) tile.sprite >= listLen(data.spriteList)))) {
         return;
     }
     
@@ -338,8 +336,16 @@ void drawTileSprite(tileData_t data, tile_t tile, int scrX, int scrY, int x, int
     // Get the sprite to draw
     sprite_t sprite;
     if(tile.sprite < 0) {
-        //todo parse character sprites
-        return;
+        if(data.charSprite.data == NULL) return;
+        
+        char ch = (-1 * tile.sprite) & 0xFF;
+        if(ch < 0x20 || ch > 0x7E) ch = ' ';
+        
+        short palette = (-1 * tile.sprite) >> 8;
+        if (palette<kMinPalette || palette>kMaxPalette) palette = kDefPalette;
+
+        data.charSprite.data[1][1] = ch;
+        data.charSprite.palette = palette;
     } else {
         sprite = *(sprite_t *) listGet(data.spriteList, tile.sprite);
     }
@@ -351,6 +357,61 @@ void drawTileSprite(tileData_t data, tile_t tile, int scrX, int scrY, int x, int
     sprite.palette = tmp;
 }
 
+//===========================<Sprite Manipulation>============================//
+/**
+ * Returns the sprite index of the tile
+ * 
+ * @param tile The tile to get the sprite index from
+ * 
+ * @return A sprite index (>= 0) if one exists, -1 if no sprite is set, -2 if 
+ *         a character sprite is set
+ */
+int getSpriteIdx(tile_t tile) {
+    return (tile.sprite < -1) ? -2 : tile.sprite;
+}
+
+/**
+ * Sets a sprite index in the tile
+ * 
+ * @param data The data structure defining tile sprites
+ * @param tile The tile to modify
+ * @param idx The sprite index to set
+ * 
+ * @return 0 on success, < 0 on failure
+ */
+int setSpriteIdx(tileData_t data, tile_t* tile, int idx) {
+    if(data.spriteList == NULL || idx < 0 || 
+            (unsigned) idx >= listLen(data.spriteList)) {
+        return -1;
+    }
+
+    tile->sprite = idx;
+    return 0;
+}
+
+/**
+ * Removes any sprite from the provided tile
+ * 
+ * @param tile The tile to modify
+ */
+void clearTileSprite(tile_t* tile) {
+    tile->sprite = kNoSprite;
+}
+
+/**
+ * Sets a character sprite on the provided tile
+ * 
+ * @param tile The tile to modify
+ * @param ch The character to set
+ * @param palette The palette to set
+ */
+void setCharSprite(tile_t* tile, char ch, short palette) {
+    if(ch >= 0x20 && ch <= 0x7e) {
+        tile->sprite = -1 * (palette << 8 | ch);
+    } else {
+        tile->sprite = kNoSprite;
+    }
+}
 
 //===============================<Misc Helpers>===============================//
 /**
@@ -364,3 +425,5 @@ void getScreenTileDim(tileData_t data, int * width, int * height) {
     if(width != NULL) *width = data.dispData.screenCols / data.emptyBase.width;
     if(height != NULL) *height = data.dispData.screenRows / data.emptyBase.height;
 }
+
+

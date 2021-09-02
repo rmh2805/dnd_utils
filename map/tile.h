@@ -46,6 +46,7 @@ typedef struct tileData_s {
     sprite_t charSprite;    // The basic character sprite
 } tileData_t;
 
+//=============================<Data Allocation>==============================//
 /** 
  * Makes a blank tile with no walls or sprite and default palettes
  * 
@@ -95,8 +96,7 @@ int readTile(tile_t * tile, FILE* fp);
  */
 int writeTile(tile_t tile, FILE* fp);
 
-
-
+//===============================<Draw Helpers>===============================//
 /**
  * Draws the provided tile in the proper place on screen
  * 
@@ -120,6 +120,59 @@ void drawTile(tileData_t data, tile_t tile, int scrX, int scrY, int x, int y);
  * @param y The y value of the tile in the map
  */
 void drawWalls(tileData_t data, tile_t tile, int scrX, int scrY, int x, int y);
+
+/**
+ * Draws the sprite of the provided tile in the proper place on screen
+ * 
+ * @param data The data structure defining the sprites to draw
+ * @param tile The tile to draw to screen
+ * @param scrX The x value of the tiles at the left of the screen
+ * @param scrY The y value of the tiles at the top of the screen
+ * @param x The x value of the tile in the map
+ * @param y The y value of the tile in the map
+ */
+void drawTileSprite(tileData_t data, tile_t tile, int scrX, int scrY, int x, int y);
+
+//===========================<Sprite Manipulation>============================//
+
+/**
+ * Returns the sprite index of the tile
+ * 
+ * @param tile The tile to get the sprite index from
+ * 
+ * @return A sprite index (>= 0) if one exists, -1 if no sprite is set, -2 if 
+ *         a character sprite is set
+ */
+int getSpriteIdx(tile_t tile);
+
+/**
+ * Sets a sprite index in the tile
+ * 
+ * @param data The data structure defining tile sprites
+ * @param tile The tile to modify
+ * @param idx The sprite index to set
+ * 
+ * @return 0 on success, < 0 on failure
+ */
+int setSpriteIdx(tileData_t data, tile_t* tile, int idx);
+
+/**
+ * Removes any sprite from the provided tile
+ * 
+ * @param tile The tile to modify
+ */
+void clearTileSprite(tile_t* tile);
+
+/**
+ * Sets a character sprite on the provided tile
+ * 
+ * @param tile The tile to modify
+ * @param ch The character to set
+ * @param palette The palette to set
+ */
+void setCharSprite(tile_t* tile, char ch, short palette);
+
+//===============================<Misc Helpers>===============================//
 
 /**
  * Calculates the width and height of the screen in tiles
