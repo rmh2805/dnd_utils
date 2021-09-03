@@ -4,6 +4,18 @@
 //===========================<Helper Declarations>============================//
 void freeTiles(tile_t** tiles, int nRows);
 
+#ifndef min
+#define min(a, b) ((a < b) ? a : b)
+#endif
+
+#ifndef max
+#define max(a, b) ((a > b) ? a : b)
+#endif
+
+#ifndef printError
+#define printError(msg) clear();printText(kRedPalette, msg, 0, 0); getch()
+#endif
+
 //============================<Memory Management>=============================//
 /**
  * Allocates and initializes a map with the provided dimensions
@@ -136,9 +148,7 @@ int loadMap(map_t* map, FILE* fp) {
     return 0;
 }
 
-#define min(a, b) ((a < b) ? a : b)
-#define max(a, b) ((a > b) ? a : b)
-
+//===============================<Map Display>================================//
 /**
  * Draw the section of the map in view, with focus on the tile at position (x,y)
  * 
@@ -179,6 +189,14 @@ int drawMap(tileData_t data, map_t map, int x, int y) {
         }
     }
 
+    // Finally, draw all of the sprites
+    for(int dRow = 0; dRow < height && dRow + scrY < map.nRows; dRow++) {
+        int row = dRow + scrY;
+        for(int dCol = 0; dCol < width && dCol + scrX < map.nCols; dCol++) {
+            int col = dCol + scrX;
+            drawTileSprite(data, map.data[row][col], scrX, scrY, col, row);
+        }
+    }
 
     // Retarget the selected tile
     move(dY * data.emptyBase.height + data.emptyBase.height/2, 
@@ -186,9 +204,6 @@ int drawMap(tileData_t data, map_t map, int x, int y) {
 
     return 0;
 }
-
-
-#define printError(msg) clear();printText(kRedPalette, msg, 0, 0); getch()
 
 int mapSectionToFile(tileData_t data, map_t map, FILE* file, 
         int startRow, int startCol, int endRow, int endCol);
