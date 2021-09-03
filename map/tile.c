@@ -8,7 +8,7 @@
  * @return A blank tile with the provided positions
  */
 tile_t mkTile() {
-    return (tile_t) {kNoSprite, 0, 0, 0, 0, 0, 0, 0};;
+    return (tile_t) {kNoSprite, 0, 0, 0, 0, 0, 0, 0};
 }
 
 /** 
