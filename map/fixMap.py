@@ -1,9 +1,16 @@
-def main():
-    fp = open("maps/room.out", "r")
+from sys import argv
+
+def main(fileName):
+    fp = open(fileName, "r")
     lines = fp.readlines()
     fp.close()
 
-    for line in lines:
+    print(lines[0].strip())
+    for i in range(1, len(lines)):
+        line = lines[i]
         print(line.strip() + " -1 0")
 
-main()
+if(len(argv) != 2):
+    print("Usage: " + argv[0] + " <file name>")
+else:
+    main(argv[1])
