@@ -100,7 +100,9 @@ void printHelp(mode_t mode) {
             printText(kBlackPalette, "Delete or 'q' will mark the tile as uninhabitable", 4, 0);
             printText(kBlackPalette, "WASD cycles the walls on each side of the cell b/n empty, solid, and door", 5, 0);
             printText(kBlackPalette, "Home or '`' will return you to the main menu", 6, 0);
-            newRow = 8;
+            helpPrinter("'c' cycles the color palette of the tile ", 7);
+            helpPrinter("'v' cycles the color palette of the tile's sprite", 8);
+            newRow = 10;
             break;
         default:
             newRow = 2;
@@ -351,7 +353,7 @@ int main() {
                     case KEY_DC:    // If delete is pressed...
                     case 27:
                     case 'q':
-                        map.data[y][x].isEmpty = true;;
+                        map.data[y][x].isEmpty = true;
                         break;
                     
                     case 'c':
@@ -364,6 +366,19 @@ int main() {
                         if(map.data[y][x].bgPalette >= kMaxPalette) {
                             map.data[y][x].bgPalette = kMinPalette;
                         }
+                        break;
+                    
+                    case 'v':
+                    case 'V':
+                        if(map.data[y][x].spritePalette == 0) {
+                            map.data[y][x].spritePalette = kDefPalette;
+                        }
+
+                        map.data[y][x].spritePalette += 1;
+                        if(map.data[y][x].spritePalette >= kMaxPalette) {
+                            map.data[y][x].spritePalette = kMinPalette;
+                        }
+                        break;
                         break;
 
                     case '?':       // Display the help text
