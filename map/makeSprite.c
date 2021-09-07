@@ -127,7 +127,11 @@ void printHelp(mode_t mode) {
             helpPrinter("Delete makes the selected char transparent", 7);
             helpPrinter("Visible character keys place chars in the sprite", 8);
             newRow = 10;
-            
+            break;
+        
+        default:
+            newRow = 2;
+            break;
     }
 
     printText(kBlackPalette, "Press enter to continue...", newRow, 0);

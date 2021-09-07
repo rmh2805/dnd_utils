@@ -95,11 +95,11 @@ void printHelp(mode_t mode) {
             newRow = 15;
             break;
         case nav:
-            printText(kBlackPalette, "Use the Arrow keys to select a tile to modify", 2, 0);
-            printText(kBlackPalette, "Enter or 'e' will mark the tile as habitable", 3, 0);
-            printText(kBlackPalette, "Delete or 'q' will mark the tile as uninhabitable", 4, 0);
-            printText(kBlackPalette, "WASD cycles the walls on each side of the cell b/n empty, solid, and door", 5, 0);
-            printText(kBlackPalette, "Home or '`' will return you to the main menu", 6, 0);
+            helpPrinter("Use the Arrow keys to select a tile to modify", 2);
+            helpPrinter("Enter or 'e' will mark the tile as habitable", 3);
+            helpPrinter("Delete or 'q' will mark the tile as uninhabitable", 4);
+            helpPrinter("WASD cycles the walls on each side of the cell b/n empty, solid, and door", 5);
+            helpPrinter("Home or '`' will return you to the main menu", 6);
             helpPrinter("'c' cycles the color palette of the tile ", 7);
             helpPrinter("'v' cycles the color palette of the tile's sprite", 8);
             newRow = 10;
