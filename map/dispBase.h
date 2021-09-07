@@ -21,10 +21,17 @@
 #define kMinPalette 1
 #define kMaxPalette 8
 
+typedef struct drawPair_s {
+    short palette;
+    char ch;
+} drawPair_t;
+
 // Define a persistent data structure
 typedef struct dispData_s {
     int screenRows;
     int screenCols;
+
+    drawPair_t ** data;
 } dispData_t;
 
 /**
@@ -40,7 +47,7 @@ int initDisp(dispData_t* data);
  * 
  * @return 0 iff display was closed correctly
  */
-int closeDisp();
+int closeDisp(dispData_t data);
 
 /**
  * Draws the specified sprite on screen

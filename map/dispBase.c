@@ -13,9 +13,11 @@ int initDisp(dispData_t* data) {
     keypad(stdscr, true);
     noecho();
 
+    data->data = NULL;
+
     // Check for color and set up palette pairs
     if(!has_colors()) {
-        closeDisp();
+        closeDisp(*data);
         fprintf(stderr, "*ERROR* in initDisp: Terminal does not have color\n");
         return -1;
     }
@@ -35,6 +37,24 @@ int initDisp(dispData_t* data) {
     // Get screen size
     getmaxyx(stdscr, data->screenRows, data->screenCols);
 
+    // Alloc the frame buffer
+    data->data = calloc(data->screenRows, sizeof(drawPair_t *));
+    if(data->data == NULL) {
+        closeDisp(*data);
+        fprintf(stderr, "*ERROR* in initDisp: Unable to allocate a frame buffer (rows)\n");
+        return -1;
+    }
+
+    for(int i = 0; i < data->screenRows; i++) {
+        data->data[i] = calloc(data->screenCols, sizeof(drawPair_t));
+
+        if(data->data[i] == NULL) {
+            closeDisp(*data);
+            fprintf(stderr, "*ERROR* in initDisp: Unable to allocate a frame buffer (cols)\n");
+            return -1;
+        }
+    }
+
     return 0;
 }
 
@@ -43,8 +63,19 @@ int initDisp(dispData_t* data) {
  * 
  * @return 0 iff display was closed correctly
  */
-int closeDisp() {
+int closeDisp(dispData_t data) {
     endwin();
+
+    if(data.data != NULL) {
+        for(int i = 0; i < data.screenRows; i++) {
+            if(data.data[i] != NULL) {
+                free(data.data[i]);
+                data.data[i] = NULL;
+            }
+        }
+
+        free(data.data);
+    }
 
     return 0;
 }
