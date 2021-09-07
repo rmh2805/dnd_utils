@@ -317,7 +317,8 @@ void drawWalls(tileData_t data, tile_t tile, int scrX, int scrY, int x, int y) {
  * @param y The y value of the tile in the map
  */
 void drawTileSprite(tileData_t data, tile_t tile, int scrX, int scrY, int x, int y) {
-    if(tile.sprite == kNoSprite) {
+    if(tile.sprite == kNoSprite || (tile.sprite >= 0 && (data.spriteList == NULL
+            || (unsigned int) tile.sprite >= listLen(data.spriteList)))) {
         return;
     }
     
@@ -351,12 +352,8 @@ void drawTileSprite(tileData_t data, tile_t tile, int scrX, int scrY, int x, int
         sprite.palette = palette;
 
         sprite = data.charSprite;
-    } else if(data.spriteList == NULL) {
-        return;
-    } else if((unsigned int) tile.sprite < listLen(data.spriteList)){
-        sprite = *(sprite_t *) listGet(data.spriteList, tile.sprite);
     } else {
-        return;
+        sprite = *(sprite_t *) listGet(data.spriteList, tile.sprite);
     }
 
     // First draw the Base tile
