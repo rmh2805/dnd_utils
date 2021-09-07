@@ -94,6 +94,44 @@ int doSelSprite(dispData_t data, list_t spriteList, int selection, const char * 
 #define kSelPrompt "Use left and right arrows to navigate, enter to select, and home to escape"
 #define kViewPrompt "Use left and right arrows to navigate and home to escape"
 
+#define helpPrinter(msg, row) printText(kBlackPalette, msg, row, 0)
+
+void printHelp(mode_t mode) {
+    clear();
+    printText(kBlackPalette, "Help Prompt", 0, 0);
+    int newRow = 2;
+    
+    switch(mode) {
+        case menu:
+            helpPrinter("Use the arrow keys and enter to select an option", 2);
+            helpPrinter("Alternatively, you can select the numbered options with their keys", 3);
+
+            helpPrinter("Edit Sprite will have you select a sprite in the loaded sheet to edit", 5);
+            helpPrinter("View Sprite will allow you to view all entries in the list", 6);
+            helpPrinter("New Sprite Sheet will have you generate a new sheet of sprites", 7);
+            helpPrinter("Load Sprite Sheet will prompt you to load a sprite sheet from file", 8);
+            helpPrinter("Save Sprite Sheet saves the current sprite sheet out to file", 9);
+            helpPrinter("Quit... quits (real original, I know)", 10);
+
+            helpPrinter("Worth noting, attempting to backspace in text entry currently results in corruption.", 12);
+            helpPrinter("Instead, the delete key currently fills its role", 13);
+            newRow = 15;
+        
+        case edit:
+            helpPrinter("The enter key will finalize the current sprite", 2);
+            helpPrinter("Arrow keys move the cursor in the sprite", 3);
+            helpPrinter("The Home key offsets the sprite down (shift to reverse)", 4);
+            helpPrinter("The End key offsets the sprite to the right (shift to reverse)", 5);
+            helpPrinter("Page Up shifts the sprite to the next palette", 6);
+            helpPrinter("Delete makes the selected char transparent", 7);
+            helpPrinter("Visible character keys place chars in the sprite", 8);
+            newRow = 10;
+            
+    }
+
+    printText(kBlackPalette, "Press enter to continue...", newRow, 0);
+    getch();
+}
 
 //==============================<Main Execution>==============================//
 int main() {
@@ -141,6 +179,9 @@ int main() {
                         break;
                     case KEY_DOWN:
                         selY = (selY + 1 == menuSize) ? selY : selY + 1;
+                        break;
+                    case '?':
+                        printHelp(menu);
                         break;
                 }
                 break;
@@ -331,7 +372,7 @@ int main() {
                 // Handle input
                 ch = getch();
                 switch(ch) {
-                    // Finalize keys
+                    // Misc keys
                     case KEY_ENTER:
                     case '\n':
                         tile = NULL;
@@ -339,6 +380,10 @@ int main() {
                         selY = 0;
                         mode = menu;
                         break;
+                    
+                    case '?':
+                        printHelp(edit);
+                        break;\
                     
                     // Cursor keys
                     case KEY_UP:
