@@ -358,7 +358,6 @@ int main() {
 
                     // Offset keys
                     case KEY_HOME:
-                    case '\t':
                         entry->yOff += 1;
                         if(entry->height + entry->yOff > tile->height) entry->yOff -= 1;
                         break;
