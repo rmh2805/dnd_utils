@@ -102,7 +102,10 @@ void printHelp(mode_t mode) {
             helpPrinter("Home or '`' will return you to the main menu", 6);
             helpPrinter("'c' cycles the color palette of the tile ", 7);
             helpPrinter("'v' cycles the color palette of the tile's sprite", 8);
-            newRow = 10;
+            helpPrinter("'r' cycles to the next loaded sprite", 9);
+            helpPrinter("'g' places a char sprite of your chosing", 10);
+            helpPrinter("'z' removes any sprite from the selected cell", 11);
+            newRow = 13;
             break;
         default:
             newRow = 2;
@@ -350,13 +353,13 @@ int main() {
                         break;
                     
                     // Misc Controls
-                    case KEY_DC:    // If delete is pressed...
+                    case KEY_DC:    // If delete is pressed empty cell
                     case 27:
                     case 'q':
                         map.data[y][x].isEmpty = true;
                         break;
                     
-                    case 'c':
+                    case 'c':   // Cycle tile palettes
                     case 'C':
                         if(map.data[y][x].bgPalette == 0) {
                             map.data[y][x].bgPalette = kDefPalette;
@@ -368,7 +371,7 @@ int main() {
                         }
                         break;
                     
-                    case 'v':
+                    case 'v':   // Cycle sprite palettes
                     case 'V':
                         if(map.data[y][x].spritePalette == 0) {
                             map.data[y][x].spritePalette = kDefPalette;
@@ -379,6 +382,21 @@ int main() {
                             map.data[y][x].spritePalette = kMinPalette;
                         }
                         break;
+                        break;
+                    
+                    // Sprite setting
+                    case 'z':   // Remove sprites
+                    case 'Z':
+                        clearTileSprite(&map.data[y][x]);
+                        break;
+                    
+                    case 'r':   // Next loaded sprite
+                    case 'R':
+                        break;
+
+                    case 'g':   // Character sprite
+                    case 'G':
+                        setCharSprite(&map.data[y][x], getch(), kDefPalette);
                         break;
 
                     case '?':       // Display the help text

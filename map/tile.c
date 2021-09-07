@@ -35,6 +35,8 @@ tile_t mkEmptyTile() {
  * @return 0 on success, <0 on failure
  */
 int loadTileData(FILE* fp, tileData_t * data) {
+    data->spriteList = NULL;
+
     loadTileDataHelp(emptyBase);
     loadTileDataHelp(tileBase);
     loadTileDataHelp(lWall);
@@ -315,8 +317,7 @@ void drawWalls(tileData_t data, tile_t tile, int scrX, int scrY, int x, int y) {
  * @param y The y value of the tile in the map
  */
 void drawTileSprite(tileData_t data, tile_t tile, int scrX, int scrY, int x, int y) {
-    if(tile.sprite == kNoSprite || (tile.sprite >= 0 && (data.spriteList == NULL 
-            || (unsigned) tile.sprite >= listLen(data.spriteList)))) {
+    if(tile.sprite == kNoSprite) {
         return;
     }
     
@@ -337,6 +338,8 @@ void drawTileSprite(tileData_t data, tile_t tile, int scrX, int scrY, int x, int
     sprite_t sprite;
     if(tile.sprite < 0) {
         if(data.charSprite.data == NULL) return;
+
+        sprite = data.charSprite;
         
         char ch = (-1 * tile.sprite) & 0xFF;
         if(ch < 0x20 || ch > 0x7E) ch = ' ';
@@ -344,15 +347,21 @@ void drawTileSprite(tileData_t data, tile_t tile, int scrX, int scrY, int x, int
         short palette = (-1 * tile.sprite) >> 8;
         if (palette<kMinPalette || palette>kMaxPalette) palette = kDefPalette;
 
-        data.charSprite.data[1][1] = ch;
-        data.charSprite.palette = palette;
-    } else {
+        sprite.data[1][1] = ch;
+        sprite.palette = palette;
+
+        sprite = data.charSprite;
+    } else if(data.spriteList == NULL) {
+        return;
+    } else if((unsigned int) tile.sprite < listLen(data.spriteList)){
         sprite = *(sprite_t *) listGet(data.spriteList, tile.sprite);
+    } else {
+        return;
     }
 
     // First draw the Base tile
     short tmp = sprite.palette;
-    if(tile.spritePalette != 0) data.tileBase.palette = tile.spritePalette;
+    if(tile.spritePalette != 0) sprite.palette = tile.spritePalette;
     drawSprite(data.dispData, sprite, row, col);
     sprite.palette = tmp;
 }
