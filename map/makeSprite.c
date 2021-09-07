@@ -116,6 +116,7 @@ void printHelp(mode_t mode) {
             helpPrinter("Worth noting, attempting to backspace in text entry currently results in corruption.", 12);
             helpPrinter("Instead, the delete key currently fills its role", 13);
             newRow = 15;
+            break;
         
         case edit:
             helpPrinter("The enter key will finalize the current sprite", 2);
