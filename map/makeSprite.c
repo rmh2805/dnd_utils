@@ -545,7 +545,7 @@ int main() {
     }
 
     // Cleanup and exit
-    closeDisp();
+    closeDisp(data);
     rmList(spriteList, freeSpriteEntry);
     freeSpriteEntry(entry);
     freeSpriteEntry(tile);
