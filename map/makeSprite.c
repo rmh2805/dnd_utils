@@ -383,7 +383,7 @@ int main() {
                     
                     case '?':
                         printHelp(edit);
-                        break;\
+                        break;
                     
                     // Cursor keys
                     case KEY_UP:
