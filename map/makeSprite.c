@@ -113,8 +113,8 @@ void printHelp(mode_t mode) {
             helpPrinter("Save Sprite Sheet saves the current sprite sheet out to file", 9);
             helpPrinter("Quit... quits (real original, I know)", 10);
 
-            helpPrinter("Worth noting, attempting to backspace in text entry currently results in corruption.", 12);
-            helpPrinter("Instead, the delete key currently fills its role", 13);
+            helpPrinter("Worth noting, attempting to backspace in text entry currently results in", 12);
+            helpPrinter("corruption. Instead, the delete key currently fills its role", 13);
             newRow = 15;
             break;
         
