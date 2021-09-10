@@ -294,7 +294,9 @@ int main() {
                 }
 
                 clear();
-                drawMap(data, map, x, y);
+                addMap(&data, map, x, y);
+                printBuffer(data.dispData);
+                setCursor(data, map, x, y);
 
                 ch = getch();
                 switch(ch) {

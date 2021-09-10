@@ -206,6 +206,31 @@ int addMap(tileData_t * data, map_t map, int x, int y) {
     return 0;
 }
 
+/**
+ * Sets cursor focus on the tile at position (x,y)
+ * 
+ * @param data The tile data struct to use for display
+ * @param map The map to display
+ * @param x The x coordinate of the selected tile
+ * @param y The y coordinate of the selected cell
+ */
+void setCursor(tileData_t data, map_t map, int x, int y) {
+    // Determine the position of the screen
+    int width, height;  // Width and height of the screen in tiles
+    getScreenTileDim(data, &width, &height);
+
+    // X & Y coords of the top-left tile
+    int scrX = max(min(x - width/2, map.nCols-width), 0);
+    int scrY = max(min(y - height/2, map.nRows-height), 0);
+
+    // X and Y offsets of the selected tile from the top-left of the screen
+    int dX = x - scrX, dY = y-scrY;
+    
+    // Retarget the selected tile
+    move(dY * data.emptyBase.height + data.emptyBase.height/2, 
+            dX * data.emptyBase.width + data.emptyBase.width/2);
+}
+
 int mapSectionToFile(tileData_t data, map_t map, FILE* file, 
         int startRow, int startCol, int endRow, int endCol);
 
