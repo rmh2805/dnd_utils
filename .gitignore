@@ -4,6 +4,7 @@ character/charCreator
 map/testSprite
 map/makeSprite
 map/makeMap
+map/randMap
 map/spriteSheets/*
 !map/spriteSheets/sprites.out
 map/maps/*

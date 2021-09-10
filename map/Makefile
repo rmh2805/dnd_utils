@@ -19,12 +19,12 @@ CFLAGS=-Wall -std=c99 -Wextra -pedantic -ggdb
 #
 #	Main Target
 #
-main: makeMap
+main: randMap
 
 #
 #	Multiple Targets
 #
-all: tests makeSprite makeMap
+all: tests makeSprite makeMap randMap
 
 tests: testSprite
 
@@ -32,6 +32,10 @@ tests: testSprite
 #	Executables
 #
 makeMap: makeMap.o sprite.o dispBase.o tile.o map.o list.o
+	$(CC) $(CFLAGS) $(CDEBUGFLAGS) -o $@ $^ $(CLIBS)
+	$(ECHO)
+
+randMap: randMap.o sprite.o dispBase.o tile.o map.o list.o
 	$(CC) $(CFLAGS) $(CDEBUGFLAGS) -o $@ $^ $(CLIBS)
 	$(ECHO)
 
@@ -67,4 +71,5 @@ testClean: clean
 realclean: clean testClean
 	-rm makeSprite
 	-rm makeMap
+	-rm randMap
 
