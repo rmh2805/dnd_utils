@@ -266,6 +266,7 @@ int mapToSections(tileData_t data, map_t map, FILE* file, int pgWidth, int pgHei
     return 0;
 }
 
+#define mapFileNextChar(file, ch) fprintf(file, "%c", ch)
 int mapSectionToFile(tileData_t data, map_t map, FILE* file, 
         int startRow, int startCol, int endRow, int endCol) {
     if(file == NULL) return -1;
@@ -279,41 +280,71 @@ int mapSectionToFile(tileData_t data, map_t map, FILE* file,
         for(int line = 0; line < data.emptyBase.height; line++) {
             for(int col = startCol; col < endCol; col++) {
                 for(int i = 0; i < data.emptyBase.width; i++) {
-                    int ch = ' ';
+                    // First attempt to render the sprite layer
+                    if(map.data[row][col].sprite != kNoSprite && (map.data[row][col].sprite < 0 || 
+                            (data.spriteList != NULL && (unsigned) map.data[row][col].sprite < listLen(data.spriteList)))) {
+                        // There is some sprite...
+
+                        int spriteNr = map.data[row][col].sprite;
+                        if(spriteNr < 0 && data.charSprite.data != NULL && 
+                                line >= data.charSprite.yOff && line < data.charSprite.yOff + data.charSprite.height &&
+                                i >= data.charSprite.xOff && i < data.charSprite.xOff + data.charSprite.width) {
+                            // Check for char sprite data
+                            mapFileNextChar(file, data.charSprite.data[line - data.charSprite.yOff][i-data.charSprite.xOff]);
+                            continue;
+                        }
+                        //todo Check for real sprites, as well
+
+                    }
+
+                    // Next attempt to render the wall layer
                     if(map.data[row][col].uWall == 1 && line < data.uWall.height && data.uWall.data[line][i]) {
                         // Check for characters in the upper wall
-                        ch = data.uWall.data[line][i];
+                        mapFileNextChar(file, data.uWall.data[line][i]);
+                        continue;
                     } else if(map.data[row][col].uWall == 2 && line < data.uDoor.height && data.uDoor.data[line][i]) {
                         // Check for characters in the upper door
-                        ch = data.uDoor.data[line][i];
+                        mapFileNextChar(file, data.uDoor.data[line][i]);
+                        continue;
                     } else if(map.data[row][col].lWall == 1 && i < data.lWall.width && data.lWall.data[line][i]) {
                         // Check for characters in the left wall
-                        ch = data.lWall.data[line][i];
+                        mapFileNextChar(file, data.lWall.data[line][i]);
+                        continue;
                     } else if(map.data[row][col].lWall == 2 && i < data.lDoor.width && data.lDoor.data[line][i]) {
                         // Check for characters in the left door
-                        ch = data.lDoor.data[line][i];
+                        mapFileNextChar(file, data.lDoor.data[line][i]);
+                        continue;
                     } else if(map.data[row][col].dWall == 1 && line >= data.emptyBase.height - data.dWall.height 
                                 && data.dWall.data[line - (data.emptyBase.height - data.dWall.height)][i]) {
                         // Check for characters in the lower wall
-                        ch = data.dWall.data[line - (data.emptyBase.height - data.dWall.height)][i];
+                        mapFileNextChar(file, data.dWall.data[line - (data.emptyBase.height - data.dWall.height)][i]);
+                        continue;
                     } else if(map.data[row][col].dWall == 2 && line >= data.emptyBase.height - data.dDoor.height 
                                 && data.dDoor.data[line - (data.emptyBase.height - data.dDoor.height)][i]) {
                         // Check for characters in the lower door
-                        ch = data.dDoor.data[line - (data.emptyBase.height - data.dDoor.height)][i];
+                        mapFileNextChar(file, data.dDoor.data[line - (data.emptyBase.height - data.dDoor.height)][i]);
+                        continue;
                     } else if(map.data[row][col].rWall == 1 && i >= data.emptyBase.width - data.rWall.width 
                                 && data.rWall.data[line][i - (data.emptyBase.width - data.rWall.width)]) {
                         // Check for characters in the right wall
-                        ch = data.rWall.data[line][i - (data.emptyBase.width - data.rWall.width)];
+                        mapFileNextChar(file, data.rWall.data[line][i - (data.emptyBase.width - data.rWall.width)]);
+                        continue;
                     } else if(map.data[row][col].rWall == 2 && i >= data.emptyBase.width - data.rDoor.width 
                                 && data.rDoor.data[line][i - (data.emptyBase.width - data.rDoor.width)]) {
                         // Check for characters in the right wall
-                        ch = data.rDoor.data[line][i - (data.emptyBase.width - data.rDoor.width)];
-                    } else if(!map.data[row][col].isEmpty && data.tileBase.data[line][i]) {
+                        mapFileNextChar(file, data.rDoor.data[line][i - (data.emptyBase.width - data.rDoor.width)]);
+                        continue;
+                    } 
+                    
+                    // Finally, render the base layer
+                    if(!map.data[row][col].isEmpty && data.tileBase.data[line][i]) {
                         // Check for characters in the base tile
-                        ch = data.tileBase.data[line][i];
+                        mapFileNextChar(file, data.tileBase.data[line][i]);
+                        continue;
                     }
                     
-                    fprintf(file, "%c", ch);
+                    // Output the proper character to file
+                    mapFileNextChar(file, ' ');
 
                 }
             }
