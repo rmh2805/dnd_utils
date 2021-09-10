@@ -94,6 +94,6 @@ void setCursor(tileData_t data, map_t map, int x, int y);
 
 int mapToFile(tileData_t data, map_t map, FILE* file);
 
-int mapToSections(tileData_t data, map_t map, FILE* file, int pgWidth, int pgHeight);
+int mapToSections(tileData_t data, map_t map, FILE* file, int pgWidth, int pgHeight, bool doSprites);
 
 #endif

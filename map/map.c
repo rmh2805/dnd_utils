@@ -232,13 +232,13 @@ void setCursor(tileData_t data, map_t map, int x, int y) {
 }
 
 int mapSectionToFile(tileData_t data, map_t map, FILE* file, 
-        int startRow, int startCol, int endRow, int endCol);
+        int startRow, int startCol, int endRow, int endCol, bool doSprites);
 
 int mapToFile(tileData_t data, map_t map, FILE* file) {
-    return mapSectionToFile(data, map, file, 0, 0, 0, 0);
+    return mapSectionToFile(data, map, file, 0, 0, 0, 0, true);
 }
 
-int mapToSections(tileData_t data, map_t map, FILE* file, int pgWidth, int pgHeight) {
+int mapToSections(tileData_t data, map_t map, FILE* file, int pgWidth, int pgHeight, bool doSprites) {
     if(file == NULL) return -1;
 
     // Determine the number of rows and columns per page (and extra lines needed)
@@ -253,7 +253,7 @@ int mapToSections(tileData_t data, map_t map, FILE* file, int pgWidth, int pgHei
         for(int pgFile = 0; pgFile * pgCols < map.nCols; pgFile++) {
             int ret = mapSectionToFile(data, map, file, 
                     pgRank * pgRows, pgFile * pgCols,
-                    (pgRank+1) * pgRows, (pgFile+1) * pgCols); 
+                    (pgRank+1) * pgRows, (pgFile+1) * pgCols, doSprites); 
             if( ret < 0) {
                 return ret - 2;
             }
@@ -268,7 +268,7 @@ int mapToSections(tileData_t data, map_t map, FILE* file, int pgWidth, int pgHei
 
 #define mapFileNextChar(file, ch) fprintf(file, "%c", ch)
 int mapSectionToFile(tileData_t data, map_t map, FILE* file, 
-        int startRow, int startCol, int endRow, int endCol) {
+        int startRow, int startCol, int endRow, int endCol, bool doSprites) {
     if(file == NULL) return -1;
     if(startRow > endRow || startCol > endCol) return -2;
     if(startRow > map.nRows || startCol > map.nCols) return 1;
@@ -281,7 +281,7 @@ int mapSectionToFile(tileData_t data, map_t map, FILE* file,
             for(int col = startCol; col < endCol; col++) {
                 for(int i = 0; i < data.emptyBase.width; i++) {
                     // First attempt to render the sprite layer
-                    if(map.data[row][col].sprite != kNoSprite && (map.data[row][col].sprite < 0 || 
+                    if(doSprites && map.data[row][col].sprite != kNoSprite && (map.data[row][col].sprite < 0 || 
                             (data.spriteList != NULL && (unsigned) map.data[row][col].sprite < listLen(data.spriteList)))) {
                         // There is some sprite...
 
@@ -290,7 +290,9 @@ int mapSectionToFile(tileData_t data, map_t map, FILE* file,
                                 line >= data.charSprite.yOff && line < data.charSprite.yOff + data.charSprite.height &&
                                 i >= data.charSprite.xOff && i < data.charSprite.xOff + data.charSprite.width) {
                             // Check for char sprite data
-                            mapFileNextChar(file, data.charSprite.data[line - data.charSprite.yOff][i-data.charSprite.xOff]);
+                            int y = line-data.charSprite.yOff, x = i-data.charSprite.xOff;
+                            
+                            mapFileNextChar(file,(x==1 && y==1) ? (char)(-1 * spriteNr) & 0xFF : data.charSprite.data[y][x]);
                             continue;
                         }
                         //todo Check for real sprites, as well

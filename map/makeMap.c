@@ -494,7 +494,7 @@ int main() {
                     y = 0;
                     break;
                 }
-                ret = mapToSections(data, map, fp, 80, 64);
+                ret = mapToSections(data, map, fp, 80, 64, true);
                 if(ret < 0) {
                     sprintf(buf, "*ERROR* Failed to write out to file (%d)", ret);
                     printError(buf);
