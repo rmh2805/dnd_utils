@@ -69,7 +69,7 @@ FILE* getSpriteFile(bool loadFile) {
 
 #define printError(msg) clear();printText(kRedPalette, msg, 0, 0); getch()
 
-int doSelSprite(dispData_t data, list_t spriteList, int selection, const char * prompt) {
+int doSelSprite(dispData_t * data, list_t spriteList, int selection, const char * prompt) {
     if(spriteList == NULL) {
         return -1;
     }
@@ -82,10 +82,12 @@ int doSelSprite(dispData_t data, list_t spriteList, int selection, const char * 
     }
 
     // Update the display itself
-    clear();
     printText(kBlackPalette, prompt, 0, 0);
-    drawSprite(data, *entry, data.screenRows/2 - entry->height/2,
-        data.screenCols/2 - entry->width/2);
+    clearBuffer(data);
+    addSprite(data, *entry, data->screenRows/2 - entry->height/2,
+        data->screenCols/2 - entry->width/2);
+    printBuffer(*data);
+    
     
     return 0;
 }
@@ -203,7 +205,7 @@ int main() {
                     clear();
                     printText(kBlackPalette, kSelPrompt, 0, 0);
                     printText(kBlackPalette, "New Sprite", data.screenRows/2, data.screenCols/2-5);
-                } else if(doSelSprite(data, spriteList, selY, kSelPrompt) < 0) {
+                } else if(doSelSprite(&data, spriteList, selY, kSelPrompt) < 0) {
                     mode = quit;
                     break;
                 }
@@ -296,7 +298,9 @@ int main() {
                 // Print the current size of the sprite
                 clear();
                 printText(kBlackPalette, "Use arrows to resize, and enter to confirm", 0, 0);
-                drawSprite(data, *entry, data.screenRows/2 - entry->height/2, data.screenCols/2 - entry->width/2);
+                clearBuffer(&data);
+                addSprite(&data, *entry, data.screenRows/2 - entry->height/2, data.screenCols/2 - entry->width/2);
+                printBuffer(data);
 
                 // todo Handle input 
                 unsigned char height = entry->height, width = entry->width;
@@ -365,12 +369,12 @@ int main() {
                 }
 
                 // Update the display
-                clear();
-                // todo Print some kind of prompt here
-                drawSprite(data, *tile, data.screenRows/2-tile->height/2, 
+                clearBuffer(&data);
+                addSprite(&data, *tile, data.screenRows/2-tile->height/2, 
                                         data.screenCols/2-tile->width/2);
-                drawSprite(data, *entry, data.screenRows/2-tile->height/2, 
+                addSprite(&data, *entry, data.screenRows/2-tile->height/2, 
                                           data.screenCols/2-tile->width/2);
+                printBuffer(data);
                 move(data.screenRows/2 - tile->height/2 + entry->yOff + selY, 
                      data.screenCols/2 - tile->width/2 + entry->xOff + selX);
 
@@ -449,7 +453,7 @@ int main() {
                 }
 
                 // Grab the proper sprite
-                ret = doSelSprite(data, spriteList, selY, kViewPrompt);
+                ret = doSelSprite(&data, spriteList, selY, kViewPrompt);
                 if(ret < 0) {
                     mode = quit;
                     break;
@@ -545,7 +549,7 @@ int main() {
     }
 
     // Cleanup and exit
-    closeDisp();
+    closeDisp(data);
     rmList(spriteList, freeSpriteEntry);
     freeSpriteEntry(entry);
     freeSpriteEntry(tile);

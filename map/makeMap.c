@@ -136,13 +136,13 @@ int main() {
     FILE* fp = fopen(kTileFile, "r");
     if(fp == NULL) {
         printError("*FATAL ERROR* Failed to load tile data file");
-        closeDisp();
+        closeDisp(data.dispData);
         return EXIT_FAILURE;
     }
 
     if(loadTileData(fp, &data)) {
         printError("*FATAL ERROR* Failed to read tile data from file");
-        closeDisp();
+        closeDisp(data.dispData);
         return EXIT_FAILURE;
     }
 
@@ -294,7 +294,9 @@ int main() {
                 }
 
                 clear();
-                drawMap(data, map, x, y);
+                addMap(&data, map, x, y);
+                printBuffer(data.dispData);
+                setCursor(data, map, x, y);
 
                 ch = getch();
                 switch(ch) {
@@ -435,7 +437,7 @@ int main() {
     }
 
     // Cleanup and exit successfully
-    closeDisp();
+    closeDisp(data.dispData);
     rmTileData(data);
     if(mapLoaded) rmMap(map);
 

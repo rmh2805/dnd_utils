@@ -150,7 +150,8 @@ int loadMap(map_t* map, FILE* fp) {
 
 //===============================<Map Display>================================//
 /**
- * Draw the section of the map in view, with focus on the tile at position (x,y)
+ * Buffers the section of the map in view, with focus on the tile at position 
+ * (x,y)
  * 
  * @param data The tile data struct to use for display
  * @param map The map to display
@@ -159,10 +160,10 @@ int loadMap(map_t* map, FILE* fp) {
  * 
  * @return 0 on success, <0 on failure
  */
-int drawMap(tileData_t data, map_t map, int x, int y) {
+int addMap(tileData_t * data, map_t map, int x, int y) {
     // Determine the position of the screen
     int width, height;  // Width and height of the screen in tiles
-    getScreenTileDim(data, &width, &height);
+    getScreenTileDim(*data, &width, &height);
 
     // X & Y coords of the top-left tile
     int scrX = max(min(x - width/2, map.nCols-width), 0);
@@ -176,7 +177,7 @@ int drawMap(tileData_t data, map_t map, int x, int y) {
         int row = dRow + scrY;
         for(int dCol = 0; dCol < width && dCol + scrX < map.nCols; dCol++) {
             int col = dCol + scrX;
-            drawTile(data, map.data[row][col], scrX, scrY, col, row);
+            addTile(data, map.data[row][col], scrX, scrY, col, row);
         }
     }
 
@@ -185,7 +186,7 @@ int drawMap(tileData_t data, map_t map, int x, int y) {
         int row = dRow + scrY;
         for(int dCol = 0; dCol < width && dCol + scrX < map.nCols; dCol++) {
             int col = dCol + scrX;
-            drawWalls(data, map.data[row][col], scrX, scrY, col, row);
+            addWalls(data, map.data[row][col], scrX, scrY, col, row);
         }
     }
 
@@ -194,15 +195,40 @@ int drawMap(tileData_t data, map_t map, int x, int y) {
         int row = dRow + scrY;
         for(int dCol = 0; dCol < width && dCol + scrX < map.nCols; dCol++) {
             int col = dCol + scrX;
-            drawTileSprite(data, map.data[row][col], scrX, scrY, col, row);
+            addTileSprite(data, map.data[row][col], scrX, scrY, col, row);
         }
     }
 
     // Retarget the selected tile
-    move(dY * data.emptyBase.height + data.emptyBase.height/2, 
-            dX * data.emptyBase.width + data.emptyBase.width/2);
+    move(dY * data->emptyBase.height + data->emptyBase.height/2, 
+            dX * data->emptyBase.width + data->emptyBase.width/2);
 
     return 0;
+}
+
+/**
+ * Sets cursor focus on the tile at position (x,y)
+ * 
+ * @param data The tile data struct to use for display
+ * @param map The map to display
+ * @param x The x coordinate of the selected tile
+ * @param y The y coordinate of the selected cell
+ */
+void setCursor(tileData_t data, map_t map, int x, int y) {
+    // Determine the position of the screen
+    int width, height;  // Width and height of the screen in tiles
+    getScreenTileDim(data, &width, &height);
+
+    // X & Y coords of the top-left tile
+    int scrX = max(min(x - width/2, map.nCols-width), 0);
+    int scrY = max(min(y - height/2, map.nRows-height), 0);
+
+    // X and Y offsets of the selected tile from the top-left of the screen
+    int dX = x - scrX, dY = y-scrY;
+    
+    // Retarget the selected tile
+    move(dY * data.emptyBase.height + data.emptyBase.height/2, 
+            dX * data.emptyBase.width + data.emptyBase.width/2);
 }
 
 int mapSectionToFile(tileData_t data, map_t map, FILE* file, 

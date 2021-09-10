@@ -200,7 +200,7 @@ int writeTile(tile_t tile, FILE* fp) {
 
 //===============================<Draw Helpers>===============================//
 /**
- * Draws the provided tile in the proper place on screen
+ * Buffers the provided tile in the proper place on screen
  * 
  * @param data The data structure defining the sprites to draw
  * @param tile The tile to draw to screen
@@ -209,10 +209,12 @@ int writeTile(tile_t tile, FILE* fp) {
  * @param x The x value of the tile in the map
  * @param y The y value of the tile in the map
  */
-void drawTile(tileData_t data, tile_t tile, int scrX, int scrY, int x, int y) {
+void addTile(tileData_t * data, tile_t tile, int scrX, int scrY, int x, int y) {
+    if(data == NULL) return;
+
     // First calculate the screen position of the tile
-    unsigned char tileWidth = data.tileBase.width;
-    unsigned char tileHeight = data.tileBase.height;
+    unsigned char tileWidth = data->tileBase.width;
+    unsigned char tileHeight = data->tileBase.height;
 
     // Adjust grid coordinates to the view of the screen
     int dX = x - scrX, dY = y - scrY;
@@ -220,24 +222,24 @@ void drawTile(tileData_t data, tile_t tile, int scrX, int scrY, int x, int y) {
 
     // Calculate the character position of the tile (and ensure it is onscreen)
     int col = dX * tileWidth, row = dY * tileHeight;
-    if(col >= data.dispData.screenCols || row >= data.dispData.screenRows) return;
+    if(col >= data->dispData.screenCols || row >= data->dispData.screenRows) return;
     
 
     // If the tile is empty, draw the empty tile and be done with it
     if(tile.isEmpty) {
-        drawSprite(data.dispData, data.emptyBase, row, col);
+        addSprite(&data->dispData, data->emptyBase, row, col);
         return;
     }
 
     // First draw the Base tile
-    short tmp = data.tileBase.palette;
-    if(tile.bgPalette != 0) data.tileBase.palette = tile.bgPalette;
-    drawSprite(data.dispData, data.tileBase, row, col);
-    data.tileBase.palette = tmp;
+    short tmp = data->tileBase.palette;
+    if(tile.bgPalette != 0) data->tileBase.palette = tile.bgPalette;
+    addSprite(&data->dispData, data->tileBase, row, col);
+    data->tileBase.palette = tmp;
 }
 
 /**
- * Draws the walls of the provided tile in the proper place on screen
+ * Buffers the walls of the provided tile in the proper place on screen
  * 
  * @param data The data structure defining the sprites to draw
  * @param tile The tile to draw to screen
@@ -246,10 +248,12 @@ void drawTile(tileData_t data, tile_t tile, int scrX, int scrY, int x, int y) {
  * @param x The x value of the tile in the map
  * @param y The y value of the tile in the map
  */
-void drawWalls(tileData_t data, tile_t tile, int scrX, int scrY, int x, int y) {
+void addWalls(tileData_t * data, tile_t tile, int scrX, int scrY, int x, int y) {
+    if(data == NULL) return;
+
     // First calculate the screen position of the tile
-    unsigned char tileWidth = data.tileBase.width;
-    unsigned char tileHeight = data.tileBase.height;
+    unsigned char tileWidth = data->tileBase.width;
+    unsigned char tileHeight = data->tileBase.height;
 
     // Adjust grid coordinates to the view of the screen
     int dX = x - scrX, dY = y - scrY;
@@ -257,57 +261,57 @@ void drawWalls(tileData_t data, tile_t tile, int scrX, int scrY, int x, int y) {
 
     // Calculate the character position of the tile (and ensure it is onscreen)
     int col = dX * tileWidth, row = dY * tileHeight;
-    if(col >= data.dispData.screenCols || row >= data.dispData.screenRows) return;
+    if(col >= data->dispData.screenCols || row >= data->dispData.screenRows) return;
 
     sprite_t sprite = kEmptySprite;
     switch(tile.lWall) {
         case 0:
             break;
         case 1:
-            sprite = data.lWall;
+            sprite = data->lWall;
             break;
         default:
-            sprite = data.lDoor;
+            sprite = data->lDoor;
     }
-    drawSprite(data.dispData, sprite, row, col);
+    addSprite(&data->dispData, sprite, row, col);
     
     switch(tile.rWall) {
         case 0:
             break;
         case 1:
-            sprite = data.rWall;
+            sprite = data->rWall;
             break;
         default:
-            sprite = data.rDoor;
+            sprite = data->rDoor;
     }
-    drawSprite(data.dispData, sprite, row, col);
+    addSprite(&data->dispData, sprite, row, col);
     
     switch(tile.uWall) {
         case 0:
             break;
         case 1:
-            sprite = data.uWall;
+            sprite = data->uWall;
             break;
         default:
-            sprite = data.uDoor;
+            sprite = data->uDoor;
     }
-    drawSprite(data.dispData, sprite, row, col);
+    addSprite(&data->dispData, sprite, row, col);
     
     switch(tile.dWall) {
         case 0:
             break;
         case 1:
-            sprite = data.dWall;
+            sprite = data->dWall;
             break;
         default:
-            sprite = data.dDoor;
+            sprite = data->dDoor;
     }
-    drawSprite(data.dispData, sprite, row, col);
+    addSprite(&data->dispData, sprite, row, col);
 
 }
 
 /**
- * Draws the sprite of the provided tile in the proper place on screen
+ * Buffers the sprite of the provided tile in the proper place on screen
  * 
  * @param data The data structure defining the sprites to draw
  * @param tile The tile to draw to screen
@@ -316,15 +320,17 @@ void drawWalls(tileData_t data, tile_t tile, int scrX, int scrY, int x, int y) {
  * @param x The x value of the tile in the map
  * @param y The y value of the tile in the map
  */
-void drawTileSprite(tileData_t data, tile_t tile, int scrX, int scrY, int x, int y) {
-    if(tile.sprite == kNoSprite || (tile.sprite >= 0 && (data.spriteList == NULL
-            || (unsigned int) tile.sprite >= listLen(data.spriteList)))) {
+void addTileSprite(tileData_t * data, tile_t tile, int scrX, int scrY, int x, int y) {
+    if(data == NULL) return;
+    
+    if(tile.sprite == kNoSprite || (tile.sprite >= 0 && (data->spriteList == NULL
+            || (unsigned int) tile.sprite >= listLen(data->spriteList)))) {
         return;
     }
     
     // First calculate the screen position of the tile
-    unsigned char tileWidth = data.tileBase.width;
-    unsigned char tileHeight = data.tileBase.height;
+    unsigned char tileWidth = data->tileBase.width;
+    unsigned char tileHeight = data->tileBase.height;
 
     // Adjust grid coordinates to the view of the screen
     int dX = x - scrX, dY = y - scrY;
@@ -332,15 +338,15 @@ void drawTileSprite(tileData_t data, tile_t tile, int scrX, int scrY, int x, int
 
     // Calculate the character position of the tile (and ensure it is onscreen)
     int col = dX * tileWidth, row = dY * tileHeight;
-    if(col >= data.dispData.screenCols || row >= data.dispData.screenRows) return;
+    if(col >= data->dispData.screenCols || row >= data->dispData.screenRows) return;
     
 
     // Get the sprite to draw
     sprite_t sprite;
     if(tile.sprite < 0) {
-        if(data.charSprite.data == NULL) return;
+        if(data->charSprite.data == NULL) return;
 
-        sprite = data.charSprite;
+        sprite = data->charSprite;
         
         char ch = (-1 * tile.sprite) & 0xFF;
         if(ch < 0x20 || ch > 0x7E) ch = ' ';
@@ -351,15 +357,15 @@ void drawTileSprite(tileData_t data, tile_t tile, int scrX, int scrY, int x, int
         sprite.data[1][1] = ch;
         sprite.palette = palette;
 
-        sprite = data.charSprite;
+        sprite = data->charSprite;
     } else {
-        sprite = *(sprite_t *) listGet(data.spriteList, tile.sprite);
+        sprite = *(sprite_t *) listGet(data->spriteList, tile.sprite);
     }
 
     // First draw the Base tile
     short tmp = sprite.palette;
     if(tile.spritePalette != 0) sprite.palette = tile.spritePalette;
-    drawSprite(data.dispData, sprite, row, col);
+    addSprite(&data->dispData, sprite, row, col);
     sprite.palette = tmp;
 }
 

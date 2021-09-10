@@ -1,5 +1,6 @@
 #include "dispBase.h"
 
+//=============================<Init and Cleanup>=============================//
 /**
  * Core display initialization
  * 
@@ -13,9 +14,11 @@ int initDisp(dispData_t* data) {
     keypad(stdscr, true);
     noecho();
 
+    data->data = NULL;
+
     // Check for color and set up palette pairs
     if(!has_colors()) {
-        closeDisp();
+        closeDisp(*data);
         fprintf(stderr, "*ERROR* in initDisp: Terminal does not have color\n");
         return -1;
     }
@@ -35,6 +38,27 @@ int initDisp(dispData_t* data) {
     // Get screen size
     getmaxyx(stdscr, data->screenRows, data->screenCols);
 
+    // Alloc the frame buffer
+    data->data = calloc(data->screenRows, sizeof(drawPair_t *));
+    if(data->data == NULL) {
+        closeDisp(*data);
+        fprintf(stderr, "*ERROR* in initDisp: Unable to allocate a frame buffer (rows)\n");
+        return -1;
+    }
+
+    for(int i = 0; i < data->screenRows; i++) {
+        data->data[i] = calloc(data->screenCols, sizeof(drawPair_t));
+
+        if(data->data[i] == NULL) {
+            closeDisp(*data);
+            fprintf(stderr, "*ERROR* in initDisp: Unable to allocate a frame buffer (cols)\n");
+            return -1;
+        }
+    }
+
+
+    // Do final setup and return success
+    clearBuffer(data);
     return 0;
 }
 
@@ -43,13 +67,24 @@ int initDisp(dispData_t* data) {
  * 
  * @return 0 iff display was closed correctly
  */
-int closeDisp() {
+int closeDisp(dispData_t data) {
     endwin();
+
+    if(data.data != NULL) {
+        for(int i = 0; i < data.screenRows; i++) {
+            if(data.data[i] != NULL) {
+                free(data.data[i]);
+                data.data[i] = NULL;
+            }
+        }
+
+        free(data.data);
+    }
 
     return 0;
 }
 
-
+//=============================<Buffer Handling>==============================//
 /**
  * Draws the specified sprite on screen
  * 
@@ -58,30 +93,30 @@ int closeDisp() {
  * @param screenRow The top row to draw in
  * @param screenCol The left column to draw in
  */
-void drawSprite(dispData_t data, sprite_t sprite, int screenRow, int screenCol) {
+void addSprite(dispData_t * data, sprite_t sprite, int screenRow, int screenCol) {
+    if(data == NULL || data->data == NULL) return;
+
     screenRow = screenRow + sprite.yOff;
     screenCol = screenCol + sprite.xOff;
     if (sprite.data == NULL || 
             screenRow + sprite.height <= 0 || screenCol + sprite.width <= 0 ||
-            screenRow >= data.screenRows || screenCol >= data.screenCols) {
+            screenRow >= data->screenRows || screenCol >= data->screenCols) {
         return;
     }
 
-    wattron(stdscr, COLOR_PAIR(sprite.palette));
     for(int dRow = 0; dRow < sprite.height; dRow++) {
         int row = screenRow + dRow;
-        if(row < 0 || row >= data.screenRows) continue;
+        if(row < 0 || row >= data->screenRows) continue;
 
         for(int dCol = 0; dCol < sprite.width; dCol++) {
             int col = screenCol + dCol;
-            if(col < 0 || col >= data.screenCols) continue;
+            if(col < 0 || col >= data->screenCols) continue;
 
             char ch = sprite.data[dRow][dCol];
             if(ch == '\0') {
                 continue;
             } else {
-                wmove(stdscr, row, col);
-                waddch(stdscr, ch);
+                data->data[row][col] = (drawPair_t) {sprite.palette, sprite.data[dRow][dCol]};
             }
         }
     }
@@ -89,7 +124,76 @@ void drawSprite(dispData_t data, sprite_t sprite, int screenRow, int screenCol) 
     wattroff(stdscr, COLOR_PAIR(sprite.palette));
 }
 
+/**
+ * Adds text to the frame buffer
+ * 
+ * @param data The display data struct
+ * @param palette The pallette to print the text in
+ * @param text The text to print to screen
+ * @param row The starting row for text
+ * @param col The starting col for text
+ */
+void addText(dispData_t * data, short palette, const char * text, int row, int col) {
+    if(data == NULL || data->data == NULL || 
+            row < 0 || row > data->screenRows || 
+            col < 0 || col > data->screenCols) {
+        return;
+    }
+    
+    for(int dCol = 0; col + dCol < data->screenCols && text[dCol]; dCol++) {
+        data->data[row][col + dCol] = (drawPair_t) {palette, text[dCol]};
+    }
+}
 
+/**
+ * Clears the screen and prints out the data stored in the buffer
+ * 
+ * @param data The display data struct
+ */
+void printBuffer(dispData_t data) {
+    if(data.data == NULL) return;
+
+    // First clear the screen
+    clear();
+
+    // Then loop for each palette (since each requires its own refresh)
+    for(short palette = kMinPalette; palette < kMaxPalette; palette++) {
+        wattron(stdscr, COLOR_PAIR(palette));
+
+        // Finally itterate through all rows and cols
+        for(int row = 0; row < data.screenRows; row++) {
+            for(int col = 0; col < data.screenCols; col++) {
+                if(data.data[row][col].palette != palette || 
+                        data.data[row][col].ch == '\0') {
+                    continue;
+                }
+
+                mvaddch(row, col, data.data[row][col].ch);
+            }
+        }
+        refresh();
+        wattroff(stdscr, COLOR_PAIR(palette));
+    }
+}
+
+/**
+ * Clears out any data already in the buffer
+ * 
+ * @param data The display data struct
+ */
+void clearBuffer(dispData_t * data) {
+    if(data == NULL || data->data == NULL) {
+        return;
+    }
+
+    for(int row = 0; row < data->screenRows; row++) {
+        for(int col = 0; col < data->screenCols; col++) {
+            data->data[row][col] = (drawPair_t) {kDefPalette, '\0'};
+        }
+    }
+}
+
+//=============================<Buffer Handling>==============================//
 /**
  * Prints the provided text to terminal
  * 

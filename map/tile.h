@@ -98,7 +98,7 @@ int writeTile(tile_t tile, FILE* fp);
 
 //===============================<Draw Helpers>===============================//
 /**
- * Draws the provided tile in the proper place on screen
+ * Buffers the provided tile in the proper place on screen
  * 
  * @param data The data structure defining the sprites to draw
  * @param tile The tile to draw to screen
@@ -107,10 +107,10 @@ int writeTile(tile_t tile, FILE* fp);
  * @param x The x value of the tile in the map
  * @param y The y value of the tile in the map
  */
-void drawTile(tileData_t data, tile_t tile, int scrX, int scrY, int x, int y);
+void addTile(tileData_t * data, tile_t tile, int scrX, int scrY, int x, int y);
 
 /**
- * Draws the walls of the provided tile in the proper place on screen
+ * Buffers the walls of the provided tile in the proper place on screen
  * 
  * @param data The data structure defining the sprites to draw
  * @param tile The tile to draw to screen
@@ -119,10 +119,10 @@ void drawTile(tileData_t data, tile_t tile, int scrX, int scrY, int x, int y);
  * @param x The x value of the tile in the map
  * @param y The y value of the tile in the map
  */
-void drawWalls(tileData_t data, tile_t tile, int scrX, int scrY, int x, int y);
+void addWalls(tileData_t * data, tile_t tile, int scrX, int scrY, int x, int y);
 
 /**
- * Draws the sprite of the provided tile in the proper place on screen
+ * Buffers the sprite of the provided tile in the proper place on screen
  * 
  * @param data The data structure defining the sprites to draw
  * @param tile The tile to draw to screen
@@ -131,7 +131,7 @@ void drawWalls(tileData_t data, tile_t tile, int scrX, int scrY, int x, int y);
  * @param x The x value of the tile in the map
  * @param y The y value of the tile in the map
  */
-void drawTileSprite(tileData_t data, tile_t tile, int scrX, int scrY, int x, int y);
+void addTileSprite(tileData_t * data, tile_t tile, int scrX, int scrY, int x, int y);
 
 //===========================<Sprite Manipulation>============================//
 
