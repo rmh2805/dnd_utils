@@ -24,7 +24,7 @@ main: randMap
 #
 #	Multiple Targets
 #
-all: tests makeSprite makeMap randMap
+all: tests makeSprite makeMap randMap dispMap
 
 tests: testSprite
 
@@ -40,6 +40,10 @@ randMap: randMap.o sprite.o dispBase.o tile.o map.o list.o
 	$(ECHO)
 
 makeSprite: makeSprite.o sprite.o dispBase.o list.o
+	$(CC) $(CFLAGS) $(CDEBUGFLAGS) -o $@ $^ $(CLIBS)
+	$(ECHO)
+
+dispMap: dispMap.o sprite.o dispBase.o tile.o map.o list.o
 	$(CC) $(CFLAGS) $(CDEBUGFLAGS) -o $@ $^ $(CLIBS)
 	$(ECHO)
 
@@ -72,4 +76,5 @@ realclean: clean testClean
 	-rm makeSprite
 	-rm makeMap
 	-rm randMap
+	-rm dispmap
 

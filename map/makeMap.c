@@ -210,6 +210,7 @@ int main() {
         closeDisp(data.dispData);
         return EXIT_FAILURE;
     }
+    fclose(fp);
 
     // Main Loop
     mode_t mode = menu;
