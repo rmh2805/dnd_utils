@@ -14,10 +14,12 @@
 #define kTileFile "walls.out"
 
 int main(int argc, char** argv) {
-    if(argc != 2) {
+    if(argc < 2) {
         printf("Usage: %s <map file>\n\n", argv[0]);
         return EXIT_FAILURE;
     }
+    
+    bool doPages = argc > 2;
 
     tileData_t data;
     
@@ -51,7 +53,11 @@ int main(int argc, char** argv) {
     fclose(fp);
 
     // Print the map to stdout
-    mapToFile(data, map, stdout);
+    if(doPages) {
+        mapToSections(data, map, stdout, 80, 64, true);
+    } else {
+        mapToFile(data, map, stdout);
+    }
 
     // Cleanup
     rmTileData(data);
