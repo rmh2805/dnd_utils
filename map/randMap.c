@@ -175,7 +175,9 @@ void placeRoom(map_t * map, room_t room, bool mergeOverlap) {
             if(col < 0) continue;
             if(col >= map->nCols) break;
 
-            if(mergeOverlap && !map->data[row][col].isEmpty) {
+            if(!map->data[row][col].isEmpty) {
+                if(!mergeOverlap) continue;
+
                 // On a present cell, make sure all walls are properley set for 
                 // the new room in order to merge the two
                 if(dRow != 0) {
@@ -342,12 +344,12 @@ int main(int argc, char** argv) {
                 printUsage(argv[0]);
                 return EXIT_FAILURE;
             }
-            if(sscanf(argv[++i], "%d", &mazeRows) != 1 || firstRoomRows <= 0) {
+            if(sscanf(argv[++i], "%d", &mazeRows) != 1 || mazeRows <= 0) {
                 fprintf(stderr, "*FATAL ERROR* in main: Invalid first room dimension \"%s\"\n", argv[i]);
                 printUsage(argv[0]);
                 return EXIT_FAILURE;
             }
-            if(sscanf(argv[++i], "%d", &firstRoomCols) != 1 || firstRoomCols <= 0) {
+            if(sscanf(argv[++i], "%d", &mazeCols) != 1 || mazeCols <= 0) {
                 fprintf(stderr, "*FATAL ERROR* in main: Invalid first room dimension \"%s\"\n", argv[i]);
                 printUsage(argv[0]);
                 return EXIT_FAILURE;
@@ -420,24 +422,19 @@ int main(int argc, char** argv) {
     room_t finalRoom = {map.nCols - finalRoomCols, map.nRows - finalRoomRows, 
                             finalRoomCols, finalRoomRows};
 
-    // Try to find some room configuration which doesn't overlap
-    if(roomsOverlap(firstRoom, finalRoom)) {
-        firstRoom = rotRoom(firstRoom);
-            if(roomsOverlap(firstRoom, finalRoom)) {
-                firstRoom = rotRoom(firstRoom);
-                finalRoom = rotRoom(finalRoom);
-
-                if(roomsOverlap(firstRoom, finalRoom)) {
-                    firstRoom = rotRoom(firstRoom);
-                }
-            }
-    }
-
     //Add the endpoint rooms to the map
-    placeRoom(&map, firstRoom, false);
     placeRoom(&map, finalRoom, false);
+    placeRoom(&map, firstRoom, false);
+
+    // Generate all the midpoint rooms
 
     //=============================<Cleanup>==============================//
+    // Set start and end sprites
+    setCharSprite(&map.data[0][0], 'S', kGreenPalette);
+    map.data[0][0].spritePalette = kGreenPalette;
+    setCharSprite(&map.data[map.nRows-1][map.nCols-1], 'E', kRedPalette);
+    map.data[map.nRows-1][map.nCols-1].spritePalette = kRedPalette;
+
     int status = EXIT_SUCCESS;
     // Write the generated map to file
     FILE* file = fopen(outFileLoc, "w");
