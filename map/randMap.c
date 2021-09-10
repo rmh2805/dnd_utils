@@ -9,8 +9,8 @@
 // Define Default maze configuration
 #define kDefDeadEndRooms 0
 #define kDefMidRooms 0
-#define kDefRows 64
-#define kDefCols 64
+#define kDefRows 32
+#define kDefCols 32
 
 // Define endpoint room sizes
 #define kDefFirstRoomRows 1
@@ -408,14 +408,46 @@ int main(int argc, char** argv) {
     }
 
     //============================<Main Code>=============================//
-    printf("Out File: %s\n", outFileLoc);
-    printf("Dead Ends: %d\n", deadEnds);
-    printf("Mid Rooms: %d\n", midRooms);
-    printf("First Room Dim: %d x %d\n", firstRoomRows, firstRoomCols);
-    printf("Final Room Dim: %d x %d\n", finalRoomRows, finalRoomCols);
-    printf("Dead end size range: [%d, %d]\n", deadEndMinDim, deadEndMaxDim);
-    printf("Mid room size range: [%d, %d]\n", midMinDim, midMaxDim);
+    // Make a map to hold the maze
+    map_t map;
+    if(mkMap(mazeRows, mazeCols, &map) != 0) {
+        fprintf(stderr, "*FATAL ERROR* failed to allocate a map\n");
+        return EXIT_FAILURE;
+    }
+
+    // Generate the starting and ending rooms
+    room_t firstRoom = {0, 0, firstRoomCols, firstRoomRows};
+    room_t finalRoom = {map.nCols - finalRoomCols, map.nRows - finalRoomRows, 
+                            finalRoomCols, finalRoomRows};
+
+    // Try to find some room configuration which doesn't overlap
+    if(roomsOverlap(firstRoom, finalRoom)) {
+        firstRoom = rotRoom(firstRoom);
+            if(roomsOverlap(firstRoom, finalRoom)) {
+                firstRoom = rotRoom(firstRoom);
+                finalRoom = rotRoom(finalRoom);
+
+                if(roomsOverlap(firstRoom, finalRoom)) {
+                    firstRoom = rotRoom(firstRoom);
+                }
+            }
+    }
+
+    //Add the endpoint rooms to the map
+    placeRoom(&map, firstRoom, false);
+    placeRoom(&map, finalRoom, false);
 
     //=============================<Cleanup>==============================//
-    return EXIT_SUCCESS;
+    int status = EXIT_SUCCESS;
+    // Write the generated map to file
+    FILE* file = fopen(outFileLoc, "w");
+    if(file == NULL || writeMap(map, file) != 0) {
+        fprintf(stderr, "*FATAL ERROR* Failed to open the output file\n");
+        status = EXIT_FAILURE;
+    } else {
+        fclose(file);
+    }
+
+    rmMap(map);
+    return status;
 }
