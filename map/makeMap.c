@@ -487,6 +487,10 @@ int main() {
                     break;
                 }
 
+                clear();
+                printText(kBlackPalette, "Include sprites [Y/n]? ", 0, 0);
+                ch = getch();
+
                 fp = getMapFile(false);
                 if(fp == NULL) {
                     printError("*ERROR* Unable to open output file");
@@ -494,7 +498,7 @@ int main() {
                     y = 0;
                     break;
                 }
-                ret = mapToSections(data, map, fp, 80, 64, true);
+                ret = mapToSections(data, map, fp, 80, 64, !(ch == 'N' || ch == 'n'));
                 if(ret < 0) {
                     sprintf(buf, "*ERROR* Failed to write out to file (%d)", ret);
                     printError(buf);
