@@ -90,8 +90,8 @@ void printHelp(mode_t mode) {
             helpPrinter("Make Printable will generate a map to be printed as plaintext", 9);
             helpPrinter("Quit... quits (real original, I know)", 10);
 
-            helpPrinter("Worth noting, attempting to backspace in text entry currently results in corruption.", 12);
-            helpPrinter("Instead, the delete key currently fills its role", 13);
+            helpPrinter("Worth noting, attempting to backspace in text entry currently results in", 12);
+            helpPrinter("corruption. Instead, the delete key currently fills its role", 13);
             newRow = 15;
             break;
         case nav:
@@ -105,7 +105,8 @@ void printHelp(mode_t mode) {
             helpPrinter("'r' cycles to the next loaded sprite", 9);
             helpPrinter("'g' places a char sprite of your chosing", 10);
             helpPrinter("'z' removes any sprite from the selected cell", 11);
-            newRow = 13;
+            helpPrinter("'p' fills the selected room with the current color", 13);
+            newRow = 15;
             break;
         default:
             newRow = 2;
