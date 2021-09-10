@@ -90,8 +90,8 @@ void printHelp(mode_t mode) {
             helpPrinter("Make Printable will generate a map to be printed as plaintext", 9);
             helpPrinter("Quit... quits (real original, I know)", 10);
 
-            helpPrinter("Worth noting, attempting to backspace in text entry currently results in corruption.", 12);
-            helpPrinter("Instead, the delete key currently fills its role", 13);
+            helpPrinter("Worth noting, attempting to backspace in text entry currently results in", 12);
+            helpPrinter("corruption. Instead, the delete key currently fills its role", 13);
             newRow = 15;
             break;
         case nav:
@@ -105,7 +105,8 @@ void printHelp(mode_t mode) {
             helpPrinter("'r' cycles to the next loaded sprite", 9);
             helpPrinter("'g' places a char sprite of your chosing", 10);
             helpPrinter("'z' removes any sprite from the selected cell", 11);
-            newRow = 13;
+            helpPrinter("'p' fills the selected room with the current color", 13);
+            newRow = 15;
             break;
         default:
             newRow = 2;
@@ -113,6 +114,70 @@ void printHelp(mode_t mode) {
     printText(kBlackPalette, "Press enter to continue...", newRow, 0);
     getch();
 
+}
+
+//===========================<Color Flood Helpers>============================//
+void floodRoomRec(map_t * map, bool** visited, short palette, int x, int y) {
+    // Caller checks position for wall detection
+    if(visited[y][x] || map->data[y][x].isEmpty) { 
+        return;
+    }
+
+    // Mark this cell as visited and update its palette
+    visited[y][x] = true;
+    map->data[y][x].bgPalette = palette;
+
+    // Call recursively to all adjacent cells not blocked by walls
+    // Cell above
+    if(y > 0 && !(map->data[y][x].uWall || map->data[y-1][x].dWall)) {
+        floodRoomRec(map, visited, palette, x, y-1);
+    }
+    // Cell below
+    if(y+1 < map->nRows && !(map->data[y][x].dWall || map->data[y+1][x].uWall)) {
+        floodRoomRec(map, visited, palette, x, y+1);
+    }
+    // Cell left
+    if(x > 0 && !(map->data[y][x].lWall || map->data[y][x-1].rWall)) {
+        floodRoomRec(map, visited, palette, x-1, y);
+    }
+    // Cell right
+    if(x+1 < map->nCols && !(map->data[y][x].rWall || map->data[y][x+1].lWall)) {
+        floodRoomRec(map, visited, palette, x+1, y);
+    }
+
+
+}
+
+void floodRoom(map_t * map, int x, int y) {
+    // First of all, ensure that the map exists and that the first square is enabled
+    if(map == NULL || y < 0 || y >= map->nRows || x < 0 || x >= map->nCols || 
+            map->data[y][x].isEmpty) {
+        return;
+    }
+
+    // First allocated a visited array
+    bool ** visited = calloc(map->nRows, sizeof(bool *));
+    if(visited == NULL) {
+        return;
+    }
+
+    for(int i = 0; i < map->nRows; i++) {
+        visited[i] = calloc(map->nCols, sizeof(bool));
+        if(visited[i] == NULL) goto floodRoomCleanup;
+    }
+
+    // Next grab the palette and begin the flood process
+    short palette = map->data[y][x].bgPalette;
+    floodRoomRec(map, visited, palette, x, y);
+
+
+floodRoomCleanup:
+    if(visited != NULL) {
+        for(int i = 0; i < map->nRows; i++) {
+            if(visited[i] != NULL) free(visited[i]);
+        }
+        free(visited);
+    }
 }
 
 //================================<Main Code>=================================//
@@ -354,13 +419,7 @@ int main() {
                         }
                         break;
                     
-                    // Misc Controls
-                    case KEY_DC:    // If delete is pressed empty cell
-                    case 27:
-                    case 'q':
-                        map.data[y][x].isEmpty = true;
-                        break;
-                    
+                    // Palette Setting
                     case 'c':   // Cycle tile palettes
                     case 'C':
                         if(map.data[y][x].bgPalette == 0) {
@@ -386,6 +445,11 @@ int main() {
                         break;
                         break;
                     
+                    case 'p':   // Fill the current room w/ the current palette
+                    case 'P':
+                        floodRoom(&map, x, y);
+                        break;
+
                     // Sprite setting
                     case 'z':   // Remove sprites
                     case 'Z':
@@ -401,6 +465,14 @@ int main() {
                         setCharSprite(&map.data[y][x], getch(), kDefPalette);
                         break;
 
+                    
+                    // Misc Controls
+                    case KEY_DC:    // If delete is pressed empty cell
+                    case 27:
+                    case 'q':
+                    case 'Q':
+                        map.data[y][x].isEmpty = true;
+                        break;
                     case '?':       // Display the help text
                         printHelp(mode);
                         break;
