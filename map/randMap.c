@@ -308,9 +308,6 @@ room_t mkRandRoom(bool isDeadEnd) {
  * @return The distance of a shortest path between the rooms
  */
 int roomDist(room_t one, room_t two, room_t * src, room_t * dst) {
-    // If the rooms overlap, then they are either merged or are adjacent
-    if(roomsOverlap(one, two)) return 0;
-
     // Find x and y coords in each which have minimum dist in that dimension
     int x1 = one.x, y1 = one.y;
     int x2 = two.x, y2 = two.y;
@@ -320,9 +317,9 @@ int roomDist(room_t one, room_t two, room_t * src, room_t * dst) {
     for(int dX1 = one.width - 1; dX1 >= 0; dX1--) {
         for(int dX2 = 0; dX2 < two.width; dX2++) {
             if(abs((one.x + dX1)-(two.x + dX2)) < xSep) {
-                x1 = dX1;
-                x2 = dX2;
-                xSep = abs(dX1-dX2);
+                x1 = (one.x + dX1);
+                x2 = (two.x + dX2);
+                xSep = abs(x1-x2);
             }
         }
     }
@@ -330,9 +327,9 @@ int roomDist(room_t one, room_t two, room_t * src, room_t * dst) {
     for(int dY1 = 0; dY1 < one.height; dY1++) {
         for(int dY2 = two.height-1; dY2 >= 0; dY2--) {
             if(abs((one.y + dY1)-(two.y + dY2)) < ySep) {
-                y1 = dY1;
-                y2 = dY2;
-                ySep = abs(dY1-dY2);
+                y1 = (one.y + dY1);
+                y2 = (two.y + dY2);
+                ySep = abs(y1-y2);
             }
         }
     }
@@ -347,6 +344,16 @@ int roomDist(room_t one, room_t two, room_t * src, room_t * dst) {
     }
 
     return (xSep - 1) + (ySep - 1);
+}
+
+
+room_t * roomCompBase = NULL;
+int compRooms(const void* a, const void* b) {
+    if(roomCompBase == NULL || a == NULL || b == NULL) return 0;
+
+    int distA = roomDist(*roomCompBase, *(room_t *) a, NULL, NULL);
+    int distB = roomDist(*roomCompBase, *(room_t *) b, NULL, NULL);
+    return distA - distB;
 }
 
 //================================<Main Code>=================================//
@@ -514,8 +521,8 @@ int main(int argc, char** argv) {
 
     // Generate all rooms
     room_t * pathRooms = calloc(2 + midRooms, sizeof(room_t));
-    pathRooms[0] = finalRoom;
-    pathRooms[1] = firstRoom;
+    pathRooms[0] = firstRoom;
+    pathRooms[1] = finalRoom;
 
     placeRoom(&map, finalRoom, false);
     placeRoom(&map, firstRoom, false);
@@ -534,6 +541,15 @@ int main(int argc, char** argv) {
         }
 
         placeRoom(&map, pathRooms[i], false);
+    }
+
+    // Sort the rooms by distance from start
+    roomCompBase = &firstRoom;
+    qsort(pathRooms, 2 + midRooms, sizeof(room_t), compRooms);
+
+    // Place a char sprite showing room order
+    for(int i = 0; i < 2 + midRooms; i++) {
+        setCharSprite(&map.data[pathRooms[i].y][pathRooms[i].x], '0' + i, kDefPalette);
     }
 
     //=============================<Cleanup>==============================//
