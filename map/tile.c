@@ -248,7 +248,7 @@ void addTile(tileData_t * data, tile_t tile, int scrX, int scrY, int x, int y) {
  * @param x The x value of the tile in the map
  * @param y The y value of the tile in the map
  */
-void addWals(tileData_t * data, tile_t tile, int scrX, int scrY, int x, int y) {
+void addWalls(tileData_t * data, tile_t tile, int scrX, int scrY, int x, int y) {
     if(data == NULL) return;
 
     // First calculate the screen position of the tile
