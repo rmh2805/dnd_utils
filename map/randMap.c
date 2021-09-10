@@ -5,6 +5,7 @@
 #include <time.h>
 
 #include "map.h"
+#include "../common/list.h"
 
 //===========================<Default Definitions>============================//
 // Define Default maze configuration
@@ -58,8 +59,6 @@ int deadEndMinDim, deadEndMaxDim;
 int midMinDim, midMaxDim;
 
 int overlapRetries, oobRetries;
-
-
 
 //=============================<Helper Functions>=============================//
 /**
@@ -298,6 +297,56 @@ room_t mkRandRoom(bool isDeadEnd) {
     room.y = randRange(0, mazeRows-1);
 
     return room;
+}
+
+/**
+ * Calculates the shortest path distance between 2 rooms
+ * 
+ * @param one The first room to check
+ * @param two The second room to check
+ * 
+ * @return The distance of a shortest path between the rooms
+ */
+int roomDist(room_t one, room_t two, room_t * src, room_t * dst) {
+    // If the rooms overlap, then they are either merged or are adjacent
+    if(roomsOverlap(one, two)) return 0;
+
+    // Find x and y coords in each which have minimum dist in that dimension
+    int x1 = one.x, y1 = one.y;
+    int x2 = two.x, y2 = two.y;
+
+    int xSep = abs(x1-x2), ySep = abs(y1-y2);
+
+    for(int dX1 = one.width - 1; dX1 >= 0; dX1--) {
+        for(int dX2 = 0; dX2 < two.width; dX2++) {
+            if(abs((one.x + dX1)-(two.x + dX2)) < xSep) {
+                x1 = dX1;
+                x2 = dX2;
+                xSep = abs(dX1-dX2);
+            }
+        }
+    }
+
+    for(int dY1 = 0; dY1 < one.height; dY1++) {
+        for(int dY2 = two.height-1; dY2 >= 0; dY2--) {
+            if(abs((one.y + dY1)-(two.y + dY2)) < ySep) {
+                y1 = dY1;
+                y2 = dY2;
+                ySep = abs(dY1-dY2);
+            }
+        }
+    }
+
+    // If they aren't null, set the src and dst "rooms" with the located 
+    // positions
+    if(src != NULL) {
+        *src = (room_t) {x1, y1, 1, 1};
+    }
+    if(dst != NULL) {
+        *dst = (room_t) {x2, y2, 1, 1};
+    }
+
+    return (xSep - 1) + (ySep - 1);
 }
 
 //================================<Main Code>=================================//
