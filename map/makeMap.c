@@ -117,7 +117,7 @@ void printHelp(mode_t mode) {
 }
 
 //===========================<Color Flood Helpers>============================//
-void floodMapRec(map_t * map, bool** visited, short palette, int x, int y) {
+void floodRoomRec(map_t * map, bool** visited, short palette, int x, int y) {
     // Caller checks position for wall detection
     if(visited[y][x] || map->data[y][x].isEmpty) { 
         return;
@@ -130,25 +130,25 @@ void floodMapRec(map_t * map, bool** visited, short palette, int x, int y) {
     // Call recursively to all adjacent cells not blocked by walls
     // Cell above
     if(y > 0 && !(map->data[y][x].uWall || map->data[y-1][x].dWall)) {
-        floodMapRec(map, visited, palette, x, y-1);
+        floodRoomRec(map, visited, palette, x, y-1);
     }
     // Cell below
     if(y+1 < map->nRows && !(map->data[y][x].dWall || map->data[y+1][x].uWall)) {
-        floodMapRec(map, visited, palette, x, y+1);
+        floodRoomRec(map, visited, palette, x, y+1);
     }
     // Cell left
     if(x > 0 && !(map->data[y][x].lWall || map->data[y][x-1].rWall)) {
-        floodMapRec(map, visited, palette, x-1, y);
+        floodRoomRec(map, visited, palette, x-1, y);
     }
     // Cell right
     if(x+1 < map->nCols && !(map->data[y][x].rWall || map->data[y][x+1].lWall)) {
-        floodMapRec(map, visited, palette, x+1, y);
+        floodRoomRec(map, visited, palette, x+1, y);
     }
 
 
 }
 
-void floodMap(map_t * map, int x, int y) {
+void floodRoom(map_t * map, int x, int y) {
     // First of all, ensure that the map exists and that the first square is enabled
     if(map == NULL || y < 0 || y >= map->nRows || x < 0 || x >= map->nCols || 
             map->data[y][x].isEmpty) {
@@ -163,15 +163,15 @@ void floodMap(map_t * map, int x, int y) {
 
     for(int i = 0; i < map->nRows; i++) {
         visited[i] = calloc(map->nCols, sizeof(bool));
-        if(visited[i] == NULL) goto floodMapCleanup;
+        if(visited[i] == NULL) goto floodRoomCleanup;
     }
 
     // Next grab the palette and begin the flood process
     short palette = map->data[y][x].bgPalette;
-    floodMapRec(map, visited, palette, x, y);
+    floodRoomRec(map, visited, palette, x, y);
 
 
-floodMapCleanup:
+floodRoomCleanup:
     if(visited != NULL) {
         for(int i = 0; i < map->nRows; i++) {
             if(visited[i] != NULL) free(visited[i]);
@@ -447,7 +447,7 @@ int main() {
                     
                     case 'p':   // Fill the current room w/ the current palette
                     case 'P':
-                        floodMap(&map, x, y);
+                        floodRoom(&map, x, y);
                         break;
 
                     // Sprite setting
