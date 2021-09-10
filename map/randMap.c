@@ -34,6 +34,8 @@
 #define kMazeDimFlag "-d"
 #define kMidRoomsFlag "-m"
 #define kDeadEndsFlag "-e"
+#define kOverlapRetriesFlag "-r"
+#define kOOBRetriesFlag "-o"
 #define kUsageFlag "-?"
 
 //===============================<Global State>===============================//
@@ -155,8 +157,10 @@ bool isOutOfBounds(map_t map, room_t room) {
  * 
  * @param map The map to place in
  * @param room The room to place
+ * @param mergeOverlap If true, merge rooms on overlap. If false, new rooms are 
+ *  placed "below" existing rooms
  */
-void placeRoom(map_t * map, room_t room) {
+void placeRoom(map_t * map, room_t room, bool mergeOverlap) {
     if(map == NULL || map->data == NULL) {
         return;
     }
@@ -171,9 +175,9 @@ void placeRoom(map_t * map, room_t room) {
             if(col < 0) continue;
             if(col >= map->nCols) break;
 
-            if(!map->data[row][col].isEmpty) {
+            if(mergeOverlap && !map->data[row][col].isEmpty) {
                 // On a present cell, make sure all walls are properley set for 
-                // the new room
+                // the new room in order to merge the two
                 if(dRow != 0) {
                     map->data[row][col].uWall = 0;
                 }
@@ -217,6 +221,16 @@ void placeRoom(map_t * map, room_t room) {
     }
 }
 
+/**
+ * Generaes a copy of the original room with dimensions reversed
+ * 
+ * @param room The root room
+ * 
+ * @return The rotated room
+ */
+room_t rotRoom(room_t room) {
+    return (room_t) {room.x, room.y, room.height, room.width};
+}
 //=============================<Helper Functions>=============================//
 /**
  * Prints a basic usage message
@@ -226,8 +240,9 @@ void placeRoom(map_t * map, room_t room) {
 void printUsage(const char * call) {
     printf("Usage: %s [%s <finalRows> <finalCols>] [%s <startRows> <startCols>]"
         " [%s <mazeRows> <mazeCols>] [%s <midRooms>] [%s <deadEnds>] "
-        "<Output File>\n\n", call, kFinalDimFlag, kStartDimFlag, kMazeDimFlag, 
-        kMidRoomsFlag, kDeadEndsFlag);
+        "[%s <overlapRetries>] [%s <oobRetries>] <Output File>\n\n", call, 
+        kFinalDimFlag, kStartDimFlag, kMazeDimFlag, kMidRoomsFlag, 
+        kDeadEndsFlag, kOverlapRetriesFlag, kOOBRetriesFlag);
 }
 
 /**
@@ -352,12 +367,36 @@ int main(int argc, char** argv) {
         } else if(strcmp(kDeadEndsFlag, argv[i]) == 0) {
             // Trying to set first room dimensions
             if(i+1 >= argc) {
-                fprintf(stderr, "*FATAL ERROR* in main: Dead End count unspecified\n");
+                fprintf(stderr, "*FATAL ERROR* in main: Dead end count unspecified\n");
                 printUsage(argv[0]);
                 return EXIT_FAILURE;
             }
             if(sscanf(argv[++i], "%d", &deadEnds) != 1 || midRooms < 0) {
                 fprintf(stderr, "*FATAL ERROR* in main: Invalid dead end count \"%s\"\n", argv[i]);
+                printUsage(argv[0]);
+                return EXIT_FAILURE;
+            }
+        } else if(strcmp(kOOBRetriesFlag, argv[i]) == 0) {
+            // Trying to set first room dimensions
+            if(i+1 >= argc) {
+                fprintf(stderr, "*FATAL ERROR* in main: OOB retry count unspecified\n");
+                printUsage(argv[0]);
+                return EXIT_FAILURE;
+            }
+            if(sscanf(argv[++i], "%d", &oobRetries) != 1 || oobRetries < 0) {
+                fprintf(stderr, "*FATAL ERROR* in main: Invalid OOB retry count \"%s\"\n", argv[i]);
+                printUsage(argv[0]);
+                return EXIT_FAILURE;
+            }
+        } else if(strcmp(kOverlapRetriesFlag, argv[i]) == 0) {
+            // Trying to set first room dimensions
+            if(i+1 >= argc) {
+                fprintf(stderr, "*FATAL ERROR* in main: Overlap retry count unspecified\n");
+                printUsage(argv[0]);
+                return EXIT_FAILURE;
+            }
+            if(sscanf(argv[++i], "%d", &overlapRetries) != 1 || overlapRetries < 0) {
+                fprintf(stderr, "*FATAL ERROR* in main: Invalid overlap retry count \"%s\"\n", argv[i]);
                 printUsage(argv[0]);
                 return EXIT_FAILURE;
             }
