@@ -2,31 +2,38 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
+#include <time.h>
 
 #include "map.h"
 
 //===========================<Default Definitions>============================//
 // Define Default maze configuration
-#define kDefDeadEndRooms 0
-#define kDefMidRooms 0
-#define kDefRows 32
-#define kDefCols 32
+#define kDefDeadEndRooms 1
+#define kDefMidRooms 5
+
+#define kDefRows 8
+#define kDefCols 20
 
 // Define endpoint room sizes
 #define kDefFirstRoomRows 1
 #define kDefFirstRoomCols 1
-#define kDefFinalRoomRows 6
-#define kDefFinalRoomCols 6
+
+#define kDefFinalRoomRows 1
+#define kDefFinalRoomCols 1
 
 // Define generated room sizes
 #define kDefDeadEndMinDim 2
 #define kDefDeadEndMaxDim 4
-#define kDefMidMinDim 4
-#define kDefMidMaxDim 6
+
+#define kDefMidMinDim 2
+#define kDefMidMaxDim 4
 
 // Define misc generation constants
-#define kDefOverlapReries 3 // Number of times to retry on overlapping rooms
-#define kDefOOBRetries 10 // Number of times to retry on OOB rooms
+#define kDefOverlapReries 10 // Number of times to retry on overlapping rooms
+#define kDefOOBRetries 20   // Number of times to retry on OOB rooms
+
+#define kMidSquarePrecent 100 // Chance that mid rooms will be forced squares
+#define kEndSquarePercent 0   // Chance that dead ends will be forced squares
 
 //==============================<Argument Flags>==============================//
 #define kFinalDimFlag "-f"
@@ -51,6 +58,36 @@ int deadEndMinDim, deadEndMaxDim;
 int midMinDim, midMaxDim;
 
 int overlapRetries, oobRetries;
+
+
+
+//=============================<Helper Functions>=============================//
+/**
+ * Prints a basic usage message
+ * 
+ * @param call The name of this executable (i.e. argv[0])
+ */
+void printUsage(const char * call) {
+    printf("Usage: %s [%s <finalRows> <finalCols>] [%s <startRows> <startCols>]"
+        " [%s <mazeRows> <mazeCols>] [%s <midRooms>] [%s <deadEnds>] "
+        "[%s <overlapRetries>] [%s <oobRetries>] <Output File>\n\n", call, 
+        kFinalDimFlag, kStartDimFlag, kMazeDimFlag, kMidRoomsFlag, 
+        kDeadEndsFlag, kOverlapRetriesFlag, kOOBRetriesFlag);
+}
+
+/**
+ * Generates a random int in a range
+ * 
+ * @param mini The minimum nr to generate (inclusive)
+ * @param maxi The maximum nr to generate (inclusive)
+ * 
+ * @return The generated number
+ */
+int randRange(int mini, int maxi) {
+    int r = rand();
+    int range = maxi-mini;
+    return mini + (r % (range + 1));
+}
 
 //=============================<Room Definitions>=============================//
 typedef struct room_s {
@@ -233,32 +270,34 @@ void placeRoom(map_t * map, room_t room, bool mergeOverlap) {
 room_t rotRoom(room_t room) {
     return (room_t) {room.x, room.y, room.height, room.width};
 }
-//=============================<Helper Functions>=============================//
-/**
- * Prints a basic usage message
- * 
- * @param call The name of this executable (i.e. argv[0])
- */
-void printUsage(const char * call) {
-    printf("Usage: %s [%s <finalRows> <finalCols>] [%s <startRows> <startCols>]"
-        " [%s <mazeRows> <mazeCols>] [%s <midRooms>] [%s <deadEnds>] "
-        "[%s <overlapRetries>] [%s <oobRetries>] <Output File>\n\n", call, 
-        kFinalDimFlag, kStartDimFlag, kMazeDimFlag, kMidRoomsFlag, 
-        kDeadEndsFlag, kOverlapRetriesFlag, kOOBRetriesFlag);
-}
 
 /**
- * Generates a random int in a range
+ * Returns a randomly generated room
  * 
- * @param mini The minimum nr to generate (inclusive)
- * @param maxi The maximum nr to generate (inclusive)
+ * @param isDeadEnd Set true if generating the room as a dead end
  * 
- * @return The generated number
+ * @return The generated room
  */
-int randRange(int mini, int maxi) {
-    int r = rand();
-    int range = maxi-mini;
-    return mini + (r % (range + 1));
+room_t mkRandRoom(bool isDeadEnd) {
+    room_t room;
+    room.width = randRange((isDeadEnd) ? deadEndMinDim : midMinDim,
+                            (isDeadEnd) ? deadEndMaxDim : midMaxDim);
+    if(randRange(0, 100) <= ((isDeadEnd) ? kEndSquarePercent : kMidSquarePrecent)) {
+        room.height = room.width;
+    } else {
+        room.height = randRange((isDeadEnd) ? deadEndMinDim : midMinDim,
+                                (isDeadEnd) ? deadEndMaxDim : midMaxDim);
+
+        // 50 % chance to flip the room
+        if(rand()%2 == 0) {
+            room = rotRoom(room);
+        }
+    }
+
+    room.x = randRange(0, mazeCols-1);
+    room.y = randRange(0, mazeRows-1);
+
+    return room;
 }
 
 //================================<Main Code>=================================//
@@ -410,6 +449,8 @@ int main(int argc, char** argv) {
     }
 
     //============================<Main Code>=============================//
+    srand(time(0));
+
     // Make a map to hold the maze
     map_t map;
     if(mkMap(mazeRows, mazeCols, &map) != 0) {
@@ -422,11 +463,29 @@ int main(int argc, char** argv) {
     room_t finalRoom = {map.nCols - finalRoomCols, map.nRows - finalRoomRows, 
                             finalRoomCols, finalRoomRows};
 
-    //Add the endpoint rooms to the map
+    // Generate all rooms
+    room_t * pathRooms = calloc(2 + midRooms, sizeof(room_t));
+    pathRooms[0] = finalRoom;
+    pathRooms[1] = firstRoom;
+
     placeRoom(&map, finalRoom, false);
     placeRoom(&map, firstRoom, false);
 
-    // Generate all the midpoint rooms
+    for(int i = 2; i < 2 + midRooms; i++) {
+        int overlaps = 0, bounds = 0;
+        while(overlaps < overlapRetries && bounds < oobRetries) {
+            pathRooms[i] = mkRandRoom(false);
+            if(roomOverlaps(map, pathRooms[i])) {
+                overlaps += 1;
+            } else if (isOutOfBounds(map, pathRooms[i])) {
+                bounds += 1;
+            } else {
+                break;
+            }
+        }
+
+        placeRoom(&map, pathRooms[i], false);
+    }
 
     //=============================<Cleanup>==============================//
     // Set start and end sprites
