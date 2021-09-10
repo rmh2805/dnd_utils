@@ -34,6 +34,7 @@ typedef struct dispData_s {
     drawPair_t ** data;
 } dispData_t;
 
+//=============================<Init and Cleanup>=============================//
 /**
  * Core display initialization
  * 
@@ -49,6 +50,7 @@ int initDisp(dispData_t* data);
  */
 int closeDisp(dispData_t data);
 
+//=============================<Buffer Handling>==============================//
 /**
  * Draws the specified sprite on screen
  * 
@@ -57,8 +59,34 @@ int closeDisp(dispData_t data);
  * @param screenRow The top row to draw in
  * @param screenCol The left column to draw in
  */
-void drawSprite(dispData_t data, sprite_t sprite, int screenRow, int screenCol);
+void addSprite(dispData_t * data, sprite_t sprite, int screenRow, int screenCol);
 
+/**
+ * Adds text to the frame buffer
+ * 
+ * @param data The display data struct
+ * @param palette The pallette to print the text in
+ * @param text The text to print to screen
+ * @param row The starting row for text
+ * @param col The starting col for text
+ */
+void addText(dispData_t * data, short palette, const char * text, int row, int col);
+
+/**
+ * Clears the screen and prints out the data stored in the buffer
+ * 
+ * @param data The display data struct
+ */
+void printBuffer(dispData_t data);
+
+/**
+ * Clears out any data already in the buffer
+ * 
+ * @param data The display data struct
+ */
+void clearBuffer(dispData_t * data);
+
+//=================================<Misc IO>==================================//
 /**
  * Prints the provided text to terminal
  * 
