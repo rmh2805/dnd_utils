@@ -482,7 +482,8 @@ void mkYPath(map_t * map, room_t src, room_t dst) {
 
         // Set this tile's side walls
         map->data[y][x].lWall = 1;
-        map->data[y][x].rWall = 1;
+        if(x == map->nCols - 1) map->data[y][x].rWall = 1;
+        else map->data[y][x + 1].lWall = 1;
         
         // Set the tile's cap wall
         if(!goingDown) {
@@ -522,9 +523,18 @@ void mkPath(map_t * map, room_t src, room_t dst) {
     src.y = max(0, min(src.y, map->nRows-1));
     dst.y = max(0, min(dst.y, map->nRows-1));
 
-    mkXPath(map, src, dst);
-    src.x = dst.x;
-    mkYPath(map, src, dst);
+    int xSep = abs(src.x - dst.x);
+    int ySep = abs(src.y - dst.y);
+
+    if(xSep > ySep) {
+        mkXPath(map, src, dst);
+        src.x = dst.x;
+        mkYPath(map, src, dst);
+    } else {
+        mkYPath(map, src, dst);
+        src.y = dst.y;
+        mkXPath(map, src, dst);
+    }
     
 }
 
