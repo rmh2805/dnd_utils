@@ -793,7 +793,8 @@ int main(int argc, char** argv) {
 
     // Place a char sprite showing room order
     for(int i = 0; i < 2 + midRooms; i++) {
-        setCharSprite(&map.data[pathRooms[i].y][pathRooms[i].x], '0' + i, kDefPalette);
+        setCharSprite(&map.data[pathRooms[i].y][pathRooms[i].x], '0' + (i % 10),
+                        kDefPalette);
     }
 
     //=============================<Cleanup>==============================//
