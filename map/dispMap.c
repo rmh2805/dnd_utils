@@ -5,7 +5,7 @@
 
 #include <ncurses.h>
 
-#include "dispBase.h"
+#include "../common/dispBase.h"
 #include "sprite.h"
 #include "tile.h"
 #include "map.h"

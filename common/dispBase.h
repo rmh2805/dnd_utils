@@ -5,8 +5,6 @@
 #include <stdio.h>
 #include <curses.h>
 
-#include "sprite.h"
-
 // Define common palette numbers
 #define kBlackPalette 1
 #define kWhitePalette 2
@@ -51,16 +49,6 @@ int initDisp(dispData_t* data);
 int closeDisp(dispData_t data);
 
 //=============================<Buffer Handling>==============================//
-/**
- * Draws the specified sprite on screen
- * 
- * @param data The display data struct
- * @param sprite The sprite to draw
- * @param screenRow The top row to draw in
- * @param screenCol The left column to draw in
- */
-void addSprite(dispData_t * data, sprite_t sprite, int screenRow, int screenCol);
-
 /**
  * Adds text to the frame buffer
  * 
