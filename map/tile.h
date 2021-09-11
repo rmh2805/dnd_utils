@@ -2,7 +2,7 @@
 #define _TILE_H_
 
 #include "sprite.h"
-#include "dispBase.h"
+#include "../common/dispBase.h"
 #include "../common/list.h"
 
 #define kNoSprite -1

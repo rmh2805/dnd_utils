@@ -5,9 +5,9 @@
 #include <curses.h>
 
 #include "sprite.h"
-#include "dispBase.h"
 
 #include "../common/list.h"
+#include "../common/dispBase.h"
 
 //==============================<Menu Handling>===============================//
 typedef enum mode_e {menu, sel, new, dim, edit, view, load, save, quit} mode_t;

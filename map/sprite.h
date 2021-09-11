@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "dispBase.h"
+#include "../common/dispBase.h"
 
 typedef struct sprite_s {
     short palette;

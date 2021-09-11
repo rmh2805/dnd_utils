@@ -63,6 +63,9 @@ fs_unix.o: ../common/fs_unix.c
 list.o: ../common/list.c
 	$(CC) $(CFLAGS) $(CDEBUGFLAGS) -c -o $@ $^
 
+dispBase.o: ../common/dispBase.c
+	$(CC) $(CFLAGS) $(CDEBUGFLAGS) -c -o $@ $^
+
 #
 #	Utils
 # 
