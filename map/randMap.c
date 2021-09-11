@@ -60,33 +60,12 @@ int midMinDim, midMaxDim;
 
 int overlapRetries, oobRetries;
 
-//=============================<Helper Functions>=============================//
-/**
- * Prints a basic usage message
- * 
- * @param call The name of this executable (i.e. argv[0])
- */
-void printUsage(const char * call) {
-    printf("Usage: %s [%s <finalRows> <finalCols>] [%s <startRows> <startCols>]"
-        " [%s <mazeRows> <mazeCols>] [%s <midRooms>] [%s <deadEnds>] "
-        "[%s <overlapRetries>] [%s <oobRetries>] <Output File>\n\n", call, 
-        kFinalDimFlag, kStartDimFlag, kMazeDimFlag, kMidRoomsFlag, 
-        kDeadEndsFlag, kOverlapRetriesFlag, kOOBRetriesFlag);
-}
+//===========================<Helper Declarations>============================//
+void printUsage(const char * call);
+int randRange(int mini, int maxi);
 
-/**
- * Generates a random int in a range
- * 
- * @param mini The minimum nr to generate (inclusive)
- * @param maxi The maximum nr to generate (inclusive)
- * 
- * @return The generated number
- */
-int randRange(int mini, int maxi) {
-    int r = rand();
-    int range = maxi-mini;
-    return mini + (r % (range + 1));
-}
+#define min(a, b) ((b < a) ? b : a)
+#define max(a, b) ((b > a) ? b : a)
 
 //=============================<Room Definitions>=============================//
 typedef struct room_s {
@@ -356,6 +335,200 @@ int compRooms(const void* a, const void* b) {
     return distA - distB;
 }
 
+//=============================<Helper Functions>=============================//
+/**
+ * Prints a basic usage message
+ * 
+ * @param call The name of this executable (i.e. argv[0])
+ */
+void printUsage(const char * call) {
+    printf("Usage: %s [%s <finalRows> <finalCols>] [%s <startRows> <startCols>]"
+        " [%s <mazeRows> <mazeCols>] [%s <midRooms>] [%s <deadEnds>] "
+        "[%s <overlapRetries>] [%s <oobRetries>] <Output File>\n\n", call, 
+        kFinalDimFlag, kStartDimFlag, kMazeDimFlag, kMidRoomsFlag, 
+        kDeadEndsFlag, kOverlapRetriesFlag, kOOBRetriesFlag);
+}
+
+/**
+ * Generates a random int in a range
+ * 
+ * @param mini The minimum nr to generate (inclusive)
+ * @param maxi The maximum nr to generate (inclusive)
+ * 
+ * @return The generated number
+ */
+int randRange(int mini, int maxi) {
+    int r = rand();
+    int range = maxi-mini;
+    return mini + (r % (range + 1));
+}
+
+
+void mkXPath(map_t * map, room_t src, room_t dst) {
+    if(src.x == dst.x) return;
+
+    bool goingLeft = dst.x < src.x;
+    int delta = (goingLeft) ? -1 : 1;
+
+    int y = src.y;
+    for(int x = src.x; x != dst.x; x += delta) {
+        if(map->data[y][x].isEmpty) {   // On a new tile...
+            // Enable this tile and mark it as a hallway
+            map->data[y][x].isEmpty = false;
+            map->data[y][x].sprite = 0;
+
+            // Set its walls
+            map->data[y][x].uWall = 1;
+            if(y == map->nRows - 1) map->data[y][x].dWall = 1;
+            else map->data[y+1][x].uWall = 1;
+        } else {   // On an existing tile...
+            // If room tile, replace walls in dir of travel with doors. 
+            // Else delete them
+            unsigned char rep = (map->data[y][x].sprite == kNoSprite) ? 2 : 0;
+            
+            if(goingLeft) {
+                if(map->data[y][x].lWall == 1) {
+                    map->data[y][x].lWall = rep;
+                }
+            } else if(x == map->nCols - 1) {
+                if(map->data[y][x].rWall == 1) {
+                    map->data[y][x].rWall = rep;
+                }
+            } else {
+                if(map->data[y][x + 1].lWall == 1) {
+                    map->data[y][x + 1].lWall = rep;
+                }
+            }
+        }
+    }
+
+    // Handle the last tile in the link
+    int x = dst.x;
+    if(map->data[y][x].isEmpty) { // On empty last tile...
+        // Enable this tile and mark it as a hallway
+        map->data[y][x].isEmpty = false;
+        map->data[y][x].sprite = 0;
+
+        // Set its walls
+        map->data[y][x].uWall = 1;
+        if(y == map->nRows - 1) map->data[y][x].dWall = 1;
+        else map->data[y+1][x].uWall = 1;
+
+        if(goingLeft) {
+            map->data[y][x].lWall = 1;
+        } else if(x == map->nCols - 1) {
+            map->data[y][x].rWall = 1;
+        } else {
+            map->data[y][x + 1].lWall = 1;
+        }
+    } else { // On an existing last tile...
+        // If room tile, replace wall behind you with door. Else delete it
+        unsigned char rep = (map->data[y][x].sprite == kNoSprite) ? 2 : 0;
+        if(!goingLeft) {
+            map->data[y][x].lWall = rep;
+        } else if(x == map->nCols - 1) {
+            map->data[y][x].rWall = rep;
+        } else {
+            map->data[y][x+1].lWall = rep;
+        }
+    }
+}
+
+void mkYPath(map_t * map, room_t src, room_t dst) {
+    if(src.y == dst.y) return;
+
+    bool goingDown = dst.y > src.y;
+    int delta = (goingDown) ? 1 : -1;
+
+    int x = src.x;
+    int y = src.y;
+
+    for(; y != dst.y; y += delta) {
+        if(map->data[y][x].isEmpty) { // On an empty tile
+            // Enable the tile and mark it as a hall
+            map->data[y][x].isEmpty = false;
+            map->data[y][x].sprite = 0;
+
+            // Set this tile's side walls
+            map->data[y][x].lWall = 1;
+            if(x == map->nCols - 1) map->data[y][x].rWall = 1;
+            else map->data[y][x + 1].lWall = 1;
+        } else { // On an existing tile...
+            // If room tile, replace walls in direction of travel with doors.
+            // Else, delete them
+            unsigned char rep = (map->data[y][x].sprite == kNoSprite) ? 2 : 0;
+
+            if(!goingDown) {
+                if (map->data[y][x].uWall == 1) {
+                    map->data[y][x].uWall = rep;
+                }
+            } else if (y == map->nRows - 1) {
+                if (map->data[y][x].dWall == 1) {
+                    map->data[y][x].dWall = rep;
+                }
+            } else {
+                if (map->data[y+1][x].uWall == 1) {
+                    map->data[y+1][x].uWall = rep;
+                }
+            }
+        }
+    }
+
+    // Handle the last tile as well
+    if(map->data[y][x].isEmpty) { // On an empty final tile...
+        // Enable the tile and mark it as a hall
+        map->data[y][x].isEmpty = false;
+        map->data[y][x].sprite = 0;
+
+        // Set this tile's side walls
+        map->data[y][x].lWall = 1;
+        map->data[y][x].rWall = 1;
+        
+        // Set the tile's cap wall
+        if(!goingDown) {
+            map->data[y][x].uWall = 1;
+        } else if(y == map->nRows - 1) {
+            map->data[y][x].dWall = 1;
+        } else {
+            map->data[y+1][x].uWall = 1;
+        }
+
+    } else { // On an existing tile...
+        // If room tile, replace walls behind you with doors. Else, delete them
+        unsigned char rep = (map->data[y][x].sprite == kNoSprite) ? 2 : 0;
+
+        if(goingDown) {
+            map->data[y][x].uWall = rep;
+        } else if (y == map->nRows - 1) {
+            map->data[y][x].dWall = rep;
+        } else {
+            map->data[y+1][x].uWall = rep;
+        }
+    }
+}
+
+/**
+ * Generates a hallway between 2 rooms on the map
+ * 
+ * @param src The room to start from
+ * @param dst The room to end in
+ */
+void mkPath(map_t * map, room_t src, room_t dst) {
+    if(map == NULL || map->data == NULL) return;
+
+    roomDist(src, dst, &src, &dst);
+    src.x = max(0, min(src.x, map->nCols-1));
+    dst.x = max(0, min(dst.x, map->nCols-1));
+    src.y = max(0, min(src.y, map->nRows-1));
+    dst.y = max(0, min(dst.y, map->nRows-1));
+
+    mkXPath(map, src, dst);
+    src.x = dst.x;
+    mkYPath(map, src, dst);
+    
+}
+
+
 //================================<Main Code>=================================//
 int main(int argc, char** argv) {
     //============================<Parse Args>============================//
@@ -546,6 +719,11 @@ int main(int argc, char** argv) {
     // Sort the rooms by distance from start
     roomCompBase = &firstRoom;
     qsort(pathRooms, 2 + midRooms, sizeof(room_t), compRooms);
+
+    // Build paths between the rooms
+    for(int i = 1; i < 2 + midRooms; i++) {
+        mkPath(&map, pathRooms[i-1], pathRooms[i]);
+    }
 
     // Place a char sprite showing room order
     for(int i = 0; i < 2 + midRooms; i++) {
