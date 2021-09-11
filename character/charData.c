@@ -30,7 +30,8 @@ void rmCharData(charData_t charData) {
 
 
 #define saveCharDataWriteString(fp, data, field) \
-    fprintf(fp, "%lu |%s\n", (size_t) strlen(data.field), data.field)
+    fprintf(fp, "%lu |%s\n", (size_t) (data.field == NULL) ? 0 : \
+        strlen(data.field), (data.field == NULL) ? "" : data.field)
 
 #define saveCharDataMergeBlock(block, data, field, width) \
     block = (block << width) | data.field
