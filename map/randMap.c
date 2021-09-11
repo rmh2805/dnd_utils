@@ -30,18 +30,20 @@
 #define kDefMidMaxDim 4
 
 // Define misc generation constants
-#define kDefOverlapReries 20 // Number of times to retry on overlapping rooms
-#define kDefOOBRetries 40   // Number of times to retry on OOB rooms
+#define kDefOverlapReries 10000 //Number of times to retry on overlapping rooms
+#define kDefOOBRetries 10000   // Number of times to retry on OOB rooms
 
-#define kMidSquarePrecent 100 // Chance that mid rooms will be forced squares
-#define kEndSquarePercent 0   // Chance that dead ends will be forced squares
+#define kMidSquarePrecent 90   // Chance that mid rooms will be forced squares
+#define kEndSquarePercent 30    // Chance that dead ends will be forced squares
 
 //==============================<Argument Flags>==============================//
 #define kFinalDimFlag "-f"
 #define kStartDimFlag "-s"
 #define kMazeDimFlag "-d"
 #define kMidRoomsFlag "-m"
+#define kMidRoomDimFlag "-M"
 #define kDeadEndsFlag "-e"
+#define kDeadEndDimFlag "-E"
 #define kOverlapRetriesFlag "-r"
 #define kOOBRetriesFlag "-o"
 #define kUsageFlag "-?"
@@ -343,10 +345,12 @@ int compRooms(const void* a, const void* b) {
  */
 void printUsage(const char * call) {
     printf("Usage: %s [%s <finalRows> <finalCols>] [%s <startRows> <startCols>]"
-        " [%s <mazeRows> <mazeCols>] [%s <midRooms>] [%s <deadEnds>] "
+        " [%s <mazeRows> <mazeCols>] [%s <midRooms>] [%s <midRoomMinDim> "
+        "<midRoomMaxDim>] [%s <deadEnds>] [%s <endMidDim> <endMaxDim>] "
         "[%s <overlapRetries>] [%s <oobRetries>] <Output File>\n\n", call, 
         kFinalDimFlag, kStartDimFlag, kMazeDimFlag, kMidRoomsFlag, 
-        kDeadEndsFlag, kOverlapRetriesFlag, kOOBRetriesFlag);
+        kMidRoomDimFlag, kDeadEndsFlag, kDeadEndDimFlag, kOverlapRetriesFlag, 
+        kOOBRetriesFlag);
 }
 
 /**
@@ -641,6 +645,40 @@ int main(int argc, char** argv) {
             }
             if(sscanf(argv[++i], "%d", &midRooms) != 1 || midRooms < 0) {
                 fprintf(stderr, "*FATAL ERROR* in main: Invalid mid room cound \"%s\"\n", argv[i]);
+                printUsage(argv[0]);
+                return EXIT_FAILURE;
+            }
+        } else if(strcmp(kMidRoomDimFlag, argv[i]) == 0) {
+            // Trying to set first room dimensions
+            if(i+2 >= argc) {
+                fprintf(stderr, "*FATAL ERROR* in main: Mid room dimensions unspecified\n");
+                printUsage(argv[0]);
+                return EXIT_FAILURE;
+            }
+            if(sscanf(argv[++i], "%d", &midMinDim) != 1 || midMinDim <= 0) {
+                fprintf(stderr, "*FATAL ERROR* in main: Invalid mid room min dimension \"%s\"\n", argv[i]);
+                printUsage(argv[0]);
+                return EXIT_FAILURE;
+            }
+            if(sscanf(argv[++i], "%d", &midMaxDim) != 1 || midMaxDim < midMinDim) {
+                fprintf(stderr, "*FATAL ERROR* in main: Invalid mid room min dimension \"%s\"\n", argv[i]);
+                printUsage(argv[0]);
+                return EXIT_FAILURE;
+            }
+        } else if(strcmp(kDeadEndDimFlag, argv[i]) == 0) {
+            // Trying to set first room dimensions
+            if(i+2 >= argc) {
+                fprintf(stderr, "*FATAL ERROR* in main: End room dimensions unspecified\n");
+                printUsage(argv[0]);
+                return EXIT_FAILURE;
+            }
+            if(sscanf(argv[++i], "%d", &deadEndMinDim) != 1 || deadEndMinDim <= 0) {
+                fprintf(stderr, "*FATAL ERROR* in main: Invalid mid room min dimension \"%s\"\n", argv[i]);
+                printUsage(argv[0]);
+                return EXIT_FAILURE;
+            }
+            if(sscanf(argv[++i], "%d", &deadEndMaxDim) != 1 || deadEndMaxDim < deadEndMinDim) {
+                fprintf(stderr, "*FATAL ERROR* in main: Invalid mid room min dimension \"%s\"\n", argv[i]);
                 printUsage(argv[0]);
                 return EXIT_FAILURE;
             }
