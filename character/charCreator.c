@@ -1,7 +1,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
 
+#include <curses.h>
+
+#include "stringUtils.h"
 #include "charData.h"
 #include "dispChar.h"
 
@@ -185,6 +189,26 @@ int main(int argc, char** argv) {
                 break;
 
             case new:
+                if(charLoaded) {
+                    rmCharData(curChar);
+                    charLoaded = false;
+                }
+                curChar = mkCharData();
+                
+                // First, get the minimum for a full character: the name
+                promptText("What is your character's name?");
+                strip(buf);
+                if(strlen(buf) == 0) {
+                    mode = menu;
+                    break;
+                }
+
+                curChar.name = calloc(strlen(buf) + 1, sizeof(char));
+                charLoaded = true;
+
+                //todo prompt for other strings
+
+
                 mode = menu;
                 break;
 
