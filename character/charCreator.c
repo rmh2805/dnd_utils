@@ -151,7 +151,7 @@ void doMenuUpdate(bool isEdit) {
             break;
         case KEY_ENTER:
         case '\n':
-            mode = modes[menuSel];
+            mode = modes[*sel];
     }
 }
 
@@ -264,6 +264,14 @@ int main(int argc, char** argv) {
                 saveChar(buf);
 
                 mode = menu;
+                break;
+
+            case eBio:
+                mode = edit;
+                break;
+
+            case eStat:
+                mode = edit;
                 break;
 
             case quit:
