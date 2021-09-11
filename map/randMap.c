@@ -9,7 +9,7 @@
 
 //===========================<Default Definitions>============================//
 // Define Default maze configuration
-#define kDefDeadEndRooms 1
+#define kDefDeadEndRooms 3
 #define kDefMidRooms 5
 
 #define kDefRows 8
@@ -30,8 +30,8 @@
 #define kDefMidMaxDim 4
 
 // Define misc generation constants
-#define kDefOverlapReries 10 // Number of times to retry on overlapping rooms
-#define kDefOOBRetries 20   // Number of times to retry on OOB rooms
+#define kDefOverlapReries 20 // Number of times to retry on overlapping rooms
+#define kDefOOBRetries 40   // Number of times to retry on OOB rooms
 
 #define kMidSquarePrecent 100 // Chance that mid rooms will be forced squares
 #define kEndSquarePercent 0   // Chance that dead ends will be forced squares
@@ -511,6 +511,7 @@ void mkYPath(map_t * map, room_t src, room_t dst) {
 /**
  * Generates a hallway between 2 rooms on the map
  * 
+ * @param map The map to place it in
  * @param src The room to start from
  * @param dst The room to end in
  */
@@ -537,7 +538,6 @@ void mkPath(map_t * map, room_t src, room_t dst) {
     }
     
 }
-
 
 //================================<Main Code>=================================//
 int main(int argc, char** argv) {
@@ -697,13 +697,28 @@ int main(int argc, char** argv) {
         return EXIT_FAILURE;
     }
 
+    // Make lists to hold the path and dead end rooms
+    room_t * pathRooms = calloc(2 + midRooms, sizeof(room_t));
+    if(pathRooms == NULL) {
+        fprintf(stderr, "*FATAL ERROR* failed to allocate a path room list\n");
+        rmMap(map);
+        return EXIT_FAILURE;
+    }
+
+    room_t * endRooms = calloc(deadEnds, sizeof(room_t));
+    if(endRooms == NULL) {
+        fprintf(stderr, "*FATAL ERROR* failed to allocate a dead-end room list\n");
+        free(pathRooms);
+        rmMap(map);
+        return EXIT_FAILURE;
+    }
+
     // Generate the starting and ending rooms
     room_t firstRoom = {0, 0, firstRoomCols, firstRoomRows};
     room_t finalRoom = {map.nCols - finalRoomCols, map.nRows - finalRoomRows, 
                             finalRoomCols, finalRoomRows};
 
-    // Generate all rooms
-    room_t * pathRooms = calloc(2 + midRooms, sizeof(room_t));
+    // Generate all path rooms
     pathRooms[0] = firstRoom;
     pathRooms[1] = finalRoom;
 
@@ -730,7 +745,7 @@ int main(int argc, char** argv) {
     roomCompBase = &firstRoom;
     qsort(pathRooms, 2 + midRooms, sizeof(room_t), compRooms);
 
-    // Build paths between the rooms
+    // Build paths between each of the mid rooms
     for(int i = 1; i < 2 + midRooms; i++) {
         mkPath(&map, pathRooms[i-1], pathRooms[i]);
     }
@@ -738,6 +753,40 @@ int main(int argc, char** argv) {
     // Place a char sprite showing room order
     for(int i = 0; i < 2 + midRooms; i++) {
         setCharSprite(&map.data[pathRooms[i].y][pathRooms[i].x], '0' + i, kDefPalette);
+    }
+
+    // Generate all of the dead end rooms
+    for(int i = 0; i < deadEnds; i++) {
+        int overlaps = 0, bounds = 0;
+        while(overlaps < overlapRetries && bounds < oobRetries) {
+            endRooms[i] = mkRandRoom(true);
+            if(roomOverlaps(map, endRooms[i])) {
+                overlaps += 1;
+            } else if (isOutOfBounds(map, endRooms[i])) {
+                bounds += 1;
+            } else {
+                break;
+            }
+        }
+
+        placeRoom(&map, endRooms[i], false);
+    }
+
+    // Make paths from all dead end rooms to their nearest path neighbors
+    for(int i = 0; i < deadEnds; i++) {
+        room_t src = endRooms[i];
+        room_t dst = pathRooms[0];
+        int dist = roomDist(src, dst, NULL, NULL);
+        
+        for(int j = 1; j < 2 + midRooms; j++) {
+            int tmp = roomDist(src, pathRooms[j], NULL, NULL);
+            if(tmp < dist) {
+                dst = pathRooms[j];
+                dist = tmp;
+            }
+        }
+
+        mkPath(&map, src, dst);
     }
 
     //=============================<Cleanup>==============================//
@@ -758,5 +807,8 @@ int main(int argc, char** argv) {
     }
 
     rmMap(map);
+
+    free(pathRooms);
+    free(endRooms);
     return status;
 }
