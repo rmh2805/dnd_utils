@@ -61,6 +61,17 @@ int closeDisp(dispData_t data);
 void addText(dispData_t * data, short palette, const char * text, int row, int col);
 
 /**
+ * Clears the fame buffer and adds a menu to it
+ * 
+ * @param data The display data struct
+ * @param prompt The menu prompt
+ * @param items A list of menu item strings
+ * @param nItems The number of items in the menu list
+ * @param selected The menu item selected for highlight (<0 to disable)
+ */
+void addMenu(dispData_t * data, const char * prompt, const char ** items, int nItems, int selected);
+
+/**
  * Clears the screen and prints out the data stored in the buffer
  * 
  * @param data The display data struct
