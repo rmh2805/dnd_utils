@@ -204,6 +204,11 @@ int main(int argc, char** argv) {
                 }
 
                 curChar.name = calloc(strlen(buf) + 1, sizeof(char));
+                if(curChar.name == NULL) {
+                    mode = menu;
+                    break;
+                }
+                strcpy(curChar.name, buf);
                 charLoaded = true;
 
                 //todo prompt for other strings
