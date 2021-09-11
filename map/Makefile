@@ -19,7 +19,7 @@ CFLAGS=-Wall -std=c99 -Wextra -pedantic -ggdb
 #
 #	Main Target
 #
-main: randMap
+main: makeMap
 
 #
 #	Multiple Targets
@@ -76,5 +76,5 @@ realclean: clean testClean
 	-rm makeSprite
 	-rm makeMap
 	-rm randMap
-	-rm dispmap
+	-rm dispMap
 
