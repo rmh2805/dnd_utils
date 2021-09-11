@@ -202,19 +202,21 @@ int main(int argc, char** argv) {
                     mode = menu;
                     break;
                 }
-
+                
+                // Allocate space for the name in the char struct
                 curChar.name = calloc(strlen(buf) + 1, sizeof(char));
                 if(curChar.name == NULL) {
                     mode = menu;
                     break;
                 }
-                strcpy(curChar.name, buf);
+
+                // Copy over the name, mark the new char as loaded, and jump to 
+                // edit mode for further setup
                 charLoaded = true;
+                strcpy(curChar.name, buf);
 
-                //todo prompt for other strings
-
-
-                mode = menu;
+                
+                mode = edit;
                 break;
 
             case load:
