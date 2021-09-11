@@ -85,7 +85,6 @@ int closeDisp(dispData_t data) {
 }
 
 //=============================<Buffer Handling>==============================//
-
 /**
  * Adds text to the frame buffer
  * 
@@ -104,6 +103,30 @@ void addText(dispData_t * data, short palette, const char * text, int row, int c
     
     for(int dCol = 0; col + dCol < data->screenCols && text[dCol]; dCol++) {
         data->data[row][col + dCol] = (drawPair_t) {palette, text[dCol]};
+    }
+}
+
+/**
+ * Clears the fame buffer and adds a menu to it
+ * 
+ * @param data The display data struct
+ * @param prompt The menu prompt
+ * @param items A list of menu item strings
+ * @param nItems The number of items in the menu list
+ * @param selected The menu item selected for highlight (<0 to disable)
+ */
+void addMenu(dispData_t * data, const char * prompt, const char ** items, 
+                int nItems, int selected) {
+    if(data == NULL || prompt == NULL || items == NULL || nItems <= 0) {
+        return;
+    }
+
+    clearBuffer(data);
+    addText(data, kBlackPalette, prompt, 0, 0);
+
+    for (int i = 0; i < nItems; i++) {
+        addText(data, (i == selected) ? kWhitePalette : kBlackPalette, items[i],
+                    2 + i, 0);
     }
 }
 
