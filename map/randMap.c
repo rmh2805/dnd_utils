@@ -750,11 +750,6 @@ int main(int argc, char** argv) {
         mkPath(&map, pathRooms[i-1], pathRooms[i]);
     }
 
-    // Place a char sprite showing room order
-    for(int i = 0; i < 2 + midRooms; i++) {
-        setCharSprite(&map.data[pathRooms[i].y][pathRooms[i].x], '0' + i, kDefPalette);
-    }
-
     // Generate all of the dead end rooms
     for(int i = 0; i < deadEnds; i++) {
         int overlaps = 0, bounds = 0;
@@ -787,6 +782,18 @@ int main(int argc, char** argv) {
         }
 
         mkPath(&map, src, dst);
+    }
+    
+    // Ensure all sprite slots are reset
+    for(int row = 0; row < map.nRows; row++) {
+        for(int col = 0; col < map.nCols; col++) {
+            map.data[row][col].sprite = kNoSprite;
+        }
+    }
+
+    // Place a char sprite showing room order
+    for(int i = 0; i < 2 + midRooms; i++) {
+        setCharSprite(&map.data[pathRooms[i].y][pathRooms[i].x], '0' + i, kDefPalette);
     }
 
     //=============================<Cleanup>==============================//
