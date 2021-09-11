@@ -10,11 +10,13 @@
 #include "dispChar.h"
 
 //=============================<Menu Definition>==============================//
-#define kMenuPrompt "Character Creator"
 
 typedef enum mode_e {
-    menu, edit, new, load, save, quit
+    menu, edit, new, load, save, quit, eBio, eStat
 } mode_t;
+
+// Main menu definition
+#define kMenuPrompt "Character Creator"
 
 const char * menuItems[] = {
     "1. Edit Character",
@@ -34,6 +36,21 @@ const mode_t menuModes[] = {
 
 const int menuSize = sizeof(menuItems)/sizeof(menuItems[0]);
 
+// Edit menu definition
+const char * editMenuItems[] = {
+    "1. Edit Bio Information",
+    "2. Edit Stats and Proficiencies",
+    "3. Back to Main Menu"
+};
+
+const mode_t editMenuModes[] = {
+    eBio,
+    eStat,
+    menu
+};
+
+const int editMenuSize = sizeof(editMenuItems)/sizeof(editMenuItems[0]);
+
 //===============================<Global State>===============================//
 // Active character data
 charData_t curChar;
@@ -46,6 +63,7 @@ char buf[bufSize];
 // Navigation variables
 mode_t mode = menu;
 int menuSel = 0;
+int editSel = 0;
 
 // Display Variables
 bool dispInitialized = false;
@@ -111,12 +129,37 @@ void promptText(const char * prompt) {
     getText(2, 0, buf, bufSize);
 }
 
+void doMenuUpdate(bool isEdit) {
+    int ch = getch();
+
+    int * sel = (isEdit) ? &editSel : &menuSel;
+    int size = (isEdit) ? editMenuSize : menuSize;
+    const mode_t * modes = (isEdit) ? editMenuModes : menuModes;
+
+    if(ch >= '1' && ch < '1' + size) {
+        menuSel = ch - '1';
+        mode = menuModes[menuSel];
+        return;
+    }
+
+    switch(ch) {
+        case KEY_UP:
+            if(*sel > 0) *sel -= 1;
+            break;
+        case KEY_DOWN:
+            if(*sel < size-1) *sel += 1;
+            break;
+        case KEY_ENTER:
+        case '\n':
+            mode = modes[menuSel];
+    }
+}
+
 //================================<Main Code>=================================//
 int main(int argc, char** argv) {
     //==============================<Setup>===============================//
     // Define some local variables
     int status = EXIT_SUCCESS;
-    int ch = 0;
 
     // Either pre-load a character from args or null-initialize the character
     if(argc >= 2) {
@@ -158,34 +201,20 @@ int main(int argc, char** argv) {
 
                 printBuffer(dispData);
 
-                ch = getch();
-                if(ch >= '1' && ch < '1' + menuSize) {
-                    menuSel = ch - '1';
-                    mode = menuModes[menuSel];
-                    break;
-                }
-
-                switch(ch) {
-                    case KEY_UP:
-                        if(menuSel > 0) menuSel -= 1;
-                        break;
-                    case KEY_DOWN:
-                        if(menuSel < menuSize-1) menuSel += 1;
-                        break;
-                    case KEY_ENTER:
-                    case '\n':
-                        mode = menuModes[menuSel];
-                }
+                doMenuUpdate(false);
                 break;
             
-            //edit, new, load, save,
             case edit:  // Edit a loaded character
                 if(!charLoaded) {
                     mode = menu;
                     break;
                 }
+                
+                sprintf(buf, "Editing character \"%s\"", curChar.name);
+                addMenu(&dispData, buf, editMenuItems, editMenuSize, editSel);
+                printBuffer(dispData);
 
-                mode = menu;
+                doMenuUpdate(true);
                 break;
 
             case new:
