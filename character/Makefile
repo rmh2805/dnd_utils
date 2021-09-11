@@ -29,7 +29,7 @@ all: charCreator
 #
 #	Executables
 #
-charCreator: charCreator.o charData.o list.o
+charCreator: charCreator.o charData.o list.o dispBase.o
 	$(CC) $(CFLAGS) $(CDEBUGFLAGS) -o $@ $^ $(CLIBS)
 	$(ECHO)
 
@@ -40,11 +40,14 @@ charCreator: charCreator.o charData.o list.o
 %.o: %.c
 	$(CC) $(CFLAGS) $(CDEBUGFLAGS) -c -o $@ $^
 
-fs_unix.o:
-	$(CC) $(CFLAGS) $(CDEBUGFLAGS) -c -o fs_unix.o ../common/fs_unix.c
+fs_unix.o: ../common/fs_unix.c
+	$(CC) $(CFLAGS) $(CDEBUGFLAGS) -c -o $@ $^
 
-list.o:
-	$(CC) $(CFLAGS) $(CDEBUGFLAGS) -c -o list.o ../common/list.c
+list.o: ../common/list.c
+	$(CC) $(CFLAGS) $(CDEBUGFLAGS) -c -o $@ $^
+
+dispBase.o: ../common/dispBase.c
+	$(CC) $(CFLAGS) $(CDEBUGFLAGS) -c -o $@ $^
 
 #
 #	Utils
