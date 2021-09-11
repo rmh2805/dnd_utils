@@ -43,16 +43,6 @@ mode_t menuModes[] = {
 
 const int menuSize = sizeof(menuItems) / sizeof(menuItems[0]);
 
-void printMenu(int selection) {
-    clear();
-    printText(kBlackPalette, "Map Editor", 0, 0);
-
-    for(int i = 0; i < menuSize; i++) {
-        short palette = (i == selection) ? kWhitePalette : kBlackPalette;
-        printText(palette, menuItems[i], i + 2, 0);
-    }
-}
-
 //===============================<Misc Helpers>===============================//
 
 #define printError(msg) clear();printText(kRedPalette, msg, 0, 0); getch()
@@ -218,7 +208,8 @@ int main() {
         switch(mode) {
             case menu:  // Main menu selection mode
                 curs_set(1);
-                printMenu(y);
+                addMenu(&data.dispData, "Make Map", menuItems, menuSize, y);
+                printBuffer(data.dispData);
 
                 ch = getch();
                 if(ch > '0' && ch <= '0' + menuSize) {

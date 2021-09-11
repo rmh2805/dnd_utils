@@ -32,16 +32,6 @@ const mode_t menuModes[] = {
 
 const unsigned char menuSize = sizeof(menuItems) / sizeof(menuItems[0]);
 
-void dispMenu(unsigned int selected) {
-    clear();
-
-    printText(kBlackPalette, "Sprite Editor", 0, 0);
-
-    for(unsigned int i = 0; i < menuSize; i++) {
-        printText((i == selected) ? kWhitePalette : kBlackPalette, menuItems[i], 2 + i, 0);
-    }
-}
-
 //===============================<Misc Helpers>===============================//
 sprite_t * mkSpriteEntry(sprite_t sprite) {
     sprite_t * ptr = malloc(sizeof(sprite_t));
@@ -163,7 +153,8 @@ int main() {
     while(mode != quit) {
         switch(mode) {
             case menu:  // Main menu
-                dispMenu(selY);
+                addMenu(&data, "Make Sprite", menuItems, menuSize, selY);
+                printBuffer(data);
 
                 ch = getch();
                 if(ch > '0' && ch <= '0' + menuSize) {
