@@ -49,7 +49,7 @@ dispData_t dispData;
 
 //=============================<Helper Functions>=============================//
 /**
- * Loads in a character from the specified file
+ * Loads a new current character from a specified file
  * 
  * @param fileName The name of the file to load from
  * 
@@ -73,6 +73,38 @@ int loadChar(const char * fileName) {
 
     fclose(fp);
     return ret;
+}
+
+/**
+ * Saves the current character to the specified file
+ * 
+ * @param fileName The name of the file to save to
+ * 
+ * @return 0 on success, < 0 on failure
+ */
+int saveChar(const char * fileName) {
+    if(fileName == NULL || !charLoaded) return -1;
+
+    FILE* fp = fopen(fileName, "w");
+    if(fp == NULL) return -1;
+
+    int ret = saveCharData(fp, curChar);
+    fclose(fp);
+    return ret;
+
+}
+
+/**
+ * Prompts the user for text and gets it (returned through buf)
+ * 
+ * @param prompt The prompt for the user
+ */
+void promptText(const char * prompt) {
+    clearBuffer(&dispData);
+    addText(&dispData, kBlackPalette, prompt, 0, 0);
+    printBuffer(dispData);
+
+    getText(2, 0, buf, bufSize);
 }
 
 //================================<Main Code>=================================//
@@ -141,9 +173,42 @@ int main(int argc, char** argv) {
                         mode = menuModes[menuSel];
                 }
                 break;
+            
+            //edit, new, load, save,
+            case edit:  // Edit a loaded character
+                if(!charLoaded) {
+                    mode = menu;
+                    break;
+                }
+
+                mode = menu;
+                break;
+
+            case new:
+                mode = menu;
+                break;
+
+            case load:
+                promptText("Enter the character file name");
+                loadChar(buf);
+                mode = menu;
+                break;
+
+            case save:
+                if(!charLoaded) {
+                    mode = menu;
+                    break;
+                }
+
+                promptText("Enter the save file name");
+                saveChar(buf);
+
+                mode = menu;
+                break;
 
             case quit:
                 break;
+
             default:
                 mode = menu;
                 break;
