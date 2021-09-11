@@ -108,7 +108,18 @@ int main(int argc, char** argv) {
     while(mode != quit) {
         switch(mode) {
             case menu:
+                // Buffer a print of the menu
                 addMenu(&dispData, kMenuPrompt, menuItems, menuSize, menuSel);
+                
+                // Also buffer a print of load status
+                if(!charLoaded) {
+                    sprintf(buf, "No Character Loaded");
+                } else {
+                    sprintf(buf, "Character \"%s\" loaded", 
+                            (curChar.name == NULL) ? "<NULL>" : curChar.name);
+                }
+                addText(&dispData, kBlackPalette, buf, 3 + menuSize, 0);
+
                 printBuffer(dispData);
 
                 ch = getch();
