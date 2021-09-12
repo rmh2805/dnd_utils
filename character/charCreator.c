@@ -66,6 +66,7 @@ char buf[bufSize];
 mode_t mode = menu;
 int menuSel = 0;
 int editSel = 0;
+int sel = 0;
 
 // Display Variables
 bool dispInitialized = false;
@@ -139,8 +140,8 @@ void doMenuUpdate(bool isEdit) {
     const mode_t * modes = (isEdit) ? editMenuModes : menuModes;
 
     if(ch >= '1' && ch < '1' + size) {
-        menuSel = ch - '1';
-        mode = menuModes[menuSel];
+        *sel = ch - '1';
+        mode = modes[*sel];
         return;
     }
 
@@ -162,6 +163,7 @@ int main(int argc, char** argv) {
     //==============================<Setup>===============================//
     // Define some local variables
     int status = EXIT_SUCCESS;
+    int ch = 0;
 
     // Either pre-load a character from args or null-initialize the character
     if(argc >= 2) {
@@ -217,6 +219,7 @@ int main(int argc, char** argv) {
                 printBuffer(dispData);
 
                 doMenuUpdate(true);
+                if(menu != edit) sel = 0;
                 break;
 
             case new:
@@ -269,14 +272,65 @@ int main(int argc, char** argv) {
                 break;
 
             case eBio:
-                mode = edit;
+                if(!charLoaded) {
+                    mode = menu;
+                    break;
+                }
+
+                // Print the current stat data
+                clearBuffer(&dispData);
+
+                sprintf(buf, "       Name: %s", (curChar.name == NULL) ? "" : curChar.name);
+                addText(&dispData, (sel == 0) ? kWhitePalette : kBlackPalette, buf, 0, 0);
+                sprintf(buf, "Player Name: %s", (curChar.playerName == NULL) ? "" : curChar.playerName);
+                addText(&dispData, (sel == 1) ? kWhitePalette : kBlackPalette, buf, 1, 0);
+
+                sprintf(buf, " Base Class: %s", (curChar.baseClass == NULL) ? "" : curChar.baseClass);
+                addText(&dispData, (sel == 2) ? kWhitePalette : kBlackPalette, buf, 2, 0);
+                sprintf(buf, " Background: %s", (curChar.background == NULL) ? "" : curChar.background);
+                addText(&dispData, (sel == 3) ? kWhitePalette : kBlackPalette, buf, 3, 0);
+                sprintf(buf, "       Race: %s", (curChar.race == NULL) ? "" : curChar.race);
+                addText(&dispData, (sel == 4) ? kWhitePalette : kBlackPalette, buf, 4, 0);
+
+                printBuffer(dispData);
+
+                // Menu navigation
+                ch = getch();
+                switch(ch) {
+                    case '`':
+                        mode = edit;
+                        break;
+                    case KEY_DOWN:
+                        sel += 1;
+                        if(sel >= 5) sel = 5;
+                        break;
+                    case KEY_UP:
+                        sel -= 1;
+                        if(sel < 0) sel = 0;
+                        break;
+                    case KEY_ENTER:
+                    case '\n':
+                        //todo Edit the selected sprite here
+                        break;
+                }
+
                 break;
 
             case eStat:
+                if(!charLoaded) {
+                    mode = menu;
+                    break;
+                }
+
                 mode = edit;
                 break;
 
             case eProf:
+                if(!charLoaded) {
+                    mode = menu;
+                    break;
+                }
+
                 mode = edit;
                 break;
 
