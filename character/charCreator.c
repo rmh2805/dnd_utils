@@ -12,7 +12,7 @@
 //=============================<Menu Definition>==============================//
 
 typedef enum mode_e {
-    menu, edit, new, load, save, quit, eBio, eStat
+    menu, edit, new, load, save, quit, eBio, eStat, eProf
 } mode_t;
 
 // Main menu definition
@@ -39,13 +39,15 @@ const int menuSize = sizeof(menuItems)/sizeof(menuItems[0]);
 // Edit menu definition
 const char * editMenuItems[] = {
     "1. Edit Bio Information",
-    "2. Edit Stats and Proficiencies",
-    "3. Back to Main Menu"
+    "2. Edit Stats",
+    "3. Edit Proficiencies",
+    "4. Back to Main Menu"
 };
 
 const mode_t editMenuModes[] = {
     eBio,
     eStat,
+    eProf,
     menu
 };
 
@@ -271,6 +273,10 @@ int main(int argc, char** argv) {
                 break;
 
             case eStat:
+                mode = edit;
+                break;
+
+            case eProf:
                 mode = edit;
                 break;
 
