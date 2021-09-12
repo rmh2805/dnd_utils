@@ -339,6 +339,7 @@ int main(int argc, char** argv) {
                         // If the field is not null, free it
                         if(*strRef != NULL) {
                             free(*strRef);
+                            *strRef = NULL;
                         }
 
                         // Prompt for the new value
