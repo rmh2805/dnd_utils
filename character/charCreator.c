@@ -164,6 +164,7 @@ int main(int argc, char** argv) {
     // Define some local variables
     int status = EXIT_SUCCESS;
     int ch = 0;
+    char ** strRef = NULL;
 
     // Either pre-load a character from args or null-initialize the character
     if(argc >= 2) {
@@ -310,10 +311,50 @@ int main(int argc, char** argv) {
                         break;
                     case KEY_ENTER:
                     case '\n':
-                        //todo Edit the selected sprite here
+                        // Get the selected field to edit
+                        strRef = NULL;
+                        switch(sel) {
+                            case 0:
+                                strRef = &curChar.name;
+                                break;
+                            case 1:
+                                strRef = &curChar.playerName;
+                                break;
+                            case 2:
+                                strRef = &curChar.baseClass;
+                                break;
+                            case 3:
+                                strRef = &curChar.background;
+                                break;
+                            case 4:
+                                strRef = &curChar.race;
+                                break;
+                            default:
+                                strRef = NULL;
+                        }
+                        if(strRef == NULL) {
+                            break;
+                        }
+
+                        // If the field is not null, free it
+                        if(*strRef != NULL) {
+                            free(*strRef);
+                        }
+
+                        // Prompt for the new value
+                        promptText("Enter the field's new value");
+
+                        // Attempt to alloc a string in the field
+                        *strRef = calloc(strlen(buf) + 1, sizeof(char));
+                        if(*strRef == NULL) {
+                            break;
+                        }
+
+                        // Copy across the gathered value
+                        strcpy(*strRef, buf);
+
                         break;
                 }
-
                 break;
 
             case eStat:
