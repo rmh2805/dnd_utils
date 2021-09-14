@@ -158,6 +158,33 @@ void doMenuUpdate(bool isEdit) {
     }
 }
 
+void modStat(int idx, int delta) {
+    if(!charLoaded) return;
+
+    switch(idx) {
+        case 0:
+            curChar.Str += delta;
+            break;
+        case 1:
+            curChar.Dex += delta;
+            break;
+        case 2:
+            curChar.Con += delta;
+            break;
+        case 3:
+            curChar.Int += delta;
+            break;
+        case 4:
+            curChar.Wis += delta;
+            break;
+        case 5:
+            curChar.Cha += delta;
+            break;
+        default:
+            break;
+    }
+}
+
 //================================<Main Code>=================================//
 int main(int argc, char** argv) {
     //==============================<Setup>===============================//
@@ -364,7 +391,32 @@ int main(int argc, char** argv) {
                     break;
                 }
 
-                mode = edit;
+                clearBuffer(&dispData);
+                addStatSel(&dispData, curChar, 0, 0, false, sel);
+                printBuffer(dispData);
+
+                ch = getch();
+                switch(ch) {
+                    case KEY_LEFT:
+                        sel -= 1;
+                        if(sel < 0) sel = 0;
+                        break;
+                    case KEY_RIGHT:
+                        sel += 1;
+                        if(sel >= 6) sel = 5;
+                        break;
+                    case KEY_UP:
+                        modStat(sel, 1);
+                        break;
+                    case KEY_DOWN:
+                        modStat(sel, -1);
+                        break;
+                    case '`':
+                    case 'q':
+                    case 'Q':
+                        mode = edit;
+                        break;
+                }
                 break;
 
             case eProf:
