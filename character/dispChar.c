@@ -144,6 +144,8 @@ void addProfSel(dispData_t * dispData, charData_t charData, int row, int col,
  * @param val The value to set
  */
 void setProfIdx(charData_t * charData, int idx, bool val) {
+    if(charData == NULL) return;
+    val = (val == 0) ? 0 : -1; // Full bit field value
 
 }
 
