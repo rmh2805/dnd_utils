@@ -10,6 +10,7 @@
 //================================<Constants>=================================//
 extern const int kNStats;
 extern const int kNProfs;
+extern const int kNDice;
 
 // Skill indeces
 #define kStrIdx 0
@@ -50,10 +51,16 @@ typedef struct charData_s {
 
     // Player State
     int level;
-
     int profBonus;  // Proficiency bonus
     int skillBonus; // Bonus to non-proficient skills (e.g. Jack of all Trades)
-
+    
+    // HP info
+    int maxHP;
+    int curHP;
+    
+    int maxHitDice[6];
+    int curHitDice[6];
+    
     // Base Stats
     uint32_t Str : 5;
     uint32_t Dex : 5;

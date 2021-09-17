@@ -3,6 +3,7 @@
 
 const int kNStats = 6;
 const int kNProfs = 24;
+const int kNDice = 6;
 
 //===============================<Alloc & Free>===============================//
 /**
@@ -61,6 +62,17 @@ int saveCharData(FILE * fp, charData_t charData) {
 
     // Save the other stats next
     fprintf(fp, "%d %d %d|\n", charData.level, charData.profBonus, charData.skillBonus);
+    fprintf(fp, "%d %d|\n", charData.maxHP, charData.curHP);
+
+    // Save out the hit dice info
+    for(int i = 0; i < kNDice; i++) {
+        fprintf(fp, "%d ", charData.maxHitDice[i]);
+    }
+    fprintf(fp, "\n");
+    for(int i = 0; i < kNDice; i++) {
+        fprintf(fp, "%d ", charData.curHitDice[i]);
+    }
+    fprintf(fp, "\n");
 
     // Generate the base stat block;
     uint32_t statBlock = 0;
@@ -172,6 +184,18 @@ int loadCharData(FILE * fp, charData_t * charData) {
             &charData->skillBonus) != 3) {
         rmCharData(*charData);
         return EXIT_FAILURE;
+    }
+    if(fscanf(fp, "%d %d|\n", &charData->maxHP, &charData->curHP) != 2) {
+        rmCharData(*charData);
+        return EXIT_FAILURE;
+    }
+
+    // Recover hit dice next
+    for(int i = 0; i < kNDice; i++) {
+        fscanf(fp, "%d ", &charData->maxHitDice[i]);
+    }
+    for(int i = 0; i < kNDice; i++) {
+        fscanf(fp, "%d ", &charData->curHitDice[i]);
     }
 
 
