@@ -9,7 +9,7 @@ static const char * statStrings[] = {
     "  Charisma  "
 };
 
-#define kStatStringsSize sizeof(statStrings)/sizeof(statStrings[0])
+const int kNStats = 6;
 
 static const char * profStrings[] = {
     "Strength",
@@ -38,7 +38,7 @@ static const char * profStrings[] = {
     "Survival"
 };
 
-#define kProfStringsSize (int)(sizeof(profStrings)/sizeof(profStrings[0]))
+const int kNProfs = 23;
 
 #define min(a, b) ((b < a) ? b : a)
 #define max(a, b) ((b > a) ? b : a)
@@ -86,7 +86,7 @@ void addStat(dispData_t * dispData, charData_t charData, int row, int col,
         default:
             return;
     }
-    int modVal = ((int) statVal - 10) / 2;
+    int modVal = (statVal / 2) - 5;
 
     addText(dispData, palette, statStrings[idx], row, col);
     addText(dispData, palette, "+----+", row + 1, col + 3);
@@ -114,7 +114,7 @@ void addStat(dispData_t * dispData, charData_t charData, int row, int col,
 void addStatSel(dispData_t * dispData, charData_t charData, int row, int col, 
                     bool doVert, int sel) {
     int y = row, x = col;
-    for(int i = 0; i < 6; i++) {
+    for(int i = 0; i < kNStats; i++) {
         addStat(dispData, charData, y, x, i, sel);
 
         if(doVert) y += 8;
@@ -141,10 +141,10 @@ void addProfSel(dispData_t * dispData, charData_t charData, int row, int col,
     // Calculate the min and max visible parameters
     int mini = max(sel - (dispData->screenRows - row) / 2, row);
 
-    for(int i = mini; row + i < dispData->screenRows && mini + i < kProfStringsSize; ++i) {
+    for(int i = mini; row + i < dispData->screenRows && mini + i < kNProfs; ++i) {
         short palette = (getProfIdx(charData, mini + i)) ? kWhitePalette : kBlackPalette;
         if(mini + i == sel) {
-            palette = (palette == kWhitePalette) ? kRedPalette : kGreenPalette;
+            palette = (palette == kWhitePalette) ? kGreenPalette : kRedPalette;
         }
 
         addText(dispData, palette, profStrings[mini + i], row + i, col);

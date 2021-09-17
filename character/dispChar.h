@@ -35,6 +35,7 @@ void addStats(dispData_t * dispData, charData_t charData, int row, int col,
 void addStatSel(dispData_t * dispData, charData_t charData, int row, int col, 
                     bool doVert, int sel);
 
+extern const int kNStats;
 
 //==============================<Proficiencies>===============================//
 /**
@@ -68,5 +69,7 @@ void setProfIdx(charData_t * charData, int idx, bool val);
  * @param The status of the selected proficiency (true iff proficient)
  */
 bool getProfIdx(charData_t charData, int idx);
+
+extern const int kNProfs;
 
 #endif

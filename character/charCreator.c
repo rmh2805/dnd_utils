@@ -403,7 +403,7 @@ int main(int argc, char** argv) {
                         break;
                     case KEY_RIGHT:
                         sel += 1;
-                        if(sel >= 6) sel = 5;
+                        if(sel >= kNStats) sel = kNStats - 1;
                         break;
                     case KEY_UP:
                         modStat(sel, 1);
@@ -428,9 +428,25 @@ int main(int argc, char** argv) {
                 clearBuffer(&dispData);
                 addProfSel(&dispData, curChar, 0, 0, sel);
                 printBuffer(dispData);
-                getch();
-
-                mode = edit;
+                
+                ch = getch();
+                switch(ch) {
+                    case KEY_UP:
+                        sel -= 1;
+                        if(sel < 0) sel = 0;
+                        break;
+                    case KEY_DOWN:
+                        sel += 1;
+                        if(sel >= kNProfs) sel = kNProfs - 1;
+                        break;
+                    case '`':
+                        mode = edit;
+                        break;
+                    case KEY_ENTER:
+                    case '\n':
+                        setProfIdx(&curChar, sel, !getProfIdx(curChar, sel));
+                        break;
+                }
                 break;
 
             case quit:
