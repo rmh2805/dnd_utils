@@ -35,10 +35,11 @@ static const char * profStrings[] = {
     "Persuasion",
     "Religion",
     "Sleight of Hand",
+    "Stealth",
     "Survival"
 };
 
-const int kNProfs = 23;
+const int kNProfs = 24;
 
 #define min(a, b) ((b < a) ? b : a)
 #define max(a, b) ((b > a) ? b : a)
