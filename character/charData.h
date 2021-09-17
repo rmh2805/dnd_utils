@@ -7,6 +7,37 @@
 #include <stdint.h>
 #include <string.h>
 
+//================================<Constants>=================================//
+extern const int kNStats;
+extern const int kNProfs;
+
+// Skill indeces
+#define kStrIdx 0
+#define kDexIdx 1
+#define kConIdx 2
+#define kIntIdx 3
+#define kWisIdx 4
+#define kChaIdx 5
+
+#define kAcroIdx 6
+#define kAnimIdx 7
+#define kArcaIdx 8
+#define kAthlIdx 9
+#define kDeceIdx 10
+#define kHistIdx 11
+#define kInsiIdx 12
+#define kIntiIdx 13
+#define kInveIdx 14
+#define kMediIdx 15
+#define kNatuIdx 16
+#define kPercIdx 17
+#define kPerfIdx 18
+#define kPersIdx 19
+#define kReliIdx 20
+#define kSligIdx 21
+#define kSteaIdx 22
+#define kSurvIdx 23
+
 //=================================<Typedefs>=================================//
 typedef struct charData_s {
     // Basic Biographical Info
@@ -53,9 +84,6 @@ typedef struct charData_s {
     uint32_t proSurv : 1;
     
 } charData_t;
-
-extern const int kNStats;
-extern const int kNProfs;
 
 
 //===============================<Alloc & Free>===============================//
@@ -140,5 +168,15 @@ void setProfIdx(charData_t * charData, int idx, bool val);
  * @param The status of the selected proficiency (true iff proficient)
  */
 bool getProfIdx(charData_t charData, int idx);
+
+/**
+ * Calculates the stat modifier for a given skill check
+ * 
+ * @param data The character making the check
+ * @param skill The relevant proficiency index (<0 for raw check)
+ * 
+ * @return The modifier of the check
+ */
+int getMod(charData_t data, int skill);
 
 #endif

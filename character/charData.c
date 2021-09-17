@@ -219,22 +219,22 @@ int loadCharData(FILE * fp, charData_t * charData) {
  */
 int getStat(charData_t * data, int idx) {
     switch(idx) {
-        case 0:
+        case kStrIdx:
             return data->Str;
             break;
-        case 1:
+        case kDexIdx:
             return data->Dex;
             break;
-        case 2:
+        case kConIdx:
             return data->Con;
             break;
-        case 3:
+        case kIntIdx:
             return data->Int;
             break;
-        case 4:
+        case kWisIdx:
             return data->Wis;
             break;
-        case 5:
+        case kChaIdx:
             return data->Cha;
             break;
         default:
@@ -252,22 +252,22 @@ int getStat(charData_t * data, int idx) {
  */
 void setStat(charData_t * data, int idx, int val) {
     switch(idx) {
-        case 0:
+        case kStrIdx:
             data->Str = val;
             break;
-        case 1:
+        case kDexIdx:
             data->Dex = val;
             break;
-        case 2:
+        case kConIdx:
             data->Con = val;
             break;
-        case 3:
+        case kIntIdx:
             data->Int = val;
             break;
-        case 4:
+        case kWisIdx:
             data->Wis = val;
             break;
-        case 5:
+        case kChaIdx:
             data->Cha = val;
             break;
         default:
@@ -285,22 +285,22 @@ void setStat(charData_t * data, int idx, int val) {
  */
 void modStat(charData_t * data, int idx, int delta) {
     switch(idx) {
-        case 0:
+        case kStrIdx:
             data->Str += delta;
             break;
-        case 1:
+        case kDexIdx:
             data->Dex += delta;
             break;
-        case 2:
+        case kConIdx:
             data->Con += delta;
             break;
-        case 3:
+        case kIntIdx:
             data->Int += delta;
             break;
-        case 4:
+        case kWisIdx:
             data->Wis += delta;
             break;
-        case 5:
+        case kChaIdx:
             data->Cha += delta;
             break;
         default:
@@ -320,77 +320,77 @@ void setProfIdx(charData_t * charData, int idx, bool val) {
     if(val) val = -1;
     
     switch(idx) {
-        case 0:
+        case kStrIdx:
             charData->proStr = val;
             break;
-        case 1:
+        case kDexIdx:
             charData->proDex = val;
             break;
-        case 2:
+        case kConIdx:
             charData->proCon = val;
             break;
-        case 3:
+        case kIntIdx:
             charData->proInt = val;
             break;
-        case 4:
+        case kWisIdx:
             charData->proWis = val;
             break;
-        case 5:
+        case kChaIdx:
             charData->proCha = val;
             break;
 
-        case 6:
+        case kAcroIdx:
             charData->proAcro = val;
             break;
-        case 7:
+        case kAnimIdx:
             charData->proAnim = val;
             break;
-        case 8:
+        case kArcaIdx:
             charData->proArca = val;
             break;
-        case 9:
+        case kAthlIdx:
             charData->proAthl = val;
             break;
-        case 10:
+        case kDeceIdx:
             charData->proDece = val;
             break;
-        case 11:
+        case kHistIdx:
             charData->proHist = val;
             break;
-        case 12:
+        case kInsiIdx:
             charData->proInsi = val;
             break;
-        case 13:
+        case kIntiIdx:
             charData->proInti = val;
             break;
-        case 14:
+        case kInveIdx:
             charData->proInve = val;
             break;
-        case 15:
+        case kMediIdx:
             charData->proMedi = val;
             break;
-        case 16:
+        case kNatuIdx:
             charData->proNatu = val;
             break;
-        case 17:
+        case kPercIdx:
             charData->proPerc = val;
             break;
-        case 18:
+        case kPerfIdx:
             charData->proPerf = val;
             break;
-        case 19:
+        case kPersIdx:
             charData->proPers = val;
             break;
-        case 20:
+        case kReliIdx:
             charData->proReli = val;
             break;
-        case 21:
+        case kSligIdx:
             charData->proSlig = val;
             break;
-        case 22:
+        case kSteaIdx:
             charData->proStea = val;
             break;
-        case 23:
+        case kSurvIdx:
             charData->proSurv = val;
             break;
     }
@@ -406,56 +406,133 @@ void setProfIdx(charData_t * charData, int idx, bool val) {
  */
 bool getProfIdx(charData_t charData, int idx) {
     switch(idx) {
-        case 0:
+        case kStrIdx:
             return charData.proStr;
-        case 1:
+        case kDexIdx:
             return charData.proDex;
-        case 2:
+        case kConIdx:
             return charData.proCon;
-        case 3:
+        case kIntIdx:
             return charData.proInt;
-        case 4:
+        case kWisIdx:
             return charData.proWis;
-        case 5:
+        case kChaIdx:
             return charData.proCha;
 
-        case 6:
+        case kAcroIdx:
             return charData.proAcro;
-        case 7:
+        case kAnimIdx:
             return charData.proAnim;
-        case 8:
+        case kArcaIdx:
             return charData.proArca;
-        case 9:
+        case kAthlIdx:
             return charData.proAthl;
-        case 10:
+        case kDeceIdx:
             return charData.proDece;
-        case 11:
+        case kHistIdx:
             return charData.proHist;
-        case 12:
+        case kInsiIdx:
             return charData.proInsi;
-        case 13:
+        case kIntiIdx:
             return charData.proInti;
-        case 14:
+        case kInveIdx:
             return charData.proInve;
-        case 15:
+        case kMediIdx:
             return charData.proMedi;
-        case 16:
+        case kNatuIdx:
             return charData.proNatu;
-        case 17:
+        case kPercIdx:
             return charData.proPerc;
-        case 18:
+        case kPerfIdx:
             return charData.proPerf;
-        case 19:
+        case kPersIdx:
             return charData.proPers;
-        case 20:
+        case kReliIdx:
             return charData.proReli;
-        case 21:
+        case kSligIdx:
             return charData.proSlig;
-        case 22:
+        case kSteaIdx:
             return charData.proStea;
-        case 23:
+        case kSurvIdx:
             return charData.proSurv;
     }
 
     return false;
+}
+
+/**
+ * Calculates the stat modifier for a given skill check
+ * 
+ * @param data The character making the check
+ * @param skill The relevant proficiency index (<0 for raw check)
+ * 
+ * @return The modifier of the check
+ */
+int getMod(charData_t data, int skill) {
+    int mod = 0; 
+
+    // First get the base stat mod
+    switch(skill) {
+        // Strength skills
+        case kStrIdx:
+        case kAthlIdx:
+            mod = data.Str;
+            break;
+        
+        // Dexterity skills
+        case kDexIdx:
+        case kAcroIdx:
+        case kSligIdx:
+        case kSteaIdx:
+            mod = data.Dex;
+            break;
+        
+        // Constitution Skills
+        case kConIdx:
+            mod = data.Con;
+            break;
+        
+        // Inteligence Skills
+        case kIntIdx:
+        case kArcaIdx:
+        case kHistIdx:
+        case kInveIdx:
+        case kNatuIdx:
+        case kReliIdx:
+            mod = data.Int;
+            break;
+        
+        // Wisdom Skills
+        case kWisIdx:
+        case kAnimIdx:
+        case kInsiIdx:
+        case kMediIdx:
+        case kPercIdx:
+        case kSurvIdx:
+            mod = data.Wis;
+            break;
+
+        // Charisma Skills
+        case kChaIdx:
+        case kDeceIdx:
+        case kIntiIdx:
+        case kPerfIdx:
+        case kPersIdx:
+            mod = data.Cha;
+
+
+        // Raw check
+        default:
+            mod = 10; // Evens out to no mod
+            break;
+    }
+    mod = (mod/2) - 5;
+
+    // Next add any proficiency
+    //todo Proficiency stuff here
+
+    // Finally, add any other bonuses (e.g. jack of all trades)
+    //todo This
+
+    return mod;
 }
