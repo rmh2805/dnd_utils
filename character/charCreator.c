@@ -172,6 +172,13 @@ int main(int argc, char** argv) {
     } 
     if (!charLoaded) {
         curChar = mkCharData();
+        curChar.name = calloc(strlen(argv[1]) + 1, sizeof(char));
+        if(curChar.name == NULL) {
+            fprintf(stderr, "*ERROR* Failed to allocate for provided name\n");
+        } else {
+            strcpy(curChar.name, argv[1]);
+            charLoaded = true;
+        }
     }
 
     // Null-out the character buffer
@@ -187,11 +194,14 @@ int main(int argc, char** argv) {
     }
     dispInitialized = true;
 
+    // Set the initial mode
+    mode = (charLoaded) ? edit : menu;
+
 
     //===============================<Loop>===============================//
     while(mode != quit) {
         switch(mode) {
-            case menu:
+            case menu:  // Main menu
                 // Buffer a print of the menu
                 addMenu(&dispData, kMenuPrompt, menuItems, menuSize, menuSel);
                 
@@ -223,7 +233,7 @@ int main(int argc, char** argv) {
                 if(menu != edit) sel = 0;
                 break;
 
-            case new:
+            case new:   // Create a new character
                 if(charLoaded) {
                     rmCharData(curChar);
                     charLoaded = false;
@@ -257,7 +267,7 @@ int main(int argc, char** argv) {
             case load:
                 promptText("Enter the character file name");
                 loadChar(buf);
-                mode = menu;
+                mode = edit;
                 break;
 
             case save:
