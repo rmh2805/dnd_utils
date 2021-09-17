@@ -60,7 +60,7 @@ int saveCharData(FILE * fp, charData_t charData) {
     saveCharDataWriteString(fp, charData, race);
 
     // Save the other stats next
-    fprintf(fp, "%hhu %d %d|\n", charData.level, charData.profBonus, charData.skillBonus);
+    fprintf(fp, "%d %d %d|\n", charData.level, charData.profBonus, charData.skillBonus);
 
     // Generate the base stat block;
     uint32_t statBlock = 0;
@@ -168,7 +168,7 @@ int loadCharData(FILE * fp, charData_t * charData) {
 
     
     // recover the other stats next
-    if(fscanf(fp, "%hhu %d %d|\n", &charData->level, &charData->profBonus, 
+    if(fscanf(fp, "%d %d %d|\n", &charData->level, &charData->profBonus, 
             &charData->skillBonus) != 3) {
         rmCharData(*charData);
         return EXIT_FAILURE;

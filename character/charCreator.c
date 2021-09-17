@@ -12,7 +12,7 @@
 //=============================<Menu Definition>==============================//
 
 typedef enum mode_e {
-    menu, edit, new, load, save, quit, eBio, eStat, eProf
+    menu, edit, new, load, save, quit, eBio, eStat, eProf, eMisc
 } mode_t;
 
 // Main menu definition
@@ -41,13 +41,15 @@ const char * editMenuItems[] = {
     "1. Edit Bio Information",
     "2. Edit Stats",
     "3. Edit Proficiencies",
-    "4. Back to Main Menu"
+    "4. Edit Misc Properties",
+    "5. Back to Main Menu"
 };
 
 const mode_t editMenuModes[] = {
     eBio,
     eStat,
     eProf,
+    eMisc,
     menu
 };
 
@@ -164,6 +166,8 @@ int main(int argc, char** argv) {
     // Define some local variables
     int status = EXIT_SUCCESS;
     int ch = 0;
+
+    int * intRef = NULL;
     char ** strRef = NULL;
 
     // Either pre-load a character from args or null-initialize the character
@@ -200,6 +204,11 @@ int main(int argc, char** argv) {
 
     //===============================<Loop>===============================//
     while(mode != quit) {
+        if(!charLoaded && (mode == save || mode == edit || mode == eBio || 
+                mode == eStat || mode == eProf || mode == eMisc)) {
+            mode = menu;
+        }
+
         switch(mode) {
             case menu:  // Main menu
                 // Buffer a print of the menu
@@ -271,11 +280,6 @@ int main(int argc, char** argv) {
                 break;
 
             case save:
-                if(!charLoaded) {
-                    mode = menu;
-                    break;
-                }
-
                 promptText("Enter the save file name");
                 saveChar(buf);
 
@@ -283,11 +287,6 @@ int main(int argc, char** argv) {
                 break;
 
             case eBio:
-                if(!charLoaded) {
-                    mode = menu;
-                    break;
-                }
-
                 // Print the current stat data
                 clearBuffer(&dispData);
 
@@ -369,11 +368,6 @@ int main(int argc, char** argv) {
                 break;
 
             case eStat:
-                if(!charLoaded) {
-                    mode = menu;
-                    break;
-                }
-
                 clearBuffer(&dispData);
                 addStatSel(&dispData, curChar, 0, 0, false, sel);
                 printBuffer(dispData);
@@ -403,11 +397,6 @@ int main(int argc, char** argv) {
                 break;
 
             case eProf:
-                if(!charLoaded) {
-                    mode = menu;
-                    break;
-                }
-
                 clearBuffer(&dispData);
                 addProfSel(&dispData, curChar, 0, 0, sel);
                 printBuffer(dispData);
@@ -430,6 +419,54 @@ int main(int argc, char** argv) {
                         setProfIdx(&curChar, sel, !getProfIdx(curChar, sel));
                         break;
                 }
+                break;
+            
+            case eMisc:
+                // Print the misc lines on the screen
+                intRef = NULL;
+                clearBuffer(&dispData);
+                
+                sprintf(buf, "Level: %d", curChar.level);
+                addText(&dispData, (sel == 0) ? kWhitePalette : kBlackPalette, buf, 0, 0);
+                if(sel == 0) intRef = &curChar.level;
+                
+                sprintf(buf, "Proficiency Bonus: %d", curChar.profBonus);
+                addText(&dispData, (sel == 1) ? kWhitePalette : kBlackPalette, buf, 1, 0);
+                if(sel == 1) intRef = &curChar.profBonus;
+
+                sprintf(buf, "Skill Bonus: %d", curChar.skillBonus);
+                addText(&dispData, (sel == 2) ? kWhitePalette : kBlackPalette, buf, 2, 0);
+                if(sel == 2) intRef = &curChar.skillBonus;
+
+                printBuffer(dispData);
+
+                // Handle input
+                ch = getch();
+                switch(ch) {
+                    case KEY_UP:
+                        sel -= 1;
+                        if(sel < 0) sel = 0;
+                        break;
+
+                    case KEY_DOWN:
+                        sel += 1;
+                        if(sel > 2) sel = 2;
+                        break;
+
+                    case KEY_LEFT:
+                        *intRef -= 1;
+                        break;
+
+                    case KEY_RIGHT:
+                        *intRef += 1;
+                        break;
+
+                    case '`':
+                        mode = edit;
+                        break;
+                    
+                }
+
                 break;
 
             case quit:

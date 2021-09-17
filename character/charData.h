@@ -49,7 +49,7 @@ typedef struct charData_s {
     char * race;
 
     // Player State
-    unsigned char level;
+    int level;
 
     int profBonus;  // Proficiency bonus
     int skillBonus; // Bonus to non-proficient skills (e.g. Jack of all Trades)
