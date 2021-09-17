@@ -207,6 +207,107 @@ int loadCharData(FILE * fp, charData_t * charData) {
 
 
 
+
+//===========================<Getters and Setters>============================//
+/**
+ * Gets the value of a stat by index
+ * 
+ * @param data The character to query
+ * @param idx The index of the stat
+ * 
+ * @return The value of the requested stat
+ */
+int getStat(charData_t * data, int idx) {
+    switch(idx) {
+        case 0:
+            return data->Str;
+            break;
+        case 1:
+            return data->Dex;
+            break;
+        case 2:
+            return data->Con;
+            break;
+        case 3:
+            return data->Int;
+            break;
+        case 4:
+            return data->Wis;
+            break;
+        case 5:
+            return data->Cha;
+            break;
+        default:
+            return -1;
+            break;
+    }
+}
+
+/**
+ * Sets a stat by index
+ * 
+ * @param data The character to modify
+ * @param idx The index of the stat
+ * @param val The new value for the stat
+ */
+void setStat(charData_t * data, int idx, int val) {
+    switch(idx) {
+        case 0:
+            data->Str = val;
+            break;
+        case 1:
+            data->Dex = val;
+            break;
+        case 2:
+            data->Con = val;
+            break;
+        case 3:
+            data->Int = val;
+            break;
+        case 4:
+            data->Wis = val;
+            break;
+        case 5:
+            data->Cha = val;
+            break;
+        default:
+            break;
+    }
+
+}
+
+/**
+ * Modifies a stat by index
+ * 
+ * @param data The character to modify
+ * @param idx The index of the stat
+ * @param delta The amount to modify the stat (added to current value)
+ */
+void modStat(charData_t * data, int idx, int delta) {
+    switch(idx) {
+        case 0:
+            data->Str += delta;
+            break;
+        case 1:
+            data->Dex += delta;
+            break;
+        case 2:
+            data->Con += delta;
+            break;
+        case 3:
+            data->Int += delta;
+            break;
+        case 4:
+            data->Wis += delta;
+            break;
+        case 5:
+            data->Cha += delta;
+            break;
+        default:
+            break;
+    }
+}
+
 /**
  * Sets a proficiency from the standard order
  * 

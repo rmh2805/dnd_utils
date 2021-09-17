@@ -158,33 +158,6 @@ void doMenuUpdate(bool isEdit) {
     }
 }
 
-void modStat(int idx, int delta) {
-    if(!charLoaded) return;
-
-    switch(idx) {
-        case 0:
-            curChar.Str += delta;
-            break;
-        case 1:
-            curChar.Dex += delta;
-            break;
-        case 2:
-            curChar.Con += delta;
-            break;
-        case 3:
-            curChar.Int += delta;
-            break;
-        case 4:
-            curChar.Wis += delta;
-            break;
-        case 5:
-            curChar.Cha += delta;
-            break;
-        default:
-            break;
-    }
-}
-
 //================================<Main Code>=================================//
 int main(int argc, char** argv) {
     //==============================<Setup>===============================//
@@ -406,10 +379,10 @@ int main(int argc, char** argv) {
                         if(sel >= kNStats) sel = kNStats - 1;
                         break;
                     case KEY_UP:
-                        modStat(sel, 1);
+                        modStat(&curChar, sel, 1);
                         break;
                     case KEY_DOWN:
-                        modStat(sel, -1);
+                        modStat(&curChar, sel, -1);
                         break;
                     case '`':
                     case 'q':

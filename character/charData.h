@@ -93,6 +93,34 @@ int saveCharData(FILE * fp, charData_t charData);
  */
 int loadCharData(FILE * fp, charData_t * charData);
 
+//===========================<Getters and Setters>============================//
+/**
+ * Gets the value of a stat by index
+ * 
+ * @param data The character to query
+ * @param idx The index of the stat
+ * 
+ * @return The value of the requested stat
+ */
+int getStat(charData_t * data, int idx);
+
+/**
+ * Sets a stat by index
+ * 
+ * @param data The character to modify
+ * @param idx The index of the stat
+ * @param val The new value for the stat
+ */
+void setStat(charData_t * data, int idx, int val);
+
+/**
+ * Modifies a stat by index
+ * 
+ * @param data The character to modify
+ * @param idx The index of the stat
+ * @param delta The amount to modify the stat (added to current value)
+ */
+void modStat(charData_t * data, int idx, int delta);
 
 /**
  * Sets a proficiency from the standard order
