@@ -61,7 +61,7 @@ void addStat(dispData_t * dispData, charData_t charData, int row, int col,
 
     short palette = (idx == sel) ? kWhitePalette : kBlackPalette;
     int statVal = getStat(charData, idx);
-    int modVal = getMod(charData, idx);
+    int modVal = (statVal/2)-5;
 
     addText(dispData, palette, statStrings[idx], row, col);
     addText(dispData, palette, "+----+", row + 1, col + 3);
