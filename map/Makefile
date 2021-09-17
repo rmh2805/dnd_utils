@@ -31,19 +31,19 @@ tests: testSprite
 #
 #	Executables
 #
-makeMap: makeMap.o sprite.o dispBase.o tile.o map.o list.o mapDisp.o
+makeMap: makeMap.o sprite.o tile.o map.o list.o dispBase.o mapDisp.o
 	$(CC) $(CFLAGS) $(CDEBUGFLAGS) -o $@ $^ $(CLIBS)
 	$(ECHO)
 
-randMap: randMap.o sprite.o dispBase.o tile.o map.o list.o mapDisp.o
+randMap: randMap.o sprite.o tile.o map.o list.o
 	$(CC) $(CFLAGS) $(CDEBUGFLAGS) -o $@ $^ $(CLIBS)
 	$(ECHO)
 
-makeSprite: makeSprite.o sprite.o dispBase.o list.o mapDisp.o
+makeSprite: makeSprite.o sprite.o list.o dispBase.o mapDisp.o
 	$(CC) $(CFLAGS) $(CDEBUGFLAGS) -o $@ $^ $(CLIBS)
 	$(ECHO)
 
-dispMap: dispMap.o sprite.o dispBase.o tile.o map.o list.o mapDisp.o
+dispMap: dispMap.o sprite.o tile.o map.o list.o dispBase.o mapDisp.o
 	$(CC) $(CFLAGS) $(CDEBUGFLAGS) -o $@ $^ $(CLIBS)
 	$(ECHO)
 
