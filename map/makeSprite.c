@@ -3,6 +3,7 @@
 #include <stdbool.h>
 
 #include <curses.h>
+#include "mapDisp.h"
 
 #include "sprite.h"
 

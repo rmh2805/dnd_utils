@@ -4,8 +4,8 @@
 #include <string.h>
 
 #include <ncurses.h>
+#include "mapDisp.h"
 
-#include "../common/dispBase.h"
 #include "sprite.h"
 #include "tile.h"
 #include "map.h"
