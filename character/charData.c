@@ -62,7 +62,7 @@ int saveCharData(FILE * fp, charData_t charData) {
 
     // Save the other stats next
     fprintf(fp, "%d %d %d|\n", charData.level, charData.profBonus, charData.skillBonus);
-    fprintf(fp, "%d %d|\n", charData.maxHP, charData.curHP);
+    fprintf(fp, "%d %d %d|\n", charData.maxHP, charData.curHP, charData.tmpHP);
 
     // Save out the hit dice info
     for(int i = 0; i < kNDice; i++) {
@@ -185,7 +185,7 @@ int loadCharData(FILE * fp, charData_t * charData) {
         rmCharData(*charData);
         return EXIT_FAILURE;
     }
-    if(fscanf(fp, "%d %d|\n", &charData->maxHP, &charData->curHP) != 2) {
+    if(fscanf(fp, "%d %d %d|\n", &charData->maxHP, &charData->curHP, &charData->tmpHP) != 3) {
         rmCharData(*charData);
         return EXIT_FAILURE;
     }

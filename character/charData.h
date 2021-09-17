@@ -57,6 +57,7 @@ typedef struct charData_s {
     // HP info
     int maxHP;
     int curHP;
+    int tmpHP;
     
     int maxHitDice[6];
     int curHitDice[6];
