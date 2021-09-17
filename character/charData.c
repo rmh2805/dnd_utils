@@ -217,25 +217,25 @@ int loadCharData(FILE * fp, charData_t * charData) {
  * 
  * @return The value of the requested stat
  */
-int getStat(charData_t * data, int idx) {
+int getStat(charData_t data, int idx) {
     switch(idx) {
         case kStrIdx:
-            return data->Str;
+            return data.Str;
             break;
         case kDexIdx:
-            return data->Dex;
+            return data.Dex;
             break;
         case kConIdx:
-            return data->Con;
+            return data.Con;
             break;
         case kIntIdx:
-            return data->Int;
+            return data.Int;
             break;
         case kWisIdx:
-            return data->Wis;
+            return data.Wis;
             break;
         case kChaIdx:
-            return data->Cha;
+            return data.Cha;
             break;
         default:
             return -1;
@@ -519,7 +519,7 @@ int getMod(charData_t data, int skill) {
         case kPerfIdx:
         case kPersIdx:
             mod = data.Cha;
-
+            break;
 
         // Raw check
         default:

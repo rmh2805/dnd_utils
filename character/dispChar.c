@@ -60,30 +60,8 @@ void addStat(dispData_t * dispData, charData_t charData, int row, int col,
     char buf[7];
 
     short palette = (idx == sel) ? kWhitePalette : kBlackPalette;
-    int statVal;
-    switch(idx) {
-        case 0:
-            statVal = charData.Str;
-            break;
-        case 1:
-            statVal = charData.Dex;
-            break;
-        case 2:
-            statVal = charData.Con;
-            break;
-        case 3:
-            statVal = charData.Int;
-            break;
-        case 4:
-            statVal = charData.Wis;
-            break;
-        case 5:
-            statVal = charData.Cha;
-            break;
-        default:
-            return;
-    }
-    int modVal = (statVal / 2) - 5;
+    int statVal = getStat(charData, idx);
+    int modVal = getMod(charData, idx);
 
     addText(dispData, palette, statStrings[idx], row, col);
     addText(dispData, palette, "+----+", row + 1, col + 3);

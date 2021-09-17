@@ -130,7 +130,7 @@ int loadCharData(FILE * fp, charData_t * charData);
  * 
  * @return The value of the requested stat
  */
-int getStat(charData_t * data, int idx);
+int getStat(charData_t data, int idx);
 
 /**
  * Sets a stat by index
