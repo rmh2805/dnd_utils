@@ -38,7 +38,10 @@ static const char * profStrings[] = {
     "Survival"
 };
 
-#define kProfStringsSize sizeof(profStrings)/sizeof(profStrings[0])
+#define kProfStringsSize (int)(sizeof(profStrings)/sizeof(profStrings[0]))
+
+#define min(a, b) ((b < a) ? b : a)
+#define max(a, b) ((b > a) ? b : a)
 
 //==================================<Stats>===================================//
 /**
@@ -134,6 +137,19 @@ void addStatSel(dispData_t * dispData, charData_t charData, int row, int col,
 void addProfSel(dispData_t * dispData, charData_t charData, int row, int col,
                 int sel) {
     if(dispData == NULL) return;
+
+    // Calculate the min and max visible parameters
+    int mini = max(sel - (dispData->screenRows - row) / 2, row);
+
+    for(int i = mini; row + i < dispData->screenRows && mini + i < kProfStringsSize; ++i) {
+        short palette = (getProfIdx(charData, mini + i)) ? kWhitePalette : kBlackPalette;
+        if(mini + i == sel) {
+            palette = (palette == kWhitePalette) ? kRedPalette : kGreenPalette;
+        }
+
+        addText(dispData, palette, profStrings[mini + i], row + i, col);
+    }
+
 }
 
 /**
@@ -145,8 +161,83 @@ void addProfSel(dispData_t * dispData, charData_t charData, int row, int col,
  */
 void setProfIdx(charData_t * charData, int idx, bool val) {
     if(charData == NULL) return;
-    val = (val == 0) ? 0 : -1; // Full bit field value
+    if(val) val = -1;
+    
+    switch(idx) {
+        case 0:
+            charData->proStr = val;
+            break;
+        case 1:
+            charData->proDex = val;
+            break;
+        case 2:
+            charData->proCon = val;
+            break;
+        case 3:
+            charData->proInt = val;
+            break;
+        case 4:
+            charData->proWis = val;
+            break;
+        case 5:
+            charData->proCha = val;
+            break;
 
+        case 6:
+            charData->proAcro = val;
+            break;
+        case 7:
+            charData->proAnim = val;
+            break;
+        case 8:
+            charData->proArca = val;
+            break;
+        case 9:
+            charData->proAthl = val;
+            break;
+        case 10:
+            charData->proDece = val;
+            break;
+        case 11:
+            charData->proHist = val;
+            break;
+        case 12:
+            charData->proInsi = val;
+            break;
+        case 13:
+            charData->proInti = val;
+            break;
+        case 14:
+            charData->proInve = val;
+            break;
+        case 15:
+            charData->proMedi = val;
+            break;
+        case 16:
+            charData->proNatu = val;
+            break;
+        case 17:
+            charData->proPerc = val;
+            break;
+        case 18:
+            charData->proPerf = val;
+            break;
+        case 19:
+            charData->proPers = val;
+            break;
+        case 20:
+            charData->proReli = val;
+            break;
+        case 21:
+            charData->proSlig = val;
+            break;
+        case 22:
+            charData->proStea = val;
+            break;
+        case 23:
+            charData->proSurv = val;
+            break;
+    }
 }
 
 /**

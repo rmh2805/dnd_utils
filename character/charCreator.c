@@ -425,7 +425,10 @@ int main(int argc, char** argv) {
                     break;
                 }
 
-                
+                clearBuffer(&dispData);
+                addProfSel(&dispData, curChar, 0, 0, sel);
+                printBuffer(dispData);
+                getch();
 
                 mode = edit;
                 break;

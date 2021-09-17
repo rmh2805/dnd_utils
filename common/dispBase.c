@@ -68,6 +68,7 @@ int initDisp(dispData_t* data) {
  * @return 0 iff display was closed correctly
  */
 int closeDisp(dispData_t data) {
+    curs_set(1);
     endwin();
 
     if(data.data != NULL) {
