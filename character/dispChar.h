@@ -35,7 +35,6 @@ void addStats(dispData_t * dispData, charData_t charData, int row, int col,
 void addStatSel(dispData_t * dispData, charData_t charData, int row, int col, 
                     bool doVert, int sel);
 
-extern const int kNStats;
 
 //==============================<Proficiencies>===============================//
 /**
@@ -50,26 +49,5 @@ extern const int kNStats;
  */
 void addProfSel(dispData_t * dispData, charData_t charData, int row, int col,
                 int sel);
-
-/**
- * Sets a proficiency from the standard order
- * 
- * @param charData The character data to modify
- * @param idx The index of the proficiency to toggle
- * @param val The value to set
- */
-void setProfIdx(charData_t * charData, int idx, bool val);
-
-/**
- * Returns the status of a proficiency from a standard order index
- * 
- * @param charData The character to query
- * @param idx The index of the proficiency to query
- * 
- * @param The status of the selected proficiency (true iff proficient)
- */
-bool getProfIdx(charData_t charData, int idx);
-
-extern const int kNProfs;
 
 #endif
