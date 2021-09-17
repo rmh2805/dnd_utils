@@ -1,12 +1,12 @@
 #include "dispChar.h"
 
 static const char * statStrings[] = {
-    "  Strength  ",
-    " Dexterity  ",
+    "Strength",
+    "Dexterity",
     "Constitution",
-    "Inteligence ",
-    "   Wisdom   ",
-    "  Charisma  "
+    "Inteligence",
+    "Wisdom",
+    "Charisma"
 };
 
 static const char * profStrings[] = {
@@ -63,7 +63,7 @@ void addStat(dispData_t * dispData, charData_t charData, int row, int col,
     int statVal = getStat(charData, idx);
     int modVal = (statVal/2)-5;
 
-    addText(dispData, palette, statStrings[idx], row, col);
+    addText(dispData, palette, statStrings[idx], row, col + (12 - strlen(statStrings[idx]))/2);
     addText(dispData, palette, "+----+", row + 1, col + 3);
     addText(dispData, palette, "|    |", row + 2, col + 3);
     sprintf(buf, "| %2u |", statVal);
@@ -71,7 +71,7 @@ void addStat(dispData_t * dispData, charData_t charData, int row, int col,
     addText(dispData, palette, "|    |", row + 4, col + 3);
     addText(dispData, palette, "+----+", row + 5, col + 3);
     sprintf(buf, "%+2d", modVal);
-    addText(dispData, palette, buf, row + 6, col + 5);
+    addText(dispData, kBlackPalette, buf, row + 6, col + 5);
 
 }
 
