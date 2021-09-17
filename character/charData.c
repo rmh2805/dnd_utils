@@ -15,6 +15,7 @@ charData_t mkCharData() {
     for(size_t i = 0; i < sizeof(data); i++) {
         ((char *) &data)[i] = 0;
     }
+
     return data;
 }
 
@@ -57,6 +58,9 @@ int saveCharData(FILE * fp, charData_t charData) {
     saveCharDataWriteString(fp, charData, baseClass);
     saveCharDataWriteString(fp, charData, background);
     saveCharDataWriteString(fp, charData, race);
+
+    // Save the other stats next
+    fprintf(fp, "%hhu %d %d|\n", charData.level, charData.profBonus, charData.skillBonus);
 
     // Generate the base stat block;
     uint32_t statBlock = 0;
@@ -161,6 +165,15 @@ int loadCharData(FILE * fp, charData_t * charData) {
         rmCharData(*charData);
         return -1;
     }
+
+    
+    // recover the other stats next
+    if(fscanf(fp, "%hhu %d %d|\n", &charData->level, &charData->profBonus, 
+            &charData->skillBonus) != 3) {
+        rmCharData(*charData);
+        return EXIT_FAILURE;
+    }
+
 
     // Load the field blocks
     uint32_t statBlock = 0, profBlock = 0;
@@ -528,11 +541,9 @@ int getMod(charData_t data, int skill) {
     }
     mod = (mod/2) - 5;
 
-    // Next add any proficiency
-    //todo Proficiency stuff here
-
-    // Finally, add any other bonuses (e.g. jack of all trades)
-    //todo This
+    // Next add any proficiency or other bonuses
+    if(getProfIdx(data, skill)) mod += data.profBonus;
+    else if (skill >= kNStats) mod += data.skillBonus;
 
     return mod;
 }

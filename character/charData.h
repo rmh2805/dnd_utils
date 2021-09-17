@@ -48,6 +48,12 @@ typedef struct charData_s {
     char * background;
     char * race;
 
+    // Player State
+    unsigned char level;
+
+    int profBonus;  // Proficiency bonus
+    int skillBonus; // Bonus to non-proficient skills (e.g. Jack of all Trades)
+
     // Base Stats
     uint32_t Str : 5;
     uint32_t Dex : 5;
