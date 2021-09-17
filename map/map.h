@@ -68,32 +68,4 @@ int writeMap(map_t map, FILE* fp);
  */
 int loadMap(map_t* map, FILE* fp);
 
-//==============================<Misc Functions>==============================//
-/**
- * Buffers the section of the map in view, with focus on the tile at position 
- * (x,y)
- * 
- * @param data The tile data struct to use for display
- * @param map The map to display
- * @param x The x coordinate of the selected tile
- * @param y The y coordinate of the selected cell
- * 
- * @return 0 on success, <0 on failure
- */
-int addMap(tileData_t * data, map_t map, int x, int y);
-
-/**
- * Sets cursor focus on the tile at position (x,y)
- * 
- * @param data The tile data struct to use for display
- * @param map The map to display
- * @param x The x coordinate of the selected tile
- * @param y The y coordinate of the selected cell
- */
-void setCursor(tileData_t data, map_t map, int x, int y);
-
-int mapToFile(tileData_t data, map_t map, FILE* file);
-
-int mapToSections(tileData_t data, map_t map, FILE* file, int pgWidth, int pgHeight, bool doSprites);
-
 #endif

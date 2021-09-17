@@ -68,15 +68,5 @@ sprite_t readSprite(FILE* file);
  */
 int writeSprite(FILE* file, sprite_t sprite);
 
-/**
- * Adds the specified sprite to the screen buffer
- * 
- * @param data The display data struct
- * @param sprite The sprite to draw
- * @param screenRow The top row to draw in
- * @param screenCol The left column to draw in
- */
-void addSprite(dispData_t * data, sprite_t sprite, int screenRow, int screenCol);
-
 
 #endif

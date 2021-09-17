@@ -96,43 +96,6 @@ int readTile(tile_t * tile, FILE* fp);
  */
 int writeTile(tile_t tile, FILE* fp);
 
-//===============================<Draw Helpers>===============================//
-/**
- * Buffers the provided tile in the proper place on screen
- * 
- * @param data The data structure defining the sprites to draw
- * @param tile The tile to draw to screen
- * @param scrX The x value of the tiles at the left of the screen
- * @param scrY The y value of the tiles at the top of the screen
- * @param x The x value of the tile in the map
- * @param y The y value of the tile in the map
- */
-void addTile(tileData_t * data, tile_t tile, int scrX, int scrY, int x, int y);
-
-/**
- * Buffers the walls of the provided tile in the proper place on screen
- * 
- * @param data The data structure defining the sprites to draw
- * @param tile The tile to draw to screen
- * @param scrX The x value of the tiles at the left of the screen
- * @param scrY The y value of the tiles at the top of the screen
- * @param x The x value of the tile in the map
- * @param y The y value of the tile in the map
- */
-void addWalls(tileData_t * data, tile_t tile, int scrX, int scrY, int x, int y);
-
-/**
- * Buffers the sprite of the provided tile in the proper place on screen
- * 
- * @param data The data structure defining the sprites to draw
- * @param tile The tile to draw to screen
- * @param scrX The x value of the tiles at the left of the screen
- * @param scrY The y value of the tiles at the top of the screen
- * @param x The x value of the tile in the map
- * @param y The y value of the tile in the map
- */
-void addTileSprite(tileData_t * data, tile_t tile, int scrX, int scrY, int x, int y);
-
 //===========================<Sprite Manipulation>============================//
 
 /**
@@ -171,16 +134,5 @@ void clearTileSprite(tile_t* tile);
  * @param palette The palette to set
  */
 void setCharSprite(tile_t* tile, char ch, short palette);
-
-//===============================<Misc Helpers>===============================//
-
-/**
- * Calculates the width and height of the screen in tiles
- * 
- * @param data The data struct defining screen tiles
- * @param width A return pointer for the width of the screen in tiles
- * @param height A return pointer for the height of the scren in tiles
- */
-void getScreenTileDim(tileData_t data, int * width, int * height);
 
 #endif
