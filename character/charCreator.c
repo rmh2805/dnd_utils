@@ -438,6 +438,18 @@ int main(int argc, char** argv) {
                 addText(&dispData, (sel == 2) ? kWhitePalette : kBlackPalette, buf, 2, 0);
                 if(sel == 2) intRef = &curChar.skillBonus;
 
+                sprintf(buf, "Max HP: %d", curChar.maxHP);
+                addText(&dispData, (sel == 3) ? kWhitePalette : kBlackPalette, buf, 3, 0);
+                if(sel == 3) intRef = &curChar.maxHP;
+
+                sprintf(buf, "Current HP: %d", curChar.curHP);
+                addText(&dispData, (sel == 4) ? kWhitePalette : kBlackPalette, buf, 4, 0);
+                if(sel == 4) intRef = &curChar.curHP;
+
+                sprintf(buf, "Temporary HP: %d", curChar.tmpHP);
+                addText(&dispData, (sel == 5) ? kWhitePalette : kBlackPalette, buf, 5, 0);
+                if(sel == 5) intRef = &curChar.tmpHP;
+
                 printBuffer(dispData);
 
                 // Handle input
@@ -450,7 +462,7 @@ int main(int argc, char** argv) {
 
                     case KEY_DOWN:
                         sel += 1;
-                        if(sel > 2) sel = 2;
+                        if(sel > 5) sel = 5;
                         break;
 
                     case KEY_LEFT:
