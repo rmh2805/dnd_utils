@@ -176,12 +176,14 @@ int main(int argc, char** argv) {
     } 
     if (!charLoaded) {
         curChar = mkCharData();
-        curChar.name = calloc(strlen(argv[1]) + 1, sizeof(char));
-        if(curChar.name == NULL) {
-            fprintf(stderr, "*ERROR* Failed to allocate for provided name\n");
-        } else {
-            strcpy(curChar.name, argv[1]);
-            charLoaded = true;
+        if(argc >= 2) {
+            curChar.name = calloc(strlen(argv[1]) + 1, sizeof(char));
+            if(curChar.name == NULL) {
+                fprintf(stderr, "*ERROR* Failed to allocate for provided name\n");
+            } else {
+                strcpy(curChar.name, argv[1]);
+                charLoaded = true;
+            }
         }
     }
 
