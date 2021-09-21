@@ -71,6 +71,7 @@ mode_t mode = menu;
 int menuSel = 0;
 int editSel = 0;
 int sel = 0;
+int sel2 = 0;
 
 // Display Variables
 bool dispInitialized = false;
@@ -168,6 +169,7 @@ int main(int argc, char** argv) {
     // Define some local variables
     int status = EXIT_SUCCESS;
     int ch = 0;
+    weapon_t weapon;
 
     int * intRef = NULL;
     char ** strRef = NULL;
@@ -243,7 +245,10 @@ int main(int argc, char** argv) {
                 printBuffer(dispData);
 
                 doMenuUpdate(true);
-                if(menu != edit) sel = 0;
+                if(menu != edit) {
+                    sel = 0;
+                    sel2 = 0; 
+                }
                 break;
 
             case new:   // Create a new character
@@ -486,7 +491,57 @@ int main(int argc, char** argv) {
                 break;
             
             case eWeap:
-                mode = edit;
+                weapon = curChar.weapons[sel];
+
+                // Update the display
+                clearBuffer(&dispData);
+                
+                sprintf(buf, "Weapon %d/3", sel + 1);
+                addText(&dispData, kBlackPalette, buf, 0, 0);
+
+                sprintf(buf, "Name: %s", weapon.name);
+                addText(&dispData, (sel2 == 0) ? kWhitePalette : kBlackPalette, buf, 2, 0);
+
+                sprintf(buf, "Attack Bonus: %hhd", weapon.atkBonus);
+                addText(&dispData, (sel2 == 1) ? kWhitePalette : kBlackPalette, buf, 3, 0);
+
+                sprintf(buf, "Damage Type: %s", weapon.dmgType);
+                addText(&dispData, (sel2 == 2) ? kWhitePalette : kBlackPalette, buf, 4, 0);
+
+                sprintf(buf, "Base Damage: %hhd", weapon.baseDamage);
+                addText(&dispData, (sel2 == 3) ? kWhitePalette : kBlackPalette, buf, 5, 0);
+
+                sprintf(buf, "Damage Die: %hhu", weapon.dmgDie);
+                addText(&dispData, (sel2 == 4) ? kWhitePalette : kBlackPalette, buf, 6, 0);
+
+                printBuffer(dispData);
+
+                ch = getch();
+                switch(ch) {
+                    case KEY_UP:
+                        sel2 += 1;
+                        if(sel2 > 4) sel2 = 4;
+                        break;
+                    case KEY_DOWN:
+                        sel2 -= 1;
+                        if(sel2 < 0) sel2 = 0;
+                        break;
+                    case KEY_RIGHT:
+                        sel += 1;
+                        if(sel >= kNWeapons) sel = 0;
+                        break;
+                    case KEY_LEFT:
+                        sel -= 1;
+                        if(sel < 0) sel = kNWeapons - 1;
+                        break;
+                    case '`':
+                        mode = edit;
+                        break;
+                    case '\n':
+                    case KEY_ENTER:
+                        //todo Edit here
+                        break;
+                }
                 break;
 
             case quit:
