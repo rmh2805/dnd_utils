@@ -72,6 +72,32 @@ void rmList(list_t list, freeFxn_t freeFxn) {
     free(list);
 }
 
+/**
+ * Saves the list out to file
+ * 
+ * @param list The list to save
+ * @param fp The file to save to
+ * @param writeEntry A function to write an entry to file
+ * 
+ * @return 0 on success, < 0 on failure
+ */
+int saveList(list_t list, FILE* fp, int (* writeEntry)(void*, FILE*)) {
+    return -1;
+}
+
+/**
+ * Reads a list from file
+ * 
+ * @param list a return pointer for the list
+ * @param fp the file to save to
+ * @param readEntry A function to read an entry from the current file line
+ * 
+ * @return 0 on success, <0 on failure
+ */
+int loadList(list_t * list, FILE* fp, int (*readEntry)(void**, FILE*)) {
+    return -1;
+}
+
 //=================================<Setters>==================================//
 /**
  * Appends an element to the end of the list

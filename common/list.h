@@ -2,10 +2,12 @@
 #define _LIST_H_
 
 #include <stdlib.h>
+#include <stdio.h>
 
 typedef struct list_s * list_t;
 typedef void (*freeFxn_t)(void * data);
 
+//==============================<Alloc and Free>==============================//
 /**
  * Makes a new linked list
  * 
@@ -20,6 +22,29 @@ list_t mkList();
  * @param freeFxn A function used to free all list elements
  */
 void rmList(list_t list, freeFxn_t freeFxn);
+
+/**
+ * Saves the list out to file
+ * 
+ * @param list The list to save
+ * @param fp The file to save to
+ * @param writeEntry A function to write an entry to file
+ * 
+ * @return 0 on success, < 0 on failure
+ */
+int saveList(list_t list, FILE* fp, int (* writeEntry)(void*, FILE*));
+
+
+/**
+ * Reads a list from file
+ * 
+ * @param list a return pointer for the list
+ * @param fp the file to save to
+ * @param readEntry A function to read an entry from the current file line
+ * 
+ * @return 0 on success, <0 on failure
+ */
+int loadList(list_t * list, FILE* fp, int (*readEntry)(void**, FILE*));
 
 //=================================<Setters>==================================//
 /**
