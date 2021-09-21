@@ -146,7 +146,7 @@ int writeStrEntry(void * str, FILE* fp) {
     if(fp == NULL) return -1;
 
     if(str == NULL) {
-        fprintf(fp, "0|\n");
+        fprintf(fp, "0 |\n");
     }
 
     unsigned len = strlen(str);
@@ -164,7 +164,19 @@ int writeStrEntry(void * str, FILE* fp) {
  * @return 0 on success, <0 on failure
  */
 int readStrEntry(void ** str, FILE* fp) {
-    return -1;
+    if(fp == NULL || str == NULL) return -1;
+
+    int len;
+    if(fscanf(fp, "%u |", &len) != 1) {
+        return -1;
+    }
+
+    *str = calloc(len + 1, sizeof(char));
+    if(*str == NULL) return -1;
+
+    fread(*str, 1, len, fp);
+
+    return 0;
 }
 
 //=================================<Setters>==================================//
