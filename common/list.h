@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 typedef struct list_s * list_t;
 typedef void (*freeFxn_t)(void * data);
@@ -34,7 +35,6 @@ void rmList(list_t list, freeFxn_t freeFxn);
  */
 int saveList(list_t list, FILE* fp, int (* writeEntry)(void*, FILE*));
 
-
 /**
  * Reads a list from file
  * 
@@ -42,9 +42,29 @@ int saveList(list_t list, FILE* fp, int (* writeEntry)(void*, FILE*));
  * @param fp the file to save to
  * @param readEntry A function to read an entry from the current file line
  * 
- * @return 0 on success, <0 on failure
+ * @return 0 on success, <0 on failure (does not self-clean on failure)
  */
 int loadList(list_t * list, FILE* fp, int (*readEntry)(void**, FILE*));
+
+/**
+ * Example writeEntry for strings
+ * 
+ * @param str The string to write
+ * @param fp The file to write to
+ * 
+ * @return 0 on success, <0 on failure
+ */
+int writeStrEntry(void * str, FILE* fp);
+
+/**
+ * Example readEntry for strings
+ * 
+ * @param str Return pointer for retrieved string
+ * @param fp The file to read from
+ * 
+ * @return 0 on success, <0 on failure
+ */
+int readStrEntry(void ** str, FILE* fp);
 
 //=================================<Setters>==================================//
 /**

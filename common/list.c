@@ -82,7 +82,20 @@ void rmList(list_t list, freeFxn_t freeFxn) {
  * @return 0 on success, < 0 on failure
  */
 int saveList(list_t list, FILE* fp, int (* writeEntry)(void*, FILE*)) {
-    return -1;
+    if(fp == NULL || writeEntry == NULL) return -1;
+
+    fprintf(fp, "%u\n", list->length);
+
+    node_t node = list->start;
+    while(node != NULL) {
+        if(writeEntry(node->data, fp) < 0) {
+            return -1;
+        }
+
+        node = node->next;
+    }
+
+    return 0;
 }
 
 /**
@@ -95,6 +108,62 @@ int saveList(list_t list, FILE* fp, int (* writeEntry)(void*, FILE*)) {
  * @return 0 on success, <0 on failure
  */
 int loadList(list_t * list, FILE* fp, int (*readEntry)(void**, FILE*)) {
+    if(list == NULL || fp == NULL || readEntry == NULL) {
+        return -1;
+    }
+
+    unsigned len;
+    if(fscanf(fp, "%u", &len) != 1) {
+        return -1;
+    }
+
+    *list = mkList();
+    for(unsigned i = 0; i < len; i++) {
+        void* ent;
+        if(readEntry(&ent, fp) < 0) {
+            return -1;
+        }
+
+        if(listAppend(*list, ent) < 0) {
+            return -1;
+        }
+    }
+
+
+    return 0;
+}
+
+
+/**
+ * Example writeEntry for strings
+ * 
+ * @param str The string to write
+ * @param fp The file to write to
+ * 
+ * @return 0 on success, <0 on failure
+ */
+int writeStrEntry(void * str, FILE* fp) {
+    if(fp == NULL) return -1;
+
+    if(str == NULL) {
+        fprintf(fp, "0|\n");
+    }
+
+    unsigned len = strlen(str);
+    fprintf(fp, "%u |%s\n", len, (char *)str);
+
+    return 0;
+}
+
+/**
+ * Example readEntry for strings
+ * 
+ * @param str Return pointer for retrieved string
+ * @param fp The file to read from
+ * 
+ * @return 0 on success, <0 on failure
+ */
+int readStrEntry(void ** str, FILE* fp) {
     return -1;
 }
 

@@ -33,6 +33,8 @@ charCreator: charCreator.o charData.o list.o dispBase.o stringUtils.o dispChar.o
 	$(CC) $(CFLAGS) $(CDEBUGFLAGS) -o $@ $^ $(CLIBS)
 	$(ECHO)
 
+testList: testList.o list.o
+	$(CC) $(CFLAGS) $(CDEBUGFLAGS) -o $@ $^ $(CLIBS)
 
 #
 #	Object Files
