@@ -6,24 +6,22 @@
 const char * str1 = "m >= n >= m+2";
 const char * str2 = "a contradiction";
 
+void freeHelp(void * ptr) {
+    if(ptr != NULL) free(ptr);
+}
+
 int main() {
     list_t list = mkList();
     FILE * fp;
     int ret;
 
-    char * buf = calloc(strlen(str1) + 1, sizeof(char));
-    strcpy(buf, str1);
-    listAppend(list, buf);
-
-    buf = calloc(strlen(str2) + 1, sizeof(char));
-    strcpy(buf, str2);
-    listAppend(list, buf);
+    listAppend(list, NULL);
 
     fp = fopen("test.out", "w");
     ret = saveList(list, fp, writeStrEntry);
     fclose(fp);
 
-    rmList(list, free);
+    rmList(list, freeHelp);
     list = NULL;
 
     if(ret < 0) {
@@ -35,7 +33,7 @@ int main() {
     fclose(fp);
 
     if(ret < 0) {
-        if(list != NULL) rmList(list, free);
+        if(list != NULL) rmList(list, freeHelp);
         return EXIT_FAILURE;
     }
 
@@ -43,6 +41,6 @@ int main() {
         printf("%s\n", (char *)listGet(list, i));
     }
 
-    rmList(list, free);
+    rmList(list, freeHelp);
     return EXIT_SUCCESS;
 }
