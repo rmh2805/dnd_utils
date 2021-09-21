@@ -12,7 +12,7 @@
 //=============================<Menu Definition>==============================//
 
 typedef enum mode_e {
-    menu, edit, new, load, save, quit, eBio, eStat, eProf, eMisc
+    menu, edit, new, load, save, quit, eBio, eStat, eProf, eMisc, eWeap
 } mode_t;
 
 // Main menu definition
@@ -41,14 +41,16 @@ const char * editMenuItems[] = {
     "1. Edit Bio Information",
     "2. Edit Stats",
     "3. Edit Proficiencies",
-    "4. Edit Misc Properties",
-    "5. Back to Main Menu"
+    "4. Edit Weapons",
+    "5. Edit Misc Properties",
+    "6. Back to Main Menu"
 };
 
 const mode_t editMenuModes[] = {
     eBio,
     eStat,
     eProf,
+    eWeap,
     eMisc,
     menu
 };
@@ -203,11 +205,11 @@ int main(int argc, char** argv) {
     // Set the initial mode
     mode = (charLoaded) ? edit : menu;
 
-
     //===============================<Loop>===============================//
     while(mode != quit) {
         if(!charLoaded && (mode == save || mode == edit || mode == eBio || 
-                mode == eStat || mode == eProf || mode == eMisc)) {
+                mode == eStat || mode == eProf || mode == eMisc || 
+                mode == eWeap)) {
             mode = menu;
         }
 
@@ -481,6 +483,10 @@ int main(int argc, char** argv) {
                     
                 }
 
+                break;
+            
+            case eWeap:
+                mode = edit;
                 break;
 
             case quit:
