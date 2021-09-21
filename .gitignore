@@ -2,8 +2,8 @@
 .vscode
 
 character/charCreator
-characters/testList
-characters/test.out
+character/testList
+character/test.out
 
 character/chars/*
 !character/chars/RayAran.chr
