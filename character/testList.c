@@ -16,12 +16,13 @@ int main() {
 
     buf = calloc(strlen(str2) + 1, sizeof(char));
     strcpy(buf, str2);
-    
     listAppend(list, buf);
 
     fp = fopen("test.out", "w");
     saveList(list, fp, writeStrEntry);
+    fclose(fp);
 
 
+    rmList(list, free);
     return EXIT_SUCCESS;
 }
