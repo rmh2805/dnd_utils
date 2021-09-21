@@ -12,6 +12,8 @@ extern const int kNStats;
 extern const int kNProfs;
 extern const int kNDice;
 
+#define kNWeapons 3
+
 // Skill indeces
 #define kStrIdx 0
 #define kDexIdx 1
@@ -40,6 +42,16 @@ extern const int kNDice;
 #define kSurvIdx 23
 
 //=================================<Typedefs>=================================//
+
+typedef struct weapon_s {
+    char * name;
+    char * dmgType;
+
+    signed char atkBonus;
+    signed char baseDamage;
+    unsigned char dmgDie;
+} weapon_t;
+
 typedef struct charData_s {
     // Basic Biographical Info
     char * name;
@@ -61,6 +73,9 @@ typedef struct charData_s {
     
     int maxHitDice[6];
     int curHitDice[6];
+
+    // Equiped Weapons
+    weapon_t weapons[kNWeapons];
     
     // Base Stats
     uint32_t Str : 5;
@@ -114,6 +129,20 @@ charData_t mkCharData();
  * @param charData The character to free
  */
 void rmCharData(charData_t charData);
+
+/**
+ * Returns a zeroed-out weapon struct
+ * 
+ * @return A zeroed-out weapon struct
+ */
+weapon_t mkWeapon();
+
+/**
+ * Frees any data allocated to a weapon struct
+ * 
+ * @param weapon The weapon
+ */
+void rmWeapon(weapon_t weapon);
 
 /**
  * Writes the provided charData file out to file

@@ -34,6 +34,29 @@ void rmCharData(charData_t charData) {
     if(charData.race != NULL) free(charData.race);
 }
 
+/**
+ * Returns a zeroed-out weapon struct
+ * 
+ * @return A zeroed-out weapon struct
+ */
+weapon_t mkWeapon() {
+    weapon_t weapon;
+    for(size_t i = 0; i < sizeof(weapon_t); i++) {
+        ((char *) & weapon)[i] = 0;
+    }
+    return weapon;
+}
+
+/**
+ * Frees any data allocated to a weapon struct
+ * 
+ * @param weapon The weapon
+ */
+void rmWeapon(weapon_t weapon) {
+    if(weapon.name != NULL) free(weapon.name);
+    if(weapon.dmgType != NULL) free(weapon.dmgType);
+}
+
 
 #define saveCharDataWriteString(fp, data, field) \
     fprintf(fp, "%lu |%s\n", (size_t) (data.field == NULL) ? 0 : \
@@ -41,6 +64,12 @@ void rmCharData(charData_t charData) {
 
 #define saveCharDataMergeBlock(block, data, field, width) \
     block = (block << width) | data.field
+
+void saveWeapon(FILE * fp, weapon_t weapon) {
+    saveCharDataWriteString(fp, weapon, name);
+    saveCharDataWriteString(fp, weapon, dmgType);
+    fprintf(fp, "%hhd %hhd %hhu|\n", weapon.atkBonus, weapon.baseDamage, weapon.dmgDie);
+}
 
 /**
  * Writes the provided charData file out to file
@@ -73,6 +102,11 @@ int saveCharData(FILE * fp, charData_t charData) {
         fprintf(fp, "%d ", charData.curHitDice[i]);
     }
     fprintf(fp, "\n");
+
+    // Save out the weapon info
+    for(int i = 0; i < kNWeapons; ++i) {
+        saveWeapon(fp, charData.weapons[i]);
+    }
 
     // Generate the base stat block;
     uint32_t statBlock = 0;
@@ -138,6 +172,20 @@ int loadCharDataString(FILE * fp, char** str) {
     return 0;
 }
 
+int loadWeapon(FILE * fp, weapon_t * weapon) {
+    /*
+    saveCharDataWriteString(fp, weapon, name);
+    saveCharDataWriteString(fp, weapon, dmgType);
+    fprintf(fp, "%hhd %hhd %hhu|\n", weapon.atkBonus, weapon.baseDamage, weapon.dmgDie);
+    */
+    if(fp == NULL || weapon == NULL) return -1;
+
+    loadCharDataString(fp, &weapon->name);
+    loadCharDataString(fp, &weapon->dmgType);
+    fscanf(fp, "%hhd %hhd %hhu|", &weapon->atkBonus, &weapon->baseDamage, &weapon->dmgDie);
+    return 0;
+}
+
 /**
  * Reads a provided character data struct from file
  * 
@@ -196,6 +244,12 @@ int loadCharData(FILE * fp, charData_t * charData) {
     }
     for(int i = 0; i < kNDice; i++) {
         fscanf(fp, "%d ", &charData->curHitDice[i]);
+    }
+
+
+    // Recover the weapon info
+    for(int i = 0; i < kNWeapons; ++i) {
+        loadWeapon(fp, &charData->weapons[i]);
     }
 
 
