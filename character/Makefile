@@ -59,3 +59,4 @@ clean:
 
 realclean: clean
 	-rm charCreator
+	-rm testList
