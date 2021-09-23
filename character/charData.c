@@ -68,7 +68,7 @@ void rmWeapon(weapon_t weapon) {
 void saveWeapon(FILE * fp, weapon_t weapon) {
     saveCharDataWriteString(fp, weapon, name);
     saveCharDataWriteString(fp, weapon, dmgType);
-    fprintf(fp, "%hhd %hhd %hhu|\n", weapon.atkBonus, weapon.baseDamage, weapon.dmgDie);
+    fprintf(fp, "%hhd %hhd %hhu %hhu|\n", weapon.atkBonus, weapon.baseDamage, weapon.dmgDie, weapon.nDice);
 }
 
 /**
@@ -173,16 +173,11 @@ int loadCharDataString(FILE * fp, char** str) {
 }
 
 int loadWeapon(FILE * fp, weapon_t * weapon) {
-    /*
-    saveCharDataWriteString(fp, weapon, name);
-    saveCharDataWriteString(fp, weapon, dmgType);
-    fprintf(fp, "%hhd %hhd %hhu|\n", weapon.atkBonus, weapon.baseDamage, weapon.dmgDie);
-    */
     if(fp == NULL || weapon == NULL) return -1;
 
     loadCharDataString(fp, &weapon->name);
     loadCharDataString(fp, &weapon->dmgType);
-    fscanf(fp, "%hhd %hhd %hhu|", &weapon->atkBonus, &weapon->baseDamage, &weapon->dmgDie);
+    fscanf(fp, "%hhd %hhd %hhu %hhu|", &weapon->atkBonus, &weapon->baseDamage, &weapon->dmgDie, &weapon->nDice);
     return 0;
 }
 

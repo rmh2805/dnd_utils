@@ -50,6 +50,7 @@ typedef struct weapon_s {
     signed char atkBonus;
     signed char baseDamage;
     unsigned char dmgDie;
+    unsigned char nDice;
 } weapon_t;
 
 typedef struct charData_s {
