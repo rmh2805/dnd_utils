@@ -515,13 +515,16 @@ int main(int argc, char** argv) {
                 sprintf(buf, "Damage Die: %hhu", weapRef->dmgDie);
                 addText(&dispData, (sel2 == 4) ? kWhitePalette : kBlackPalette, buf, 6, 0);
 
+                sprintf(buf, "Damage Dice Count: %hhu", weapRef->nDice);
+                addText(&dispData, (sel2 == 5) ? kWhitePalette : kBlackPalette, buf, 7, 0);
+
                 printBuffer(dispData);
 
                 ch = getch();
                 switch(ch) {
                     case KEY_UP:
                         sel2 -= 1;
-                        if(sel2 > 4) sel2 = 4;
+                        if(sel2 > 5) sel2 = 5;
                         break;
                     case KEY_DOWN:
                         sel2 += 1;
@@ -570,7 +573,6 @@ int main(int argc, char** argv) {
                             // Set the new string
                             *strRef = nStr;
                         } else {
-
                             switch(sel2) {
                                 case 1:
                                     weapRef->atkBonus = ch;
@@ -581,6 +583,8 @@ int main(int argc, char** argv) {
                                 case 4:
                                     weapRef->dmgDie = ch;
                                     break;
+                                case 5:
+                                    weapRef->nDice = ch;
                             }
 
                         }
