@@ -169,8 +169,9 @@ int main(int argc, char** argv) {
     // Define some local variables
     int status = EXIT_SUCCESS;
     int ch = 0;
-    weapon_t weapon;
+    int ret = 0;
 
+    weapon_t * weapRef = NULL;
     int * intRef = NULL;
     char ** strRef = NULL;
 
@@ -491,7 +492,7 @@ int main(int argc, char** argv) {
                 break;
             
             case eWeap:
-                weapon = curChar.weapons[sel];
+                weapRef = &curChar.weapons[sel];
 
                 // Update the display
                 clearBuffer(&dispData);
@@ -499,19 +500,19 @@ int main(int argc, char** argv) {
                 sprintf(buf, "Weapon %d/3", sel + 1);
                 addText(&dispData, kBlackPalette, buf, 0, 0);
 
-                sprintf(buf, "Name: %s", weapon.name);
+                sprintf(buf, "Name: %s", weapRef->name);
                 addText(&dispData, (sel2 == 0) ? kWhitePalette : kBlackPalette, buf, 2, 0);
 
-                sprintf(buf, "Attack Bonus: %hhd", weapon.atkBonus);
+                sprintf(buf, "Attack Bonus: %hhd", weapRef->atkBonus);
                 addText(&dispData, (sel2 == 1) ? kWhitePalette : kBlackPalette, buf, 3, 0);
 
-                sprintf(buf, "Damage Type: %s", weapon.dmgType);
+                sprintf(buf, "Damage Type: %s", weapRef->dmgType);
                 addText(&dispData, (sel2 == 2) ? kWhitePalette : kBlackPalette, buf, 4, 0);
 
-                sprintf(buf, "Base Damage: %hhd", weapon.baseDamage);
+                sprintf(buf, "Base Damage: %hhd", weapRef->baseDamage);
                 addText(&dispData, (sel2 == 3) ? kWhitePalette : kBlackPalette, buf, 5, 0);
 
-                sprintf(buf, "Damage Die: %hhu", weapon.dmgDie);
+                sprintf(buf, "Damage Die: %hhu", weapRef->dmgDie);
                 addText(&dispData, (sel2 == 4) ? kWhitePalette : kBlackPalette, buf, 6, 0);
 
                 printBuffer(dispData);
@@ -519,11 +520,11 @@ int main(int argc, char** argv) {
                 ch = getch();
                 switch(ch) {
                     case KEY_UP:
-                        sel2 += 1;
+                        sel2 -= 1;
                         if(sel2 > 4) sel2 = 4;
                         break;
                     case KEY_DOWN:
-                        sel2 -= 1;
+                        sel2 += 1;
                         if(sel2 < 0) sel2 = 0;
                         break;
                     case KEY_RIGHT:
@@ -539,7 +540,51 @@ int main(int argc, char** argv) {
                         break;
                     case '\n':
                     case KEY_ENTER:
-                        //todo Edit here
+                        ch = 0;
+                        strRef = NULL;
+
+                        promptText("Enter the new value");
+
+                        switch(sel2) {
+                            case 0:
+                                strRef = &weapRef->name;
+                                break;
+                            case 2:
+                                strRef = &weapRef->dmgType;
+                                break;
+                            default:
+                                ret = sscanf(buf, "%d", &ch);
+                        }
+
+                        if(strRef == NULL && ret < 1) break;
+
+                        if(strRef != NULL) {
+                            // Alloc a new string to hold the value on heap
+                            char * nStr = calloc(strlen(buf) + 1, sizeof(char));
+                            if(nStr == NULL) break;
+                            strcpy(nStr, buf);
+
+                            // Free any pre-existing string
+                            if(*strRef != NULL) free(*strRef);
+
+                            // Set the new string
+                            *strRef = nStr;
+                        } else {
+
+                            switch(sel2) {
+                                case 1:
+                                    weapRef->atkBonus = ch;
+                                    break;
+                                case 3:
+                                    weapRef->baseDamage = ch;
+                                    break;
+                                case 4:
+                                    weapRef->dmgDie = ch;
+                                    break;
+                            }
+
+                        }
+
                         break;
                 }
                 break;
