@@ -585,10 +585,9 @@ int main(int argc, char** argv) {
                                     break;
                                 case 5:
                                     weapRef->nDice = ch;
+                                    break;
                             }
-
                         }
-
                         break;
                 }
                 break;
