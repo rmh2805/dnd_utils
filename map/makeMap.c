@@ -262,6 +262,7 @@ int main(int argc, char** argv) {
             case menu:  // Main menu selection mode
                 curs_set(1);
                 addMenu(&data.dispData, "Make Map", menuItems, menuSize, y);
+                addText(&data.dispData, kBlackPalette, (mapLoaded) ? "A map is loaded" : "No map loaded", menuSize+3, 0);
                 printBuffer(data.dispData);
 
                 ch = getch();
