@@ -15,8 +15,10 @@
 #define kTileFile "walls.out"
 
 // global allocation of large arrays (let the compiler sort this one out)
-#define kDefMapRows 6
-#define kDefMapCols 6
+#define kDefMapRows 32
+#define kDefMapCols 32
+
+
 
 //===============================<Menu Helpers>===============================//
 typedef enum mode_e {
@@ -51,14 +53,14 @@ const int menuSize = sizeof(menuItems) / sizeof(menuItems[0]);
 #define max(a, b) ((a > b) ? a : b)
 
 
-FILE* getMapFile(bool loadFile) {
+FILE* promptFile(bool openRead) {
     char buf[128];
 
     clear();
-    printText(kBlackPalette, "Enter the save path", 0, 0);
+    printText(kBlackPalette, "Enter the file path", 0, 0);
     getText(2, 0, buf, 128);
 
-    FILE* fp = fopen(buf, (loadFile) ? "r" : "w");
+    FILE* fp = fopen(buf, (openRead) ? "r" : "w");
     return fp;
 }
 
@@ -239,6 +241,9 @@ int main() {
                         if(mode == new) {
                             x = kDefMapCols;
                             y = kDefMapRows;
+                        } else if (mode == nav && mapLoaded) {
+                            x = map.nCols/2;
+                            y = map.nRows/2;
                         } else {
                             x = 0;
                             y = 0;
@@ -305,7 +310,7 @@ int main() {
                     mapLoaded = false;
                 }
                 
-                fp = getMapFile(true);
+                fp = promptFile(true);
                 if(fp == NULL) {
                     printError("*ERROR* Unable to open map file");
                     y = 0;
@@ -328,7 +333,7 @@ int main() {
                     break;
                 }
                 
-                fp = getMapFile(false);
+                fp = promptFile(false);
                 if(fp == NULL) {
                     printError("*ERROR* Unable to open map file");
                     y = 0;
@@ -351,6 +356,7 @@ int main() {
                 }
 
                 clear();
+                clearBuffer(&data);
                 addMap(&data, map, x, y);
                 printBuffer(data.dispData);
                 setCursor(data, map, x, y);
@@ -483,7 +489,7 @@ int main() {
                 printText(kBlackPalette, "Include sprites [Y/n]? ", 0, 0);
                 ch = getch();
 
-                fp = getMapFile(false);
+                fp = promptFile(false);
                 if(fp == NULL) {
                     printError("*ERROR* Unable to open output file");
                     mode = menu;
