@@ -18,7 +18,9 @@
 #define kDefMapRows 32
 #define kDefMapCols 32
 
-
+#define kMapFileFlag "-m"
+#define kSpriteFileFlag "-s"
+#define kUsageFlag "-?"
 
 //===============================<Menu Helpers>===============================//
 typedef enum mode_e {
@@ -174,15 +176,64 @@ floodRoomCleanup:
 
 //================================<Main Code>=================================//
 
-int main() {
+int main(int argc, char** argv) {
     tileData_t data;
     int ret, ch;
     int x = 0, y = 0;
     char buf[80];
 
+    FILE * fp;
+
     bool mapLoaded = false;
     map_t map;
 
+
+    //=========================<Argument Parsing>=========================//
+    for(int i = 1; i < argc; i++) {
+        if(strcmp(kUsageFlag, argv[i]) == 0) {
+            if(mapLoaded) rmMap(map);
+            printf("Usage: %s [%s <Map File>] [%s <Sprite File>]\n", argv[0], kMapFileFlag, kSpriteFileFlag);
+            return EXIT_SUCCESS;
+        } else if (strcmp(kMapFileFlag, argv[i]) == 0) {
+            if(mapLoaded) {
+                rmMap(map);
+                fprintf(stderr, "*FATAL ERROR* Attempted to load 2 maps by arg\n");
+                return EXIT_FAILURE;
+            }
+            if(++i >= argc) {
+                fprintf(stderr, "*FATAL ERROR* No map file specified\n");
+                return EXIT_FAILURE;
+            }
+
+            fp = fopen(argv[i], "r");
+            if(fp == NULL) {
+                fprintf(stderr, "*FATAL ERROR* Unable to open map file \"%s\"\n", argv[i]);
+                return EXIT_FAILURE;
+            }
+
+            if(loadMap(&map, fp) < 0) {
+                fclose(fp);
+                fprintf(stderr, "*FATAL ERROR* Unable to read map file \"%s\"\n", argv[i]);
+                return EXIT_FAILURE;
+            }
+            mapLoaded = true;
+
+        } else if(strcmp(kSpriteFileFlag, argv[i]) == 0) {
+            if(++i > argc) {
+                if(mapLoaded) rmMap(map);
+                fprintf(stderr, "*FATAL ERROR* No sprite sheet specified\n");
+                return EXIT_FAILURE;
+            }
+            continue;
+        } else {
+            fprintf(stderr, "*FATAL ERROR* Unkown argument \"%s\"\n", argv[i]);
+            if(mapLoaded) rmMap(map);
+            return EXIT_FAILURE;
+        }
+
+    }
+
+    //==========================<Initialization>==========================//
     // Initialize the display
     if(initDisp(&data.dispData) != 0) {
         fprintf(stderr, "*FATAL ERROR* Failed to initialize the display\n");
@@ -190,7 +241,7 @@ int main() {
     }
 
     // Load in the tile file
-    FILE* fp = fopen(kTileFile, "r");
+    fp = fopen(kTileFile, "r");
     if(fp == NULL) {
         printError("*FATAL ERROR* Failed to load tile data file");
         closeDisp(data.dispData);
@@ -204,8 +255,8 @@ int main() {
     }
     fclose(fp);
 
-    // Main Loop
-    mode_t mode = menu;
+    //============================<Main Loop>=============================//
+    mode_t mode = (mapLoaded) ? nav : menu;
     while(mode != quit) {
         switch(mode) {
             case menu:  // Main menu selection mode
@@ -356,7 +407,7 @@ int main() {
                 }
 
                 clear();
-                clearBuffer(&data);
+                clearBuffer(&data.dispData);
                 addMap(&data, map, x, y);
                 printBuffer(data.dispData);
                 setCursor(data, map, x, y);
