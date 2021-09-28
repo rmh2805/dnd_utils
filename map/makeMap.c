@@ -96,7 +96,7 @@ void printHelp(mode_t mode) {
             helpPrinter("Home or '`' will return you to the main menu", 6);
             helpPrinter("'c' cycles the color palette of the tile ", 7);
             helpPrinter("'v' cycles the color palette of the tile's sprite", 8);
-            helpPrinter("'r' cycles to the next loaded sprite", 9);
+            helpPrinter("'r' cycles to the next loaded sprite (not currently implemented)", 9);
             helpPrinter("'g' places a char sprite of your chosing", 10);
             helpPrinter("'z' removes any sprite from the selected cell", 11);
             helpPrinter("'p' fills the selected room with the current color", 13);
