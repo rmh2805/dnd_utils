@@ -24,7 +24,7 @@
 
 //===============================<Menu Helpers>===============================//
 typedef enum mode_e {
-    menu, quit, new, load, save, nav, file
+    menu, quit, new, load, save, nav, file, getClip
 } mode_t;
 
 const char * menuItems[] = {
@@ -33,7 +33,8 @@ const char * menuItems[] = {
     "3. Save Map",
     "4. Edit Map",
     "5. Make Printable",
-    "6. Quit"
+    "6. Load a Clip",
+    "7. Quit"
 };
 
 mode_t menuModes[] = {
@@ -42,6 +43,7 @@ mode_t menuModes[] = {
     save,
     nav,
     file,
+    getClip,
     quit
 };
 
@@ -186,6 +188,8 @@ int main(int argc, char** argv) {
 
     bool mapLoaded = false;
     map_t map;
+    bool clipLoaded = false;
+    map_t clip;
 
 
     //=========================<Argument Parsing>=========================//
@@ -557,6 +561,10 @@ int main(int argc, char** argv) {
                 fclose(fp);
                 mode = menu;
                 break;
+            case getClip:
+                mode = menu;
+                
+                break;
             default:    // All other modes should simply quit
                 mode = quit;
                 break;
@@ -567,6 +575,7 @@ int main(int argc, char** argv) {
     closeDisp(data.dispData);
     rmTileData(data);
     if(mapLoaded) rmMap(map);
+    if(clipLoaded) rmMap(clip);
 
     return EXIT_SUCCESS;
 }
