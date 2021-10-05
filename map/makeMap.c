@@ -176,6 +176,27 @@ floodRoomCleanup:
     }
 }
 
+int doLoad(map_t * map, bool * isLoaded) {
+    if(*isLoaded) {
+        rmMap(*map);
+        *isLoaded = false;
+    }
+    
+    FILE * fp = promptFile(true);
+    if(fp == NULL) {
+        printError("*ERROR* Unable to open map file");
+        return -1;
+    }
+    if(loadMap(map, fp) < 0) {
+        printError("*ERROR* Unable to read map from file");
+    } else {
+        *isLoaded = true;
+    }
+    fclose(fp);
+
+    return (*isLoaded) ? -1 : 0;
+}
+
 //================================<Main Code>=================================//
 
 int main(int argc, char** argv) {
@@ -361,25 +382,8 @@ int main(int argc, char** argv) {
                 }
                 break;
             case load:  // Loads a saved map from file
-                if(mapLoaded) {
-                    rmMap(map);
-                    mapLoaded = false;
-                }
-                
-                fp = promptFile(true);
-                if(fp == NULL) {
-                    printError("*ERROR* Unable to open map file");
-                    y = 0;
-                    mode = menu;
-                    break;
-                }
-                if(loadMap(&map, fp) < 0) {
-                    printError("*ERROR* Unable to read map from file");
-                } else {
-                    mapLoaded = true;
-                }
-                fclose(fp);
-
+                doLoad(&map, &mapLoaded);
+                y = 0;
                 mode = menu;
                 break;
 
@@ -562,8 +566,9 @@ int main(int argc, char** argv) {
                 mode = menu;
                 break;
             case getClip:
+                doLoad(&clip, &clipLoaded);
+                y = 0;
                 mode = menu;
-                
                 break;
             default:    // All other modes should simply quit
                 mode = quit;
