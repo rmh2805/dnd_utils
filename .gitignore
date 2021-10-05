@@ -12,7 +12,6 @@ character/chars/*
 map/testSprite
 map/makeSprite
 map/makeMap
-map/randMap
 map/dispMap
 
 map/spriteSheets/*
