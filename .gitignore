@@ -21,3 +21,8 @@ map/spriteSheets/*
 map/maps/*
 !map/maps/FirstDungeon*.out
 !map/maps/room.out
+
+WorldGen/mkWorldMap
+Worldgen/randMap
+WorldGen/dispMap
+WorldGen/walls.out

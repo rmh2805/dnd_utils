@@ -31,6 +31,12 @@ all: mkWorldMap
 #
 mkWorldMap: mkWorldMap.o map.o sprite.o tile.o list.o
 	$(CC) $(CFLAGS) $(CDEBUGFLAGS) -o $@ $^
+	$(ECHO)
+
+randMap: randMap.o sprite.o tile.o map.o list.o
+	$(CC) $(CFLAGS) $(CDEBUGFLAGS) -o $@ $^ $(CLIBS)
+	$(ECHO)
+
 
 #
 #	Object Files
@@ -69,4 +75,5 @@ clean:
 
 realclean: clean
 	-rm mkWorldMap
+	-rm randMap
 
