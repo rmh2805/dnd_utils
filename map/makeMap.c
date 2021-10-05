@@ -217,7 +217,7 @@ int main(int argc, char** argv) {
     for(int i = 1; i < argc; i++) {
         if(strcmp(kUsageFlag, argv[i]) == 0) {
             if(mapLoaded) rmMap(map);
-            printf("Usage: %s [%s <Map File>] [%s <Sprite File>]\n", argv[0], kMapFileFlag, kSpriteFileFlag);
+            printf("Usage: %s [%s <Map File>]\n", argv[0], kMapFileFlag);
             return EXIT_SUCCESS;
         } else if (strcmp(kMapFileFlag, argv[i]) == 0) {
             if(mapLoaded) {
