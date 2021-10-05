@@ -262,6 +262,7 @@ int main(int argc, char** argv) {
     //==========================<Initialization>==========================//
     // Initialize the display
     if(initDisp(&data.dispData) != 0) {
+        if(mapLoaded) rmMap(map);
         fprintf(stderr, "*FATAL ERROR* Failed to initialize the display\n");
         return EXIT_FAILURE;
     }
@@ -270,12 +271,14 @@ int main(int argc, char** argv) {
     fp = fopen(kTileFile, "r");
     if(fp == NULL) {
         printError("*FATAL ERROR* Failed to load tile data file");
+        if(mapLoaded) rmMap(map);
         closeDisp(data.dispData);
         return EXIT_FAILURE;
     }
 
     if(loadTileData(fp, &data)) {
         printError("*FATAL ERROR* Failed to read tile data from file");
+        if(mapLoaded) rmMap(map);
         closeDisp(data.dispData);
         return EXIT_FAILURE;
     }
