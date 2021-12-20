@@ -98,6 +98,18 @@ void addTileBase(tileData_t * data, tile_t tile, int scrX, int scrY, int x, int 
     addSprite(&data->dispData, data->tileBase, palette, row, col);
 }
 
+#define getWallSprite(dir)\
+    switch(tile.dir##Wall) {\
+        case 0:\
+            break;\
+        case 1: \
+            sprite = data->dir##Wall;\
+            break;\
+        default:\
+            sprite = data->dir##Door;\
+    }
+
+
 void addTileWalls(tileData_t * data, tile_t tile, int scrX, int scrY, int x, int y) {
     if(data == NULL) return;
     
@@ -107,48 +119,16 @@ void addTileWalls(tileData_t * data, tile_t tile, int scrX, int scrY, int x, int
     }
 
     sprite_t sprite = kEmptySprite;
-    switch(tile.lWall) {
-        case 0:
-            break;
-        case 1:
-            sprite = data->lWall;
-            break;
-        default:
-            sprite = data->lDoor;
-    }
+    getWallSprite(l);
     addSprite(&data->dispData, sprite, 0, row, col);
     
-    switch(tile.rWall) {
-        case 0:
-            break;
-        case 1:
-            sprite = data->rWall;
-            break;
-        default:
-            sprite = data->rDoor;
-    }
+    getWallSprite(r);
     addSprite(&data->dispData, sprite, 0, row, col);
     
-    switch(tile.uWall) {
-        case 0:
-            break;
-        case 1:
-            sprite = data->uWall;
-            break;
-        default:
-            sprite = data->uDoor;
-    }
+    getWallSprite(u);
     addSprite(&data->dispData, sprite, 0, row, col);
     
-    switch(tile.dWall) {
-        case 0:
-            break;
-        case 1:
-            sprite = data->dWall;
-            break;
-        default:
-            sprite = data->dDoor;
-    }
+    getWallSprite(d);
     addSprite(&data->dispData, sprite, 0, row, col);
 
 }
