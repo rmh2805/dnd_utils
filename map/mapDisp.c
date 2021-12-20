@@ -33,12 +33,10 @@ void addSprite(dispData_t * data, sprite_t sprite, short palette, int screenRow,
             if(ch == '\0') {
                 continue;
             } else {
-                data->data[row][col] = (drawPair_t) {sprite.defPalette, sprite.data[dRow][dCol]};
+                data->data[row][col] = (drawPair_t) {palette, sprite.data[dRow][dCol]};
             }
         }
     }
-    refresh();
-    wattroff(stdscr, COLOR_PAIR(sprite.defPalette));
 }
 
 //===============================<Tile Display>===============================//
@@ -67,7 +65,7 @@ void addTile(tileData_t * data, tile_t tile, int scrX, int scrY, int x, int y) {
 
     // First draw the Base tile
     short tmp = data->tileBase.defPalette;
-    short palette = (tile.bgPalette == 0) ? 0 : tile.bgPalette;
+    short palette = (tile.bgOverride != 0) ? tile.bgOverride : tile.bgPalette;
     addSprite(&data->dispData, data->tileBase, palette, row, col);
     data->tileBase.defPalette = tmp;
 }
@@ -178,8 +176,8 @@ void addTileSprite(tileData_t * data, tile_t tile, int scrX, int scrY, int x, in
 
     // First draw the Base tile
     short tmp = sprite.defPalette;
-    if(tile.spritePalette != 0) sprite.defPalette = tile.spritePalette;
-    addSprite(&data->dispData, sprite, 0, row, col);
+    short palette = (tile.spriteOverride != 0) ? tile.spriteOverride : tile.spritePalette;
+    addSprite(&data->dispData, sprite, palette, row, col);
     sprite.defPalette = tmp;
 }
 
