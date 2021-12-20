@@ -420,8 +420,8 @@ int main() {
                             
                     // Palette swap keys
                     case KEY_PPAGE: // Entry palette swap
-                        entry->palette += 1;
-                        if(entry->palette > kMaxPalette) entry->palette = kMinPalette;
+                        entry->defPalette += 1;
+                        if(entry->defPalette > kMaxPalette) entry->defPalette = kMinPalette;
                         break;
                     
                     // Data entry keys

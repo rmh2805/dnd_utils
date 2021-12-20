@@ -9,16 +9,9 @@
 #endif
 
 //==============================<Sprite Display>==============================//
-/**
- * Draws the specified sprite on screen
- * 
- * @param data A common display data struct
- * @param sprite The sprite to draw
- * @param screenRow The top row to draw in
- * @param screenCol The left column to draw in
- */
-void addSprite(dispData_t * data, sprite_t sprite, int screenRow, int screenCol) {
+void addSprite(dispData_t * data, sprite_t sprite, short palette, int screenRow, int screenCol) {
     if(data == NULL || data->data == NULL) return;
+    if(palette == 0) palette = sprite.defPalette; 
 
     screenRow = screenRow + sprite.yOff;
     screenCol = screenCol + sprite.xOff;
@@ -40,25 +33,16 @@ void addSprite(dispData_t * data, sprite_t sprite, int screenRow, int screenCol)
             if(ch == '\0') {
                 continue;
             } else {
-                data->data[row][col] = (drawPair_t) {sprite.palette, sprite.data[dRow][dCol]};
+                data->data[row][col] = (drawPair_t) {sprite.defPalette, sprite.data[dRow][dCol]};
             }
         }
     }
     refresh();
-    wattroff(stdscr, COLOR_PAIR(sprite.palette));
+    wattroff(stdscr, COLOR_PAIR(sprite.defPalette));
 }
 
 //===============================<Tile Display>===============================//
-/**
- * Buffers the provided tile in the proper place on screen
- * 
- * @param data The data structure defining the sprites to draw
- * @param tile The tile to draw to screen
- * @param scrX The x value of the tiles at the left of the screen
- * @param scrY The y value of the tiles at the top of the screen
- * @param x The x value of the tile in the map
- * @param y The y value of the tile in the map
- */
+
 void addTile(tileData_t * data, tile_t tile, int scrX, int scrY, int x, int y) {
     if(data == NULL) return;
 
@@ -77,27 +61,17 @@ void addTile(tileData_t * data, tile_t tile, int scrX, int scrY, int x, int y) {
 
     // If the tile is empty, draw the empty tile and be done with it
     if(tile.isEmpty) {
-        addSprite(&data->dispData, data->emptyBase, row, col);
+        addSprite(&data->dispData, data->emptyBase, 0, row, col);
         return;
     }
 
     // First draw the Base tile
-    short tmp = data->tileBase.palette;
-    if(tile.bgPalette != 0) data->tileBase.palette = tile.bgPalette;
-    addSprite(&data->dispData, data->tileBase, row, col);
-    data->tileBase.palette = tmp;
+    short tmp = data->tileBase.defPalette;
+    short palette = (tile.bgPalette == 0) ? 0 : tile.bgPalette;
+    addSprite(&data->dispData, data->tileBase, palette, row, col);
+    data->tileBase.defPalette = tmp;
 }
 
-/**
- * Buffers the walls of the provided tile in the proper place on screen
- * 
- * @param data The data structure defining the sprites to draw
- * @param tile The tile to draw to screen
- * @param scrX The x value of the tiles at the left of the screen
- * @param scrY The y value of the tiles at the top of the screen
- * @param x The x value of the tile in the map
- * @param y The y value of the tile in the map
- */
 void addWalls(tileData_t * data, tile_t tile, int scrX, int scrY, int x, int y) {
     if(data == NULL) return;
 
@@ -123,7 +97,7 @@ void addWalls(tileData_t * data, tile_t tile, int scrX, int scrY, int x, int y) 
         default:
             sprite = data->lDoor;
     }
-    addSprite(&data->dispData, sprite, row, col);
+    addSprite(&data->dispData, sprite, 0, row, col);
     
     switch(tile.rWall) {
         case 0:
@@ -134,7 +108,7 @@ void addWalls(tileData_t * data, tile_t tile, int scrX, int scrY, int x, int y) 
         default:
             sprite = data->rDoor;
     }
-    addSprite(&data->dispData, sprite, row, col);
+    addSprite(&data->dispData, sprite, 0, row, col);
     
     switch(tile.uWall) {
         case 0:
@@ -145,7 +119,7 @@ void addWalls(tileData_t * data, tile_t tile, int scrX, int scrY, int x, int y) 
         default:
             sprite = data->uDoor;
     }
-    addSprite(&data->dispData, sprite, row, col);
+    addSprite(&data->dispData, sprite, 0, row, col);
     
     switch(tile.dWall) {
         case 0:
@@ -156,20 +130,10 @@ void addWalls(tileData_t * data, tile_t tile, int scrX, int scrY, int x, int y) 
         default:
             sprite = data->dDoor;
     }
-    addSprite(&data->dispData, sprite, row, col);
+    addSprite(&data->dispData, sprite, 0, row, col);
 
 }
 
-/**
- * Buffers the sprite of the provided tile in the proper place on screen
- * 
- * @param data The data structure defining the sprites to draw
- * @param tile The tile to draw to screen
- * @param scrX The x value of the tiles at the left of the screen
- * @param scrY The y value of the tiles at the top of the screen
- * @param x The x value of the tile in the map
- * @param y The y value of the tile in the map
- */
 void addTileSprite(tileData_t * data, tile_t tile, int scrX, int scrY, int x, int y) {
     if(data == NULL) return;
     
@@ -205,7 +169,7 @@ void addTileSprite(tileData_t * data, tile_t tile, int scrX, int scrY, int x, in
         if (palette<kMinPalette || palette>kMaxPalette) palette = kDefPalette;
 
         sprite.data[1][1] = ch;
-        sprite.palette = palette;
+        sprite.defPalette = palette;
 
         sprite = data->charSprite;
     } else {
@@ -213,36 +177,19 @@ void addTileSprite(tileData_t * data, tile_t tile, int scrX, int scrY, int x, in
     }
 
     // First draw the Base tile
-    short tmp = sprite.palette;
-    if(tile.spritePalette != 0) sprite.palette = tile.spritePalette;
-    addSprite(&data->dispData, sprite, row, col);
-    sprite.palette = tmp;
+    short tmp = sprite.defPalette;
+    if(tile.spritePalette != 0) sprite.defPalette = tile.spritePalette;
+    addSprite(&data->dispData, sprite, 0, row, col);
+    sprite.defPalette = tmp;
 }
 
-/**
- * Calculates the width and height of the screen in tiles
- * 
- * @param data The data struct defining screen tiles
- * @param width A return pointer for the width of the screen in tiles
- * @param height A return pointer for the height of the scren in tiles
- */
 void getScreenTileDim(tileData_t data, int * width, int * height) {
     if(width != NULL) *width = data.dispData.screenCols / data.emptyBase.width;
     if(height != NULL) *height = data.dispData.screenRows / data.emptyBase.height;
 }
 
 //===============================<Map Display>================================//
-/**
- * Buffers the section of the map in view, with focus on the tile at position 
- * (x,y)
- * 
- * @param data The tile data struct to use for display
- * @param map The map to display
- * @param x The x coordinate of the selected tile
- * @param y The y coordinate of the selected cell
- * 
- * @return 0 on success, <0 on failure
- */
+
 int addMap(tileData_t * data, map_t map, int x, int y) {
     // Determine the position of the screen
     int width, height;  // Width and height of the screen in tiles
@@ -289,14 +236,6 @@ int addMap(tileData_t * data, map_t map, int x, int y) {
     return 0;
 }
 
-/**
- * Sets cursor focus on the tile at position (x,y)
- * 
- * @param data The tile data struct to use for display
- * @param map The map to display
- * @param x The x coordinate of the selected tile
- * @param y The y coordinate of the selected cell
- */
 void setCursor(tileData_t data, map_t map, int x, int y) {
     // Determine the position of the screen
     int width, height;  // Width and height of the screen in tiles

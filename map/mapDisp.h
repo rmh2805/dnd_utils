@@ -14,10 +14,11 @@
  * 
  * @param data The display data struct
  * @param sprite The sprite to draw
+ * @param palette The palette to draw the sprite in (0 for default)
  * @param screenRow The top row to draw in
  * @param screenCol The left column to draw in
  */
-void addSprite(dispData_t * data, sprite_t sprite, int screenRow, int screenCol);
+void addSprite(dispData_t * data, sprite_t sprite, short palette, int screenRow, int screenCol);
 
 //===============================<Tile Display>===============================//
 /**

@@ -7,7 +7,7 @@
 #include "../common/dispBase.h"
 
 typedef struct sprite_s {
-    short palette;
+    short defPalette;               // The default palette for this sprite
 
     unsigned char width, height;    // Width and height of the sprite
     unsigned char xOff, yOff;       // X and Y offsets from top left of tile

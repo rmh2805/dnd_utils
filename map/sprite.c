@@ -144,7 +144,7 @@ sprite_t readSprite(FILE* file) {
 int writeSprite(FILE* file, sprite_t sprite) {
     if(file == NULL || sprite.data == NULL) return -1;
 
-    fprintf(file, "%hd %hhu %hhu %hhu %hhu |", sprite.palette, sprite.width,
+    fprintf(file, "%hd %hhu %hhu %hhu %hhu |", sprite.defPalette, sprite.width,
                 sprite.height, sprite.xOff, sprite.yOff);
     
     for(int row = 0; row < sprite.height; row++) {
