@@ -14,43 +14,59 @@
 #define kTileFile "walls.spt"
 
 int main(int argc, char** argv) {
+    //============================<Core State>============================//
+    int status = EXIT_FAILURE;
+    
+    FILE* fp = NULL;
+    bool fileOpen = false;
+
+    tileData_t data;
+    bool tilesLoaded = false;
+
+    map_t map;
+    bool mapLoaded = false;
+
+    //============================<Main Code>=============================//
     if(argc < 2) {
         printf("Usage: %s <map file>\n\n", argv[0]);
-        return EXIT_FAILURE;
+        goto main_cleanup;
     }
     
     bool doPages = argc > 2;
 
-    tileData_t data;
     
     // Load in the tile file
-    FILE* fp = fopen(kTileFile, "r");
+    fp = fopen(kTileFile, "r");
     if(fp == NULL) {
         fprintf(stderr, "*FATAL ERROR* Failed to load tile data file\n");
-        return EXIT_FAILURE;
+        goto main_cleanup;
     }
+    fileOpen = true;
 
     if(loadTileData(fp, &data)) {
         fprintf(stderr, "*FATAL ERROR* Failed to read tile data from file\n");
-        return EXIT_FAILURE;
+        goto main_cleanup;
     }
     fclose(fp);
+    fileOpen = false;
+    tilesLoaded = true;
 
     // Load in the map
     fp = fopen(argv[1], "r");
     if(fp == NULL) {
         fprintf(stderr, "*FATAL ERROR* Failed to open map file\n");
-        rmTileData(data);
-        return EXIT_FAILURE;
+        goto main_cleanup;
     }
+    fileOpen = true;
 
-    map_t map;
     if(loadMap(&map, fp) != 0) {
         fprintf(stderr, "*FATAL ERROR* Failed to load map from file\n");
-        rmTileData(data);
-        return EXIT_FAILURE;
+        goto main_cleanup;
     }
     fclose(fp);
+    fileOpen = false;
+    mapLoaded = true;
+    
 
     // Print the map to stdout
     if(doPages) {
@@ -59,8 +75,11 @@ int main(int argc, char** argv) {
         mapToFile(data, map, stdout);
     }
 
+    status = EXIT_SUCCESS;
+main_cleanup:
     // Cleanup
-    rmTileData(data);
-    rmMap(map);
-    return EXIT_SUCCESS;
+    if(fileOpen) fclose(fp);
+    if(tilesLoaded) rmTileData(data);
+    if(mapLoaded) rmMap(map);
+    return status;
 }
