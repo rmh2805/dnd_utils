@@ -12,10 +12,6 @@ void freeTiles(tile_t** tiles, int nRows);
 #define max(a, b) ((a > b) ? a : b)
 #endif
 
-#ifndef printError
-#define printError(msg) clear();printText(kRedPalette, msg, 0, 0); getch()
-#endif
-
 //============================<Memory Management>=============================//
 /**
  * Allocates and initializes a map with the provided dimensions
