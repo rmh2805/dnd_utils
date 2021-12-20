@@ -87,6 +87,8 @@ int main(int argc, char** argv) {
                 // Display the menu
                 clearBuffer(&dispData);
                 addMenu(&dispData, "MakeSprite", menuItems, menuSize, y);
+                sprintf(buf, "%d sprites in the list", (spriteList == NULL) ? 0 : listLen(spriteList));
+                addText(&dispData, kBlackPalette, buf, menuSize + 3, 0);
                 printBuffer(dispData);
 
                 // Get the next input
