@@ -24,7 +24,7 @@
 
 //===============================<Menu Helpers>===============================//
 typedef enum mode_e {
-    menu, quit, new, load, save, nav, file, getClip
+    menu, quit, new, load, save, nav, file
 } mode_t;
 
 const char * menuItems[] = {
@@ -33,8 +33,7 @@ const char * menuItems[] = {
     "3. Save Map",
     "4. Edit Map",
     "5. Make Printable",
-    "6. Load a Clip",
-    "7. Quit"
+    "6. Quit"
 };
 
 mode_t menuModes[] = {
@@ -43,7 +42,6 @@ mode_t menuModes[] = {
     save,
     nav,
     file,
-    getClip,
     quit
 };
 
@@ -102,7 +100,6 @@ void printHelp(mode_t mode) {
             helpPrinter("'g' places a char sprite of your chosing", 10);
             helpPrinter("'z' removes any sprite from the selected cell", 11);
             helpPrinter("'p' fills the selected room with the current color", 13);
-            helpPrinter("',' Pastes the current clip into the map (not currently implemented)", 14);
             newRow = 16;
             break;
         default:
@@ -210,8 +207,6 @@ int main(int argc, char** argv) {
 
     bool mapLoaded = false;
     map_t map;
-    bool clipLoaded = false;
-    map_t clip;
 
 
     //=========================<Argument Parsing>=========================//
@@ -292,7 +287,6 @@ int main(int argc, char** argv) {
                 curs_set(1);
                 addMenu(&data.dispData, "Make Map", menuItems, menuSize, y);
                 addText(&data.dispData, kBlackPalette, (mapLoaded) ? "A map is loaded" : "No map loaded", menuSize+3, 0);
-                addText(&data.dispData, kBlackPalette, (clipLoaded) ? "A clip is loaded" : "No clip loaded", menuSize+4, 0);
                 printBuffer(data.dispData);
 
                 ch = getch();
@@ -570,11 +564,6 @@ int main(int argc, char** argv) {
                 fclose(fp);
                 mode = menu;
                 break;
-            case getClip:
-                doLoad(&clip, &clipLoaded);
-                y = 0;
-                mode = menu;
-                break;
             default:    // All other modes should simply quit
                 mode = quit;
                 break;
@@ -585,7 +574,6 @@ int main(int argc, char** argv) {
     closeDisp(data.dispData);
     rmTileData(data);
     if(mapLoaded) rmMap(map);
-    if(clipLoaded) rmMap(clip);
 
     return EXIT_SUCCESS;
 }
