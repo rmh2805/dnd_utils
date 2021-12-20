@@ -25,15 +25,15 @@
 int getScreenRowCol(tileData_t * data, int scrX, int scrY, int x, int y, int * col, int * row) {
     if(data == NULL) return -1;
 
-    // First calculate the screen position of the tile
-    unsigned char tileWidth = data->tileBase.width;
-    unsigned char tileHeight = data->tileBase.height;
-
     // Adjust grid coordinates to the view of the screen
     int dX = x - scrX, dY = y - scrY;
     if(dX < 0 || dY < 0) {
         return -1;    // Nothing to draw above or left of screen
     }
+
+    // First calculate the screen position of the tile
+    unsigned char tileWidth = data->tileBase.width;
+    unsigned char tileHeight = data->tileBase.height;
 
     // Calculate the character position of the tile (and ensure it is onscreen)
     *col = dX * tileWidth;
