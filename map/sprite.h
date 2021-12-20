@@ -5,6 +5,7 @@
 #include <stdio.h>
 
 #include "../common/dispBase.h"
+#include "../common/list.h"
 
 typedef struct sprite_s {
     short defPalette;               // The default palette for this sprite
@@ -68,5 +69,29 @@ sprite_t readSprite(FILE* file);
  */
 int writeSprite(FILE* file, sprite_t sprite);
 
+/**
+ * Loads all sprites from the provided file and appends them to the provided list
+ * 
+ * @param file The file to load sprites from
+ * @param list The sprite list to load into
+ * 
+ * @return The number of sprites read (<0 on failure)
+ */
+int loadSpriteList(FILE* file, list_t * list);
+
+/**
+ * Copies the contents of a sprite onto the heap for entry into a list
+ * 
+ * @param sprite The sprite to copy onto the heap
+ * @return The pointer to the new heap sprite
+ */
+sprite_t * mkSpriteEntry(sprite_t sprite);
+
+/**
+ * Free function for sprite list entries
+ * 
+ * @param entry The sprite list entry to free
+ */
+void freeSpriteEntry(void * entry);
 
 #endif

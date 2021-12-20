@@ -169,3 +169,55 @@ int writeSprite(FILE* file, sprite_t sprite) {
     fprintf(file, "\n");
     return 0;
 }
+
+int loadSpriteList(FILE* file, list_t * list) {
+    // Ensure that the file and sprite list both exist
+    if(list == NULL || file == NULL) {
+        return -1;
+    }
+
+    // Prepare internal files
+    int nRead = 0, ret = 0;
+    sprite_t sprite, * entry;
+
+    // While valid sprites are being returned from the file...
+    while((sprite = readSprite(file)).data != NULL) {
+        ret = -1;
+        // Turn the sprite into an entry
+        entry = mkSpriteEntry(sprite);
+        if(entry == NULL) {
+            break;
+        }
+
+        ret = listAppend(*list, entry);
+        if(ret < 0) {
+            freeSpriteEntry(entry);
+            break;
+        }
+
+        ++nRead;
+    }
+
+    if(nRead == 0 && ret < 0) { // If we failed to create or append the first entry...
+        return -1;
+    }
+
+    return nRead;
+}
+
+sprite_t * mkSpriteEntry(sprite_t sprite) {
+    sprite_t * ptr = calloc(1, sizeof(sprite_t));
+    if(ptr == NULL) {
+        return NULL;
+    }
+    *ptr = sprite;
+    return ptr;
+}
+
+void freeSpriteEntry(void * entry) {
+    if(entry == NULL) {
+        return;
+    }
+    rmSprite(*(sprite_t *) entry);
+    free(entry);
+}

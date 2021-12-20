@@ -36,7 +36,7 @@ const mode_t menuModes[] = {
 const unsigned char menuSize = sizeof(menuItems) / sizeof(menuItems[0]);
 
 //===============================<Misc Helpers>===============================//
-sprite_t * mkSpriteEntry(sprite_t sprite) {
+sprite_t * mkSpriteEntry_makeSprite(sprite_t sprite) {
     sprite_t * ptr = malloc(sizeof(sprite_t));
     if(ptr == NULL) return NULL;
     *ptr = sprite;
@@ -220,7 +220,7 @@ int main() {
                             }
 
                             // Wrap the new sprite into an entry
-                            entry = mkSpriteEntry(sprite);
+                            entry = mkSpriteEntry_makeSprite(sprite);
                             if(entry == NULL) {
                                 rmSprite(sprite);
                                 printError("*ERROR* Failed to allocate data for new sprite entry");
@@ -266,7 +266,7 @@ int main() {
                 }
 
                 // Create a new basic tile to resize
-                entry = mkSpriteEntry(mkBlankTile(kDefPalette, 8, 5));
+                entry = mkSpriteEntry_makeSprite(mkBlankTile(kDefPalette, 8, 5));
                 if(entry == NULL || entry->data == NULL) {
                     printError("*FATAL ERROR* Failed to allocate a new tile");
                     mode = quit;
@@ -492,7 +492,7 @@ int main() {
 
                 // For each sprite in the sheet
                 for(sprite = readSprite(fp); sprite.data != NULL; sprite = readSprite(fp)) {
-                    entry = mkSpriteEntry(sprite);
+                    entry = mkSpriteEntry_makeSprite(sprite);
 
                     
                     if(entry == NULL) { // On failure to place sprite in heap...
