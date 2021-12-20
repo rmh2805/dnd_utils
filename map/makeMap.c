@@ -48,157 +48,25 @@ mode_t menuModes[] = {
 
 const int menuSize = sizeof(menuItems) / sizeof(menuItems[0]);
 
-//===============================<Misc Helpers>===============================//
-
+//============================<Helper Definitions>============================//
 #define printError(msg) clear();printText(kRedPalette, msg, 0, 0); getch()
 
+#ifndef min
 #define min(a, b) ((a < b) ? a : b)
+#endif
+
+#ifndef max
 #define max(a, b) ((a > b) ? a : b)
+#endif
 
+void floodRoom(map_t * map, int x, int y);
 
-FILE* promptFile(bool openRead) {
-    char buf[128];
+void printHelp(mode_t mode);
 
-    clear();
-    printText(kBlackPalette, "Enter the file path", 0, 0);
-    getText(2, 0, buf, 128);
-
-    FILE* fp = fopen(buf, (openRead) ? "r" : "w");
-    return fp;
-}
-
-#define helpPrinter(msg, row) printText(kBlackPalette, msg, row, 0)
-
-void printHelp(mode_t mode) {
-    clear();
-    printText(kBlackPalette, "Help Prompt", 0, 0);
-    int newRow = 2;
-    switch(mode) {
-        case menu:
-            helpPrinter("Use the arrow keys and enter to select an option", 2);
-            helpPrinter("Alternatively, you can select the numbered options with their keys", 3);
-
-            helpPrinter("New Map will prompt you to select dimensions for a new map", 5);
-            helpPrinter("Load Map will prompt you for a file to load a map from", 6);
-            helpPrinter("Save Map will prmopt you for a filename to save out the current map", 7);
-            helpPrinter("Edit map will allow you to edit the loaded map", 8);
-            helpPrinter("Make Printable will generate a map to be printed as plaintext", 9);
-            helpPrinter("Quit... quits (real original, I know)", 10);
-
-            helpPrinter("Worth noting, attempting to backspace in text entry currently results in", 12);
-            helpPrinter("corruption. Instead, the delete key currently fills its role", 13);
-            newRow = 15;
-            break;
-        case nav:
-            helpPrinter("Use the Arrow keys to select a tile to modify", 2);
-            helpPrinter("Enter or 'e' will mark the tile as habitable", 3);
-            helpPrinter("Delete or 'q' will mark the tile as uninhabitable", 4);
-            helpPrinter("WASD cycles the walls on each side of the cell b/n empty, solid, and door", 5);
-            helpPrinter("Home or '`' will return you to the main menu", 6);
-            helpPrinter("'c' cycles the color palette of the tile ", 7);
-            helpPrinter("'v' cycles the color palette of the tile's sprite", 8);
-            helpPrinter("'r' cycles to the next loaded sprite (not currently implemented)", 9);
-            helpPrinter("'g' places a char sprite of your chosing", 10);
-            helpPrinter("'z' removes any sprite from the selected cell", 11);
-            helpPrinter("'p' fills the selected room with the current color", 13);
-            newRow = 16;
-            break;
-        default:
-            newRow = 2;
-    }
-    printText(kBlackPalette, "Press enter to continue...", newRow, 0);
-    getch();
-
-}
-
-//===========================<Color Flood Helpers>============================//
-void floodRoomRec(map_t * map, bool** visited, short palette, int x, int y) {
-    // Caller checks position for wall detection
-    if(visited[y][x] || map->data[y][x].isEmpty) { 
-        return;
-    }
-
-    // Mark this cell as visited and update its palette
-    visited[y][x] = true;
-    map->data[y][x].bgPalette = palette;
-
-    // Call recursively to all adjacent cells not blocked by walls
-    // Cell above
-    if(y > 0 && !(map->data[y][x].uWall || map->data[y-1][x].dWall)) {
-        floodRoomRec(map, visited, palette, x, y-1);
-    }
-    // Cell below
-    if(y+1 < map->nRows && !(map->data[y][x].dWall || map->data[y+1][x].uWall)) {
-        floodRoomRec(map, visited, palette, x, y+1);
-    }
-    // Cell left
-    if(x > 0 && !(map->data[y][x].lWall || map->data[y][x-1].rWall)) {
-        floodRoomRec(map, visited, palette, x-1, y);
-    }
-    // Cell right
-    if(x+1 < map->nCols && !(map->data[y][x].rWall || map->data[y][x+1].lWall)) {
-        floodRoomRec(map, visited, palette, x+1, y);
-    }
-
-
-}
-
-void floodRoom(map_t * map, int x, int y) {
-    // First of all, ensure that the map exists and that the first square is enabled
-    if(map == NULL || y < 0 || y >= map->nRows || x < 0 || x >= map->nCols || 
-            map->data[y][x].isEmpty) {
-        return;
-    }
-
-    // First allocated a visited array
-    bool ** visited = calloc(map->nRows, sizeof(bool *));
-    if(visited == NULL) {
-        return;
-    }
-
-    for(int i = 0; i < map->nRows; i++) {
-        visited[i] = calloc(map->nCols, sizeof(bool));
-        if(visited[i] == NULL) goto floodRoomCleanup;
-    }
-
-    // Next grab the palette and begin the flood process
-    short palette = map->data[y][x].bgPalette;
-    floodRoomRec(map, visited, palette, x, y);
-
-
-floodRoomCleanup:
-    if(visited != NULL) {
-        for(int i = 0; i < map->nRows; i++) {
-            if(visited[i] != NULL) free(visited[i]);
-        }
-        free(visited);
-    }
-}
-
-int doLoad(map_t * map, bool * isLoaded) {
-    FILE * fp = promptFile(true);
-    if(fp == NULL) {
-        printError("*ERROR* Unable to open map file");
-        return -1;
-    }
-
-    if(*isLoaded) {
-        rmMap(*map);
-        *isLoaded = false;
-    }
-
-    if(loadMap(map, fp) < 0) {
-        printError("*ERROR* Unable to read map from file");
-    } else {
-        *isLoaded = true;
-    }
-    fclose(fp);
-
-    return (*isLoaded) ? -1 : 0;
-}
+FILE* promptFile(bool openRead);
+int doLoad(map_t * map, bool * isLoaded);
 
 //================================<Main Code>=================================//
-
 int main(int argc, char** argv) {
     int status = EXIT_FAILURE;
 
@@ -621,4 +489,147 @@ main_cleanup:
     if(mapLoaded) rmMap(map);
 
     return status;
+}
+
+//===========================<Color Flood Helpers>============================//
+void floodRoomRec(map_t * map, bool** visited, short palette, int x, int y) {
+    // Caller checks position for wall detection
+    if(visited[y][x] || map->data[y][x].isEmpty) { 
+        return;
+    }
+
+    // Mark this cell as visited and update its palette
+    visited[y][x] = true;
+    map->data[y][x].bgPalette = palette;
+
+    // Call recursively to all adjacent cells not blocked by walls
+    // Cell above
+    if(y > 0 && !(map->data[y][x].uWall || map->data[y-1][x].dWall)) {
+        floodRoomRec(map, visited, palette, x, y-1);
+    }
+    // Cell below
+    if(y+1 < map->nRows && !(map->data[y][x].dWall || map->data[y+1][x].uWall)) {
+        floodRoomRec(map, visited, palette, x, y+1);
+    }
+    // Cell left
+    if(x > 0 && !(map->data[y][x].lWall || map->data[y][x-1].rWall)) {
+        floodRoomRec(map, visited, palette, x-1, y);
+    }
+    // Cell right
+    if(x+1 < map->nCols && !(map->data[y][x].rWall || map->data[y][x+1].lWall)) {
+        floodRoomRec(map, visited, palette, x+1, y);
+    }
+
+
+}
+
+void floodRoom(map_t * map, int x, int y) {
+    // First of all, ensure that the map exists and that the first square is enabled
+    if(map == NULL || y < 0 || y >= map->nRows || x < 0 || x >= map->nCols || 
+            map->data[y][x].isEmpty) {
+        return;
+    }
+
+    // First allocated a visited array
+    bool ** visited = calloc(map->nRows, sizeof(bool *));
+    if(visited == NULL) {
+        return;
+    }
+
+    for(int i = 0; i < map->nRows; i++) {
+        visited[i] = calloc(map->nCols, sizeof(bool));
+        if(visited[i] == NULL) goto floodRoomCleanup;
+    }
+
+    // Next grab the palette and begin the flood process
+    short palette = map->data[y][x].bgPalette;
+    floodRoomRec(map, visited, palette, x, y);
+
+
+floodRoomCleanup:
+    if(visited != NULL) {
+        for(int i = 0; i < map->nRows; i++) {
+            if(visited[i] != NULL) free(visited[i]);
+        }
+        free(visited);
+    }
+}
+
+//===============================<File Helper>================================//
+FILE* promptFile(bool openRead) {
+    char buf[128];
+
+    clear();
+    printText(kBlackPalette, "Enter the file path", 0, 0);
+    getText(2, 0, buf, 128);
+
+    FILE* fp = fopen(buf, (openRead) ? "r" : "w");
+    return fp;
+}
+
+int doLoad(map_t * map, bool * isLoaded) {
+    FILE * fp = promptFile(true);
+    if(fp == NULL) {
+        printError("*ERROR* Unable to open map file");
+        return -1;
+    }
+
+    if(*isLoaded) {
+        rmMap(*map);
+        *isLoaded = false;
+    }
+
+    if(loadMap(map, fp) < 0) {
+        printError("*ERROR* Unable to read map from file");
+    } else {
+        *isLoaded = true;
+    }
+    fclose(fp);
+
+    return (*isLoaded) ? -1 : 0;
+}
+
+//===============================<Misc Helpers>===============================//
+#define helpPrinter(msg, row) printText(kBlackPalette, msg, row, 0)
+
+void printHelp(mode_t mode) {
+    clear();
+    printText(kBlackPalette, "Help Prompt", 0, 0);
+    int newRow = 2;
+    switch(mode) {
+        case menu:
+            helpPrinter("Use the arrow keys and enter to select an option", 2);
+            helpPrinter("Alternatively, you can select the numbered options with their keys", 3);
+
+            helpPrinter("New Map will prompt you to select dimensions for a new map", 5);
+            helpPrinter("Load Map will prompt you for a file to load a map from", 6);
+            helpPrinter("Save Map will prmopt you for a filename to save out the current map", 7);
+            helpPrinter("Edit map will allow you to edit the loaded map", 8);
+            helpPrinter("Make Printable will generate a map to be printed as plaintext", 9);
+            helpPrinter("Quit... quits (real original, I know)", 10);
+
+            helpPrinter("Worth noting, attempting to backspace in text entry currently results in", 12);
+            helpPrinter("corruption. Instead, the delete key currently fills its role", 13);
+            newRow = 15;
+            break;
+        case nav:
+            helpPrinter("Use the Arrow keys to select a tile to modify", 2);
+            helpPrinter("Enter or 'e' will mark the tile as habitable", 3);
+            helpPrinter("Delete or 'q' will mark the tile as uninhabitable", 4);
+            helpPrinter("WASD cycles the walls on each side of the cell b/n empty, solid, and door", 5);
+            helpPrinter("Home or '`' will return you to the main menu", 6);
+            helpPrinter("'c' cycles the color palette of the tile ", 7);
+            helpPrinter("'v' cycles the color palette of the tile's sprite", 8);
+            helpPrinter("'r' cycles to the next loaded sprite (not currently implemented)", 9);
+            helpPrinter("'g' places a char sprite of your chosing", 10);
+            helpPrinter("'z' removes any sprite from the selected cell", 11);
+            helpPrinter("'p' fills the selected room with the current color", 13);
+            newRow = 15;
+            break;
+        default:
+            newRow = 2;
+    }
+    printText(kBlackPalette, "Press enter to continue...", newRow, 0);
+    getch();
+
 }
