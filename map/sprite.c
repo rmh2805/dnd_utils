@@ -10,7 +10,12 @@
  * @return The allocated and initialized sprite
  */
 sprite_t mkSprite(short palette, unsigned char width, unsigned char height, unsigned char xOff, unsigned char yOff) {
-    sprite_t sprite = {palette, width, height, xOff, yOff, NULL};
+    sprite_t sprite;
+    sprite.defPalette = palette;
+    sprite.width = width;
+    sprite.height = height;
+    sprite.xOff = xOff;
+    sprite.yOff = yOff;
 
     sprite.data = calloc(height, sizeof(char *));
     
