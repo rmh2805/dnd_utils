@@ -237,6 +237,8 @@ void setCursor(tileData_t data, map_t map, int x, int y) {
             dX * data.emptyBase.width + data.emptyBase.width/2);
 }
 
+//todo Consider replacing this with a general buffer to file function
+
 int mapSectionToFile(tileData_t data, map_t map, FILE* file, 
         int startRow, int startCol, int endRow, int endCol, bool doSprites);
 
