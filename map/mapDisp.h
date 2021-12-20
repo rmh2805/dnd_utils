@@ -31,7 +31,7 @@ void addSprite(dispData_t * data, sprite_t sprite, short palette, int screenRow,
  * @param x The x value of the tile in the map
  * @param y The y value of the tile in the map
  */
-void addTile(tileData_t * data, tile_t tile, int scrX, int scrY, int x, int y);
+void addTileBase(tileData_t * data, tile_t tile, int scrX, int scrY, int x, int y);
 
 /**
  * Buffers the walls of the provided tile in the proper place on screen
@@ -43,7 +43,7 @@ void addTile(tileData_t * data, tile_t tile, int scrX, int scrY, int x, int y);
  * @param x The x value of the tile in the map
  * @param y The y value of the tile in the map
  */
-void addWalls(tileData_t * data, tile_t tile, int scrX, int scrY, int x, int y);
+void addTileWalls(tileData_t * data, tile_t tile, int scrX, int scrY, int x, int y);
 
 /**
  * Buffers the sprite of the provided tile in the proper place on screen

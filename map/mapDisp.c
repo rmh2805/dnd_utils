@@ -78,7 +78,7 @@ void addSprite(dispData_t * data, sprite_t sprite, short palette, int screenRow,
 
 //===============================<Tile Display>===============================//
 
-void addTile(tileData_t * data, tile_t tile, int scrX, int scrY, int x, int y) {
+void addTileBase(tileData_t * data, tile_t tile, int scrX, int scrY, int x, int y) {
     if(data == NULL) return;
 
     int row, col;
@@ -99,7 +99,7 @@ void addTile(tileData_t * data, tile_t tile, int scrX, int scrY, int x, int y) {
     data->tileBase.defPalette = tmp;
 }
 
-void addWalls(tileData_t * data, tile_t tile, int scrX, int scrY, int x, int y) {
+void addTileWalls(tileData_t * data, tile_t tile, int scrX, int scrY, int x, int y) {
     if(data == NULL) return;
     
     int row, col;
@@ -219,7 +219,7 @@ int addMap(tileData_t * data, map_t map, int x, int y) {
         int row = dRow + scrY;
         for(int dCol = 0; dCol < width && dCol + scrX < map.nCols; dCol++) {
             int col = dCol + scrX;
-            addTile(data, map.data[row][col], scrX, scrY, col, row);
+            addTileBase(data, map.data[row][col], scrX, scrY, col, row);
         }
     }
 
@@ -228,7 +228,7 @@ int addMap(tileData_t * data, map_t map, int x, int y) {
         int row = dRow + scrY;
         for(int dCol = 0; dCol < width && dCol + scrX < map.nCols; dCol++) {
             int col = dCol + scrX;
-            addWalls(data, map.data[row][col], scrX, scrY, col, row);
+            addTileWalls(data, map.data[row][col], scrX, scrY, col, row);
         }
     }
 
