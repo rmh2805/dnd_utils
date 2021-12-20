@@ -11,15 +11,16 @@
 #include "map.h"
 
 //================================<Misc Data>=================================//
+//todo Replace this, so walls can be linked in and exe can move
 // Data file names
 #define kTileFile "walls.spt"
 
-// global allocation of large arrays (let the compiler sort this one out)
+// Define default values
 #define kDefMapRows 32
 #define kDefMapCols 32
 
+// Define argument values
 #define kMapFileFlag "-m"
-#define kSpriteFileFlag "-s"
 #define kUsageFlag "-?"
 
 //===============================<Menu Helpers>===============================//
@@ -198,7 +199,8 @@ int doLoad(map_t * map, bool * isLoaded) {
 //================================<Main Code>=================================//
 
 int main(int argc, char** argv) {
-    tileData_t data;
+    int status = EXIT_FAILURE;
+
     int ret, ch;
     int x = 0, y = 0;
     char buf[80];
@@ -206,50 +208,43 @@ int main(int argc, char** argv) {
     FILE * fp;
 
     bool mapLoaded = false;
+    bool dispOpen = false;
     map_t map;
 
+    bool tilesLoaded = false;
+    tileData_t data;
 
     //=========================<Argument Parsing>=========================//
     for(int i = 1; i < argc; i++) {
-        if(strcmp(kUsageFlag, argv[i]) == 0) {
-            if(mapLoaded) rmMap(map);
+        if(strcmp(kUsageFlag, argv[i]) == 0) {  // Argument to print usage msg
             printf("Usage: %s [%s <Map File>]\n", argv[0], kMapFileFlag);
-            return EXIT_SUCCESS;
+            status = EXIT_SUCCESS;
+            goto main_cleanup;
         } else if (strcmp(kMapFileFlag, argv[i]) == 0) {
             if(mapLoaded) {
-                rmMap(map);
                 fprintf(stderr, "*FATAL ERROR* Attempted to load 2 maps by arg\n");
-                return EXIT_FAILURE;
+                goto main_cleanup;
             }
             if(++i >= argc) {
                 fprintf(stderr, "*FATAL ERROR* No map file specified\n");
-                return EXIT_FAILURE;
+                goto main_cleanup;
             }
 
             fp = fopen(argv[i], "r");
             if(fp == NULL) {
                 fprintf(stderr, "*FATAL ERROR* Unable to open map file \"%s\"\n", argv[i]);
-                return EXIT_FAILURE;
+                goto main_cleanup;
             }
 
             if(loadMap(&map, fp) < 0) {
                 fclose(fp);
                 fprintf(stderr, "*FATAL ERROR* Unable to read map file \"%s\"\n", argv[i]);
-                return EXIT_FAILURE;
+                goto main_cleanup;
             }
             mapLoaded = true;
-
-        } else if(strcmp(kSpriteFileFlag, argv[i]) == 0) {
-            if(++i > argc) {
-                if(mapLoaded) rmMap(map);
-                fprintf(stderr, "*FATAL ERROR* No sprite sheet specified\n");
-                return EXIT_FAILURE;
-            }
-            continue;
         } else {
             fprintf(stderr, "*FATAL ERROR* Unkown argument \"%s\"\n", argv[i]);
-            if(mapLoaded) rmMap(map);
-            return EXIT_FAILURE;
+            goto main_cleanup;
         }
 
     }
@@ -257,27 +252,25 @@ int main(int argc, char** argv) {
     //==========================<Initialization>==========================//
     // Initialize the display
     if(initDisp(&data.dispData) != 0) {
-        if(mapLoaded) rmMap(map);
         fprintf(stderr, "*FATAL ERROR* Failed to initialize the display\n");
-        return EXIT_FAILURE;
+        goto main_cleanup;
     }
+    dispOpen = true;
 
     // Load in the tile file
     fp = fopen(kTileFile, "r");
     if(fp == NULL) {
         printError("*FATAL ERROR* Failed to load tile data file");
-        if(mapLoaded) rmMap(map);
-        closeDisp(data.dispData);
-        return EXIT_FAILURE;
+        goto main_cleanup;
     }
 
     if(loadTileData(fp, &data)) {
         printError("*FATAL ERROR* Failed to read tile data from file");
-        if(mapLoaded) rmMap(map);
-        closeDisp(data.dispData);
-        return EXIT_FAILURE;
+        goto main_cleanup;
     }
     fclose(fp);
+
+    tilesLoaded = true;
 
     //============================<Main Loop>=============================//
     mode_t mode = (mapLoaded) ? nav : menu;
@@ -501,7 +494,6 @@ int main(int argc, char** argv) {
                             map.data[y][x].spritePalette = kMinPalette;
                         }
                         break;
-                        break;
                     
                     case 'p':   // Fill the current room w/ the current palette
                     case 'P':
@@ -569,11 +561,13 @@ int main(int argc, char** argv) {
                 break;
         }
     }
-
+    
+    status = EXIT_SUCCESS;
+main_cleanup:
     // Cleanup and exit successfully
-    closeDisp(data.dispData);
-    rmTileData(data);
+    if(dispOpen) closeDisp(data.dispData);
+    if(tilesLoaded) rmTileData(data);
     if(mapLoaded) rmMap(map);
 
-    return EXIT_SUCCESS;
+    return status;
 }
