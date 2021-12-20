@@ -11,7 +11,7 @@
 #include "map.h"
 
 
-#define kTileFile "walls.out"
+#define kTileFile "walls.spt"
 
 int main(int argc, char** argv) {
     if(argc < 2) {

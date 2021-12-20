@@ -12,7 +12,7 @@
 
 //================================<Misc Data>=================================//
 // Data file names
-#define kTileFile "walls.out"
+#define kTileFile "walls.spt"
 
 // global allocation of large arrays (let the compiler sort this one out)
 #define kDefMapRows 32
