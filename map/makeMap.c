@@ -220,7 +220,7 @@ int main(int argc, char** argv) {
             printf("Usage: %s [%s <Map File>]\n", argv[0], kMapFileFlag);
             status = EXIT_SUCCESS;
             goto main_cleanup;
-        } else if (strcmp(kMapFileFlag, argv[i]) == 0) {
+        } else if (strcmp(kMapFileFlag, argv[i]) == 0) { // Argument to pre-load map
             if(mapLoaded) {
                 fprintf(stderr, "*FATAL ERROR* Attempted to load 2 maps by arg\n");
                 goto main_cleanup;
@@ -241,6 +241,8 @@ int main(int argc, char** argv) {
                 fprintf(stderr, "*FATAL ERROR* Unable to read map file \"%s\"\n", argv[i]);
                 goto main_cleanup;
             }
+
+            // Mark the map as loaded
             mapLoaded = true;
         } else {
             fprintf(stderr, "*FATAL ERROR* Unkown argument \"%s\"\n", argv[i]);
@@ -272,8 +274,17 @@ int main(int argc, char** argv) {
 
     tilesLoaded = true;
 
+    // Set the initial mode and navigation
+    mode_t mode = menu;
+
+    if(mapLoaded) { // if map loaded, go to nav from center of map
+        mode = nav;
+        x = map.nCols/2;
+        y = map.nRows/2;
+    }
+
+
     //============================<Main Loop>=============================//
-    mode_t mode = (mapLoaded) ? nav : menu;
     while(mode != quit) {
         switch(mode) {
             case menu:  // Main menu selection mode
