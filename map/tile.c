@@ -85,46 +85,10 @@ loadTileDataFail:
  * 
  * @param data The sprite entry to free
  */
-void freeSpriteEntry(void * data) {
+void freeSpriteEntry_tile(void * data) {
     if(data == NULL) return;
     rmSprite(*(sprite_t *) data);
     free(data);
-}
-
-
-/**
- * Loads a sprite list from file
- * 
- * @param fp The file to read from
- * @param data The tile data to load into
- * 
- * @return 0 on success, < 0 on failure
- */
-int loadSpriteList(FILE* fp, tileData_t data) {
-    if(fp == NULL || data.spriteList != NULL) return -1;
-
-    data.spriteList = mkList();
-    if(data.spriteList == NULL) return -1;
-
-    sprite_t sprite, * entry;
-
-    for(sprite = readSprite(fp); sprite.data != NULL; sprite = readSprite(fp)) {
-        entry = malloc(sizeof(sprite_t));
-        
-        if(entry == NULL) { // On failure to place sprite in heap...
-            // Clear out the existing menu items
-            rmList(data.spriteList, freeSpriteEntry);
-            data.spriteList = NULL;
-
-            // Inform the user and drop back to menu
-            return -1;
-        } else {    // On success in placing sprite in heap...
-            *entry = sprite;
-            listAppend(data.spriteList, entry);  // Add sprite to list
-        }
-    }
-
-    return 0;
 }
 
 /**
@@ -144,7 +108,7 @@ void rmTileData(tileData_t data) {
     rmSprite(data.uDoor);
     rmSprite(data.dDoor);
 
-    rmList(data.spriteList, freeSpriteEntry);
+    rmList(data.spriteList, freeSpriteEntry_tile);
 
     rmSprite(data.charSprite);
 }
