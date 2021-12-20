@@ -109,7 +109,6 @@ void addTileBase(tileData_t * data, tile_t tile, int scrX, int scrY, int x, int 
             sprite = data->dir##Door;\
     }
 
-
 void addTileWalls(tileData_t * data, tile_t tile, int scrX, int scrY, int x, int y) {
     if(data == NULL) return;
     
@@ -121,13 +120,10 @@ void addTileWalls(tileData_t * data, tile_t tile, int scrX, int scrY, int x, int
     sprite_t sprite = kEmptySprite;
     getWallSprite(l);
     addSprite(&data->dispData, sprite, 0, row, col);
-    
     getWallSprite(r);
     addSprite(&data->dispData, sprite, 0, row, col);
-    
     getWallSprite(u);
     addSprite(&data->dispData, sprite, 0, row, col);
-    
     getWallSprite(d);
     addSprite(&data->dispData, sprite, 0, row, col);
 
