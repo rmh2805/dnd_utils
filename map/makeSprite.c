@@ -10,6 +10,8 @@
 #include "../common/list.h"
 #include "../common/dispBase.h"
 
+// todo This whole program needs an overhaul. It builds, but it's old
+
 //==============================<Menu Handling>===============================//
 typedef enum mode_e {menu, sel, new, dim, edit, view, load, save, quit} mode_t;
 
@@ -41,7 +43,7 @@ sprite_t * mkSpriteEntry(sprite_t sprite) {
     return ptr;
 }
 
-void freeSpriteEntry(void * data) {
+void freeSpriteEntry_makeSprite(void * data) {
     if(data == NULL) return;
     rmSprite(*(sprite_t *) data);
     free(data);
@@ -75,7 +77,7 @@ int doSelSprite(dispData_t * data, list_t spriteList, int selection, const char 
     // Update the display itself
     printText(kBlackPalette, prompt, 0, 0);
     clearBuffer(data);
-    addSprite(data, *entry, data->screenRows/2 - entry->height/2,
+    addSprite(data, *entry, 0, data->screenRows/2 - entry->height/2,
         data->screenCols/2 - entry->width/2);
     printBuffer(*data);
     
@@ -228,7 +230,7 @@ int main() {
 
                             // Append the entry to list and shift to resize mode
                             if(listAppend(spriteList, entry) < 0) {
-                                freeSpriteEntry(entry);
+                                freeSpriteEntry_makeSprite(entry);
                                 printError("*ERROR* Failed to put new sprite on list");
                                 mode = menu;
                                 break;
@@ -255,7 +257,7 @@ int main() {
             
             case new:   // Create a new sprite sheet
                 // Free the old sprite list and create a new one
-                rmList(spriteList, freeSpriteEntry);
+                rmList(spriteList, freeSpriteEntry_makeSprite);
                 spriteList = mkList();
                 if(spriteList == NULL) {
                     printError("*FATAL ERROR* Failed to allocate new sprite list");
@@ -291,7 +293,8 @@ int main() {
                 clear();
                 printText(kBlackPalette, "Use arrows to resize, and enter to confirm", 0, 0);
                 clearBuffer(&data);
-                addSprite(&data, *entry, data.screenRows/2 - entry->height/2, data.screenCols/2 - entry->width/2);
+                addSprite(&data, *entry, 0, data.screenRows/2 - entry->height/2,
+                            data.screenCols/2 - entry->width/2);
                 printBuffer(data);
 
                 // todo Handle input 
@@ -362,9 +365,9 @@ int main() {
 
                 // Update the display
                 clearBuffer(&data);
-                addSprite(&data, *tile, data.screenRows/2-tile->height/2, 
+                addSprite(&data, *tile, 0, data.screenRows/2-tile->height/2, 
                                         data.screenCols/2-tile->width/2);
-                addSprite(&data, *entry, data.screenRows/2-tile->height/2, 
+                addSprite(&data, *entry, 0, data.screenRows/2-tile->height/2, 
                                           data.screenCols/2-tile->width/2);
                 printBuffer(data);
                 move(data.screenRows/2 - tile->height/2 + entry->yOff + selY, 
@@ -478,7 +481,7 @@ int main() {
                 }
 
                 // Create the new sprite list
-                rmList(spriteList, freeSpriteEntry);
+                rmList(spriteList, freeSpriteEntry_makeSprite);
 
                 spriteList = mkList();
                 if(spriteList == NULL) {
@@ -494,7 +497,7 @@ int main() {
                     
                     if(entry == NULL) { // On failure to place sprite in heap...
                         // Clear out the existing menu items
-                        rmList(spriteList, freeSpriteEntry);
+                        rmList(spriteList, freeSpriteEntry_makeSprite);
                         spriteList = NULL;
 
                         // Inform the user and drop back to menu
@@ -542,8 +545,8 @@ int main() {
 
     // Cleanup and exit
     closeDisp(data);
-    rmList(spriteList, freeSpriteEntry);
-    freeSpriteEntry(entry);
-    freeSpriteEntry(tile);
+    rmList(spriteList, freeSpriteEntry_makeSprite);
+    freeSpriteEntry_makeSprite(entry);
+    freeSpriteEntry_makeSprite(tile);
     return EXIT_SUCCESS;
 }

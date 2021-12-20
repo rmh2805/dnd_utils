@@ -39,7 +39,7 @@ randMap: randMap.o sprite.o tile.o map.o list.o
 	$(CC) $(CFLAGS) $(CDEBUGFLAGS) -o $@ $^ $(CLIBS)
 	$(ECHO)
 
-makeSprite: makeSprite.o sprite.o list.o dispBase.o mapDisp.o
+makeSprite: makeSprite.o sprite.o tile.o map.o list.o dispBase.o mapDisp.o 
 	$(CC) $(CFLAGS) $(CDEBUGFLAGS) -o $@ $^ $(CLIBS)
 	$(ECHO)
 
