@@ -8,6 +8,43 @@
 #define max(a, b) ((a > b) ? a : b)
 #endif
 
+//==================================<Helpers>=================================//
+/**
+ * Returns the screen position of a tile
+ * 
+ * @param data The tile data struct to use for the display
+ * @param scrX The map x coordinate of the left-most tiles
+ * @param scrY The map y coordinate of the upper-most tiles
+ * @param x The map x coordinate of the tile in question
+ * @param y The map y coordinate of the tile in question
+ * 
+ * @param col A return pointer for the screen column
+ * @param row A return pointer for the screen row
+ * @return 0 if tile is visible, <0 otherwise
+ */
+int getScreenRowCol(tileData_t * data, int scrX, int scrY, int x, int y, int * col, int * row) {
+    if(data == NULL) return -1;
+
+    // First calculate the screen position of the tile
+    unsigned char tileWidth = data->tileBase.width;
+    unsigned char tileHeight = data->tileBase.height;
+
+    // Adjust grid coordinates to the view of the screen
+    int dX = x - scrX, dY = y - scrY;
+    if(dX < 0 || dY < 0) {
+        return -1;    // Nothing to draw above or left of screen
+    }
+
+    // Calculate the character position of the tile (and ensure it is onscreen)
+    *col = dX * tileWidth;
+    *row = dY * tileHeight;
+    if(*col >= data->dispData.screenCols || *row >= data->dispData.screenRows) {
+        return -1;
+    }
+
+    return 0;
+}
+
 //==============================<Sprite Display>==============================//
 void addSprite(dispData_t * data, sprite_t sprite, short palette, int screenRow, int screenCol) {
     if(data == NULL || data->data == NULL) return;
@@ -44,18 +81,10 @@ void addSprite(dispData_t * data, sprite_t sprite, short palette, int screenRow,
 void addTile(tileData_t * data, tile_t tile, int scrX, int scrY, int x, int y) {
     if(data == NULL) return;
 
-    // First calculate the screen position of the tile
-    unsigned char tileWidth = data->tileBase.width;
-    unsigned char tileHeight = data->tileBase.height;
-
-    // Adjust grid coordinates to the view of the screen
-    int dX = x - scrX, dY = y - scrY;
-    if(dX < 0 || dY < 0) return;    // Nothing to draw above or left of screen
-
-    // Calculate the character position of the tile (and ensure it is onscreen)
-    int col = dX * tileWidth, row = dY * tileHeight;
-    if(col >= data->dispData.screenCols || row >= data->dispData.screenRows) return;
-    
+    int row, col;
+    if(getScreenRowCol(data, scrX, scrY, x, y, &col, &row) != 0) {
+        return;
+    }
 
     // If the tile is empty, draw the empty tile and be done with it
     if(tile.isEmpty) {
@@ -72,18 +101,11 @@ void addTile(tileData_t * data, tile_t tile, int scrX, int scrY, int x, int y) {
 
 void addWalls(tileData_t * data, tile_t tile, int scrX, int scrY, int x, int y) {
     if(data == NULL) return;
-
-    // First calculate the screen position of the tile
-    unsigned char tileWidth = data->tileBase.width;
-    unsigned char tileHeight = data->tileBase.height;
-
-    // Adjust grid coordinates to the view of the screen
-    int dX = x - scrX, dY = y - scrY;
-    if(dX < 0 || dY < 0) return;    // Nothing to draw above or left of screen
-
-    // Calculate the character position of the tile (and ensure it is onscreen)
-    int col = dX * tileWidth, row = dY * tileHeight;
-    if(col >= data->dispData.screenCols || row >= data->dispData.screenRows) return;
+    
+    int row, col;
+    if(getScreenRowCol(data, scrX, scrY, x, y, &col, &row) != 0) {
+        return;
+    }
 
     sprite_t sprite = kEmptySprite;
     switch(tile.lWall) {
@@ -140,18 +162,10 @@ void addTileSprite(tileData_t * data, tile_t tile, int scrX, int scrY, int x, in
         return;
     }
     
-    // First calculate the screen position of the tile
-    unsigned char tileWidth = data->tileBase.width;
-    unsigned char tileHeight = data->tileBase.height;
-
-    // Adjust grid coordinates to the view of the screen
-    int dX = x - scrX, dY = y - scrY;
-    if(dX < 0 || dY < 0) return;    // Nothing to draw above or left of screen
-
-    // Calculate the character position of the tile (and ensure it is onscreen)
-    int col = dX * tileWidth, row = dY * tileHeight;
-    if(col >= data->dispData.screenCols || row >= data->dispData.screenRows) return;
-    
+    int row, col;
+    if(getScreenRowCol(data, scrX, scrY, x, y, &col, &row) != 0) {
+        return;
+    }
 
     // Get the sprite to draw
     sprite_t sprite;
