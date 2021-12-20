@@ -284,10 +284,30 @@ int main(int argc, char** argv) {
         y = map.nRows/2;
     }
 
+    mode_t prevMode = mode;
     //============================<Main Loop>=============================//
     while(mode != quit) {
-        //todo Centralize default x-y set here
+        // If the mode has changed, update the cursor coords to their default values
+        if(prevMode != mode) {
+            switch(mode) {
+                case new:
+                    x = kDefMapCols;
+                    y = kDefMapRows;
+                    break;
+                case nav:
+                    x = mapLoaded ? map.nCols/2 : 0;
+                    y = mapLoaded ? map.nRows/2 : 0;
+                    break;
+                default:
+                    x = 0;
+                    y = 0;
+            }
+        }
 
+        // Update the previous mode tracker
+        prevMode = mode;
+
+        // Break out functions by mode
         switch(mode) {
             //======================<Main Menu>=======================//
             case menu:
@@ -303,10 +323,6 @@ int main(int argc, char** argv) {
                 if(ch > '0' && ch <= '0' + menuSize) {
                     y = 0;
                     mode = menuModes[ch - '1'];
-                    if(mode == new) {
-                        x = kDefMapCols;
-                        y = kDefMapRows;
-                    }
                     break;
                 }
 
@@ -330,16 +346,6 @@ int main(int argc, char** argv) {
                     case KEY_ENTER:
                     case '\n':
                         mode = menuModes[y];
-                        if(mode == new) {
-                            x = kDefMapCols;
-                            y = kDefMapRows;
-                        } else if (mode == nav && mapLoaded) {
-                            x = map.nCols/2;
-                            y = map.nRows/2;
-                        } else {
-                            x = 0;
-                            y = 0;
-                        }
                         break;
                     
                     // Quit with '`' or '~'
@@ -361,8 +367,10 @@ int main(int argc, char** argv) {
                 printText(kBlackPalette, buf, 2 * data.dispData.screenRows / 3, 
                             data.dispData.screenCols / 2 - strlen(buf)/2);
 
+                // Get and act on input
                 ch = getch();
                 switch(ch) {
+                    // Arrow keys modify size
                     case KEY_UP:
                         y = (y <= 1) ? 1 : y-1;
                         break;
@@ -376,13 +384,14 @@ int main(int argc, char** argv) {
                         ++x;
                         break;
 
+                    // This case returns to the main menu
                     case KEY_HOME:
                     case '`':
-                        x = 0; 
-                        y = 0;
+                    case '~':
                         mode = menu;
                         break;
 
+                    // This case handles when dimensions are confirmed
                     case KEY_ENTER:
                     case '\n':
                         if(mapLoaded) {
@@ -397,8 +406,6 @@ int main(int argc, char** argv) {
                             mapLoaded = true;
                             mode = nav;
                         }
-                        x = 0; 
-                        y = 0;
                         break;
                 }
                 break;
@@ -411,19 +418,22 @@ int main(int argc, char** argv) {
                 break;
 
             //========================<Save Map>=========================//
-            case save:  // Saves a map to file
+            case save:
+                // Ensure that a map is loaded
                 if(!mapLoaded) {
                     mode = menu;
                     break;
                 }
-                
+
+                // Prompt the user for a (writable) file
                 fp = promptFile(false);
                 if(fp == NULL) {
                     printError("*ERROR* Unable to open map file");
-                    y = 0;
                     mode = menu;
                     break;
                 }
+
+                // Attempt to writhe the map to file and close it
                 if(writeMap(map, fp) < 0) {
                     printError("*ERROR* Unable to write map to file");
                 }
@@ -432,37 +442,45 @@ int main(int argc, char** argv) {
                 mode = menu;
                 break;
 
-            case nav:   // Navigate around the map
+            //======================<Navigate Map>=======================//
+            case nav:
+                // Ensure that a map is loaded
                 if(!mapLoaded) {
-                    x = 0;
-                    y = 0;
                     mode = menu;
                     break;
                 }
 
-                clear();
+                // Add the map to the buffer and print
                 clearBuffer(&data.dispData);
                 addMap(&data, map, x, y);
+                clear();
                 printBuffer(data.dispData);
                 setCursor(data, map, x, y);
 
+                // Get and act on input
                 ch = getch();
                 switch(ch) {
-                    // Mode changes
+                    // Change modes
                     case KEY_HOME:
                     case '`':
-                        x = 0; 
-                        y = 0;
+                    case '~':
                         mode = menu;
                         break;
 
+                    // Tile set/unset
                     case KEY_ENTER:
                     case '\n':
                     case 'e':
                         map.data[y][x].isEmpty = false;
                         break;
+                    case KEY_DC:    // If delete is pressed empty cell
+                    case 27:
+                    case 'q':
+                    case 'Q':
+                        map.data[y][x].isEmpty = true;
+                        break;
                     
-                    // Cursor Control
+                    // Cursor Control with arrows
                     case KEY_UP:
                         y = max(y-1, 0);
                         break;
@@ -476,29 +494,29 @@ int main(int argc, char** argv) {
                         x = min(x+1, map.nCols-1);
                         break;
                     
-                    // Set walls
-                    case 'a':
-                    case 'A':
-                        map.data[y][x].lWall = (map.data[y][x].lWall+1)%3;
-                        break;
-                    case 'd':
-                    case 'D':
-                        if(x == map.nCols - 1) {
-                            map.data[y][x].rWall=(map.data[y][x].rWall+1)%3;
-                        } else {
-                            map.data[y][x+1].lWall=(map.data[y][x+1].lWall+1)%3;
-                        }
-                        break;
+                    // Set walls on current cell with WASD
                     case 'w':
                     case 'W':
                         map.data[y][x].uWall = (map.data[y][x].uWall+1)%3;
                         break;
-                    case 's':
+                    case 'a':
+                    case 'A':
+                        map.data[y][x].lWall = (map.data[y][x].lWall+1)%3;
+                        break;
+                    case 's':   // Try to set top wall on cell below first
                     case 'S':
                         if(y == map.nRows - 1) {
                             map.data[y][x].dWall=(map.data[y][x].dWall+1)%3;
                         } else {
                             map.data[y+1][x].uWall=(map.data[y+1][x].uWall+1)%3;
+                        }
+                        break;
+                    case 'd':   // Try to set left wall on cell to right first
+                    case 'D':
+                        if(x == map.nCols - 1) {
+                            map.data[y][x].rWall=(map.data[y][x].rWall+1)%3;
+                        } else {
+                            map.data[y][x+1].lWall=(map.data[y][x+1].lWall+1)%3;
                         }
                         break;
                     
@@ -547,47 +565,48 @@ int main(int argc, char** argv) {
                         setCharSprite(&map.data[y][x], getch(), kDefPalette);
                         break;
 
-                    
                     // Misc Controls
-                    case KEY_DC:    // If delete is pressed empty cell
-                    case 27:
-                    case 'q':
-                    case 'Q':
-                        map.data[y][x].isEmpty = true;
-                        break;
                     case '?':       // Display the help text
+                    case KEY_F(1):
                         printHelp(mode);
                         break;
                 }
                 break;
-            
+
+            //================<Output to printable files>================//
             case file:
+                // Ensure that a map is loaded
                 if(!mapLoaded) {
-                    x = 0;
-                    y = 0;
                     mode = menu;
                     break;
                 }
 
+                // Prompt the user for the inclusion of sprites
                 clear();
                 printText(kBlackPalette, "Include sprites [Y/n]? ", 0, 0);
                 ch = getch();
 
+                // Prompt the user for a (writeable) filename
                 fp = promptFile(false);
                 if(fp == NULL) {
                     printError("*ERROR* Unable to open output file");
                     mode = menu;
-                    y = 0;
                     break;
                 }
+
+                // Attempt to output the file in printable sections
                 ret = mapToSections(data, map, fp, 80, 64, !(ch == 'N' || ch == 'n'));
                 if(ret < 0) {
                     sprintf(buf, "*ERROR* Failed to write out to file (%d)", ret);
                     printError(buf);
                 }
+
+                // Close the file and return to the menu
                 fclose(fp);
                 mode = menu;
                 break;
+            
+            //=========================<Default>=========================//
             default:    // All other modes should simply quit
                 mode = quit;
                 break;
