@@ -11,10 +11,6 @@
 #include "map.h"
 
 //================================<Misc Data>=================================//
-//todo Replace this, so walls can be linked in and exe can move
-// Data file names
-#define kTileFile "walls.spt"
-
 // Define default values
 #define kDefMapRows 32
 #define kDefMapCols 32
@@ -128,18 +124,11 @@ int main(int argc, char** argv) {
     }
     dispOpen = true;
 
-    // Load in the tile file
-    fp = fopen(kTileFile, "r");
-    if(fp == NULL) {
-        printError("*FATAL ERROR* Failed to load tile data file");
-        goto main_cleanup;
-    }
-
-    if(loadTileData(fp, &data)) {
+    // Load the tile data
+    if(loadTileData(&data)) {
         printError("*FATAL ERROR* Failed to read tile data from file");
         goto main_cleanup;
     }
-    fclose(fp);
 
     tilesLoaded = true;
 

@@ -29,10 +29,6 @@ tile_t mkEmptyTile() {
 }
 
 
-#define loadTileDataHelp(field) \
-    data->field = readSprite(fp);\
-    if(data->field.data == NULL) goto loadTileDataFail
-
 /**
  * Loads a tile data struct's sprites from file
  * 
@@ -40,19 +36,56 @@ tile_t mkEmptyTile() {
  * @param data A return pointer for the tile data struct
  * @return 0 on success, <0 on failure
  */
-int loadTileData(FILE* fp, tileData_t * data) {
+int loadTileData(tileData_t * data) {
     data->spriteList = NULL;
 
-    loadTileDataHelp(emptyBase);
-    loadTileDataHelp(tileBase);
-    loadTileDataHelp(lWall);
-    loadTileDataHelp(rWall);
-    loadTileDataHelp(uWall);
-    loadTileDataHelp(dWall);
-    loadTileDataHelp(lDoor);
-    loadTileDataHelp(rDoor);
-    loadTileDataHelp(uDoor);
-    loadTileDataHelp(dDoor);
+    // Construct the cells from the given dimensional data
+    data->emptyBase = mkSprite(kEmptyPalette, kTileWidth, kTileHeight, 0, 0);
+    data->tileBase = mkSprite(kBasePalette, kTileWidth, kTileHeight, 0, 0);
+    if(data->emptyBase.data == NULL || data->tileBase.data == NULL) {
+        goto loadTileDataFail;
+    }
+    for(int row = 0; row < kTileHeight; ++row) {
+        for(int col = 0; col < kTileWidth; ++col) {
+            data->emptyBase.data[row][col] = ' ';
+            data->tileBase.data[row][col] = ' ';
+        }
+    }
+
+    data->lWall = mkSprite(kWallPalette, 1, kTileHeight, 0, 0);
+    data->rWall = mkSprite(kWallPalette, 1, kTileHeight, kTileWidth-1, 0);
+    data->lDoor = mkSprite(kDoorPalette, 1, kTileHeight, 0, 0);
+    data->rDoor = mkSprite(kDoorPalette, 1, kTileHeight, kTileWidth-1, 0);
+    if(data->lWall.data == NULL || data->lDoor.data == NULL || 
+        data->rWall.data == NULL || data->rDoor.data == NULL) {
+        goto loadTileDataFail;
+    }
+    for(int row = 0; row < kTileHeight; ++row) {
+        data->lWall.data[row][0] = kWallChar;
+        data->rWall.data[row][0] = kWallChar;
+        data->lDoor.data[row][0] = kDoorChar;
+        data->rDoor.data[row][0] = kDoorChar;
+        data->tileBase.data[row][0] = kCellVertiChar;
+    }
+
+
+    data->uWall = mkSprite(kWallPalette, kTileWidth, 1, 0, 0);
+    data->dWall = mkSprite(kWallPalette, kTileWidth, 1, 0, kTileHeight-1);
+    data->uDoor = mkSprite(kDoorPalette, kTileWidth, 1, 0, 0);
+    data->dDoor = mkSprite(kDoorPalette, kTileWidth, 1, 0, kTileHeight-1);
+    if(data->uWall.data == NULL || data->uDoor.data == NULL || 
+        data->dWall.data == NULL || data->dDoor.data == NULL) {
+        goto loadTileDataFail;
+    }
+    for(int col = 0; col < kTileWidth; ++col) {
+        data->uWall.data[0][col] = kWallChar;
+        data->dWall.data[0][col] = kWallChar;
+        data->uDoor.data[0][col] = kDoorChar;
+        data->dDoor.data[0][col] = kDoorChar;
+        data->tileBase.data[0][col] = kCellHorizChar;
+    }
+
+    data->tileBase.data[0][0] = kCellCornerChar;
 
     // Allocate the character sprite
     data->charSprite = mkBlankTile(kWhitePalette, 3, 3);

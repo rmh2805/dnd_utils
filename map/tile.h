@@ -1,6 +1,7 @@
 #ifndef _TILE_H_
 #define _TILE_H_
 
+#include "wallSprites.h"
 #include "sprite.h"
 #include "../common/dispBase.h"
 #include "../common/list.h"
@@ -69,7 +70,7 @@ tile_t mkEmptyTile();
  * @param data A return pointer for the tile data struct
  * @return 0 on success, <0 on failure
  */
-int loadTileData(FILE* fp, tileData_t * data);
+int loadTileData(tileData_t * data);
 
 /**
  * Frees all of the allocated data from the tileData struct
