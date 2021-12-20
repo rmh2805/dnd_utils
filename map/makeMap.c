@@ -283,17 +283,22 @@ int main(int argc, char** argv) {
         y = map.nRows/2;
     }
 
-
     //============================<Main Loop>=============================//
     while(mode != quit) {
+        //todo Centralize default x-y set here
+
         switch(mode) {
-            case menu:  // Main menu selection mode
-                curs_set(1);
+            //======================<Main Menu>=======================//
+            case menu:
+                // Print the menu text
                 addMenu(&data.dispData, "Make Map", menuItems, menuSize, y);
                 addText(&data.dispData, kBlackPalette, (mapLoaded) ? "A map is loaded" : "No map loaded", menuSize+3, 0);
                 printBuffer(data.dispData);
 
+                // Get the next input
                 ch = getch();
+
+                // If the input is a valid menu option, take it
                 if(ch > '0' && ch <= '0' + menuSize) {
                     y = 0;
                     mode = menuModes[ch - '1'];
@@ -304,17 +309,23 @@ int main(int argc, char** argv) {
                     break;
                 }
 
+                // Otherwise, break out for handling of individual keys
                 switch(ch) {
+                    // Print help splash with '?' or F1
                     case '?':
+                    case KEY_F(1):
                         printHelp(menu);
                         break;
+
+                    // Change selected item with up and down arrow keys
                     case KEY_UP:
                         if(y > 0) --y;
                         break;
                     case KEY_DOWN:
                         if(y + 1 < menuSize) ++y;
                         break;
-                    
+
+                    // Make a selection with enter
                     case KEY_ENTER:
                     case '\n':
                         mode = menuModes[y];
@@ -329,15 +340,16 @@ int main(int argc, char** argv) {
                             y = 0;
                         }
                         break;
+                    
+                    // Quit with '`' or '~'
+                    case '`':
+                    case '~':
+                        mode = quit;
                 }
                 break;
 
-            case new:   // Creates a new blank map and transitions to edit screen
-                if(mapLoaded) {
-                    rmMap(map);
-                    mapLoaded = false;
-                }
-
+            //===================<New Map Creation>===================//
+            case new:
                 // Update the display
                 clear();
                 curs_set(1);
@@ -372,6 +384,11 @@ int main(int argc, char** argv) {
 
                     case KEY_ENTER:
                     case '\n':
+                        if(mapLoaded) {
+                            rmMap(map);
+                            mapLoaded = false;
+                        }
+
                         if(mkMap(y, x, &map) < 0) {
                             printError("*ERROR* Unable to allocate new map");
                             mode = menu;
