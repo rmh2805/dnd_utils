@@ -10,8 +10,10 @@
 
 typedef struct tile_s {
     int sprite;             // The index of the sprite used on this tile
-    short bgPalette;        // Palette overrides for this tile
-    short spritePalette;    // Pallette override for this sprite
+    short bgPalette;        // Background palette for this tile
+    short bgOverride;       // Background palette override for this tile
+    short spritePalette;    // Sprite palette for this tile
+    short spriteOverride;   // sprite palette override for this tile
 
     // For each: 0 is no wall, 1 is wall, >1 is door
     unsigned char lWall : 2;

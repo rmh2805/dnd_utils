@@ -8,18 +8,24 @@
  * @return A blank tile with the provided positions
  */
 tile_t mkTile() {
-    return (tile_t) {kNoSprite, 0, 0, 0, 0, 0, 0, 0};
+    tile_t tile;
+    for(size_t i = 0; i < sizeof(tile); i++) {
+        ((char *) &tile)[i] = 0;
+    }
+
+    tile.sprite = kNoSprite;
+    return tile;
 }
 
-/** 
- * Makes an empty tile with default palettes
- * 
- * @param x The grid position x value
- * @param y The grid position y value
- * @return A blank tile with the provided positions
- */
 tile_t mkEmptyTile() {
-    return (tile_t) {kNoSprite, 0, 0, 0, 0, 0, 0, -1};
+    tile_t tile;
+    for(size_t i = 0; i < sizeof(tile); i++) {
+        ((char *) &tile)[i] = 0;
+    }
+
+    tile.sprite = kNoSprite;
+    tile.isEmpty = true;
+    return tile;
 }
 
 
