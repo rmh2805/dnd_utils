@@ -47,17 +47,18 @@ int getScreenRowCol(tileData_t * data, int scrX, int scrY, int x, int y, int * c
 
 //==============================<Sprite Display>==============================//
 void addSprite(dispData_t * data, sprite_t sprite, short palette, int screenRow, int screenCol) {
-    if(data == NULL || data->data == NULL) return;
+    if(data == NULL || data->data == NULL || sprite.data == NULL) return;
     if(palette == 0) palette = sprite.defPalette; 
 
+    // Ensure the sprite is not entirely off screen
     screenRow = screenRow + sprite.yOff;
     screenCol = screenCol + sprite.xOff;
-    if (sprite.data == NULL || 
-            screenRow + sprite.height <= 0 || screenCol + sprite.width <= 0 ||
+    if (screenRow + sprite.height <= 0 || screenCol + sprite.width <= 0 ||
             screenRow >= data->screenRows || screenCol >= data->screenCols) {
         return;
     }
 
+    // Buffer each character from the sprite
     for(int dRow = 0; dRow < sprite.height; dRow++) {
         int row = screenRow + dRow;
         if(row < 0 || row >= data->screenRows) continue;
