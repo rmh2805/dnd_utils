@@ -92,11 +92,10 @@ void addTileBase(tileData_t * data, tile_t tile, int scrX, int scrY, int x, int 
         return;
     }
 
-    // First draw the Base tile
-    short tmp = data->tileBase.defPalette;
+
+    // Determine correct palette (override or tile), and buffer sprite
     short palette = (tile.bgOverride != 0) ? tile.bgOverride : tile.bgPalette;
     addSprite(&data->dispData, data->tileBase, palette, row, col);
-    data->tileBase.defPalette = tmp;
 }
 
 void addTileWalls(tileData_t * data, tile_t tile, int scrX, int scrY, int x, int y) {
@@ -188,11 +187,9 @@ void addTileSprite(tileData_t * data, tile_t tile, int scrX, int scrY, int x, in
         sprite = *(sprite_t *) listGet(data->spriteList, tile.sprite);
     }
 
-    // First draw the Base tile
-    short tmp = sprite.defPalette;
+    // Determine correct palette (override or tile), and buffer sprite
     short palette = (tile.spriteOverride != 0) ? tile.spriteOverride : tile.spritePalette;
     addSprite(&data->dispData, sprite, palette, row, col);
-    sprite.defPalette = tmp;
 }
 
 void getScreenTileDim(tileData_t data, int * width, int * height) {
