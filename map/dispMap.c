@@ -10,9 +10,6 @@
 #include "tile.h"
 #include "map.h"
 
-
-#define kTileFile "walls.spt"
-
 int main(int argc, char** argv) {
     //============================<Core State>============================//
     int status = EXIT_FAILURE;
@@ -35,20 +32,11 @@ int main(int argc, char** argv) {
     bool doPages = argc > 2;
 
     
-    // Load in the tile file
-    fp = fopen(kTileFile, "r");
-    if(fp == NULL) {
-        fprintf(stderr, "*FATAL ERROR* Failed to load tile data file\n");
-        goto main_cleanup;
-    }
-    fileOpen = true;
-
-    if(loadTileData(fp, &data)) {
+    // Load in the tile data
+    if(loadTileData(&data)) {
         fprintf(stderr, "*FATAL ERROR* Failed to read tile data from file\n");
         goto main_cleanup;
     }
-    fclose(fp);
-    fileOpen = false;
     tilesLoaded = true;
 
     // Load in the map
