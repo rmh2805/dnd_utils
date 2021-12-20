@@ -82,6 +82,7 @@ void addSprite(dispData_t * data, sprite_t sprite, short palette, int screenRow,
 void addTileBase(tileData_t * data, tile_t tile, int scrX, int scrY, int x, int y) {
     if(data == NULL) return;
 
+    // Get the row and column of the referenced tile
     int row, col;
     if(getScreenRowCol(data, scrX, scrY, x, y, &col, &row) != 0) {
         return;
@@ -92,7 +93,6 @@ void addTileBase(tileData_t * data, tile_t tile, int scrX, int scrY, int x, int 
         addSprite(&data->dispData, data->emptyBase, 0, row, col);
         return;
     }
-
 
     // Determine correct palette (override or tile), and buffer sprite
     short palette = (tile.bgOverride != 0) ? tile.bgOverride : tile.bgPalette;
@@ -113,6 +113,7 @@ void addTileBase(tileData_t * data, tile_t tile, int scrX, int scrY, int x, int 
 void addTileWalls(tileData_t * data, tile_t tile, int scrX, int scrY, int x, int y) {
     if(data == NULL) return;
     
+    // Get the row and column of the referenced tile
     int row, col;
     if(getScreenRowCol(data, scrX, scrY, x, y, &col, &row) != 0) {
         return;
@@ -133,11 +134,13 @@ void addTileWalls(tileData_t * data, tile_t tile, int scrX, int scrY, int x, int
 void addTileSprite(tileData_t * data, tile_t tile, int scrX, int scrY, int x, int y) {
     if(data == NULL) return;
     
-    if(tile.sprite == kNoSprite || (tile.sprite >= 0 && (data->spriteList == NULL
-            || (unsigned int) tile.sprite >= listLen(data->spriteList)))) {
+    // Ensure that a sprite is specified (and that the list contains it)
+    if(tile.sprite == kNoSprite || (tile.sprite >= 0 && (data->spriteList == NULL || 
+            (unsigned int) tile.sprite >= listLen(data->spriteList)))) {
         return;
     }
     
+    // Get the row and column of the referenced tile
     int row, col;
     if(getScreenRowCol(data, scrX, scrY, x, y, &col, &row) != 0) {
         return;
@@ -145,15 +148,17 @@ void addTileSprite(tileData_t * data, tile_t tile, int scrX, int scrY, int x, in
 
     // Get the sprite to draw
     sprite_t sprite;
-    if(tile.sprite < 0) {
+    if(tile.sprite < 0) {   // Decode the character sprite
         if(data->charSprite.data == NULL) return;
 
         sprite = data->charSprite;
         
-        char ch = (-1 * tile.sprite) & 0xFF;
-        if(ch < 0x20 || ch > 0x7E) ch = ' ';
+        char ch = getCharSpriteChar(tile.sprite);
+        if(ch == '\0') {
+            ch == ' ';
+        }
         
-        short palette = (-1 * tile.sprite) >> 8;
+        short palette = getCharSpritePalette(tile.sprite);
         if (palette<kMinPalette || palette>kMaxPalette) palette = kDefPalette;
 
         sprite.data[1][1] = ch;

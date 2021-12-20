@@ -254,9 +254,28 @@ void clearTileSprite(tile_t* tile) {
 void setCharSprite(tile_t* tile, char ch, short palette) {
     if(ch >= 0x20 && ch <= 0x7e) {
         tile->sprite = -1 * (palette << 8 | ch);
+        if(tile->sprite > 0) tile->sprite = kNoSprite;  // Safety check
     } else {
         tile->sprite = kNoSprite;
     }
 }
 
+char getCharSpriteChar(int spriteCode) {
+    if(spriteCode >= 0 || spriteCode == kNoSprite) return '\0';
+    
+    char ch = (spriteCode * -1) & 0xFF;
+    if(ch < 0x20 || ch > 0x7e) {    // Ensure it's in the valid range for encoding
+        return '\0';
+    }
+
+    return ch;
+}
+
+short getCharSpritePalette(int spriteCode) {
+    if(spriteCode >= 0 || spriteCode == kNoSprite) {
+        return 0;
+    }
+
+    return (spriteCode * -1) >> 8;
+}
 

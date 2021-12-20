@@ -137,4 +137,20 @@ void clearTileSprite(tile_t* tile);
  */
 void setCharSprite(tile_t* tile, char ch, short palette);
 
+/**
+ * Extracts a charSprite's character from its encoding
+ * 
+ * @param spriteCode The encoding for the char sprite
+ * @return The char sprite's character
+ */
+char getCharSpriteChar(int spriteCode);
+
+/**
+ * Extract's a charSprite's default palette from its encoding
+ * 
+ * @param spriteCode The encoding for the char sprite
+ * @return The char sprite's character
+ */
+short getCharSpritePalette(int spriteCode);
+
 #endif
