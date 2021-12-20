@@ -36,27 +36,15 @@ const mode_t menuModes[] = {
 const unsigned char menuSize = sizeof(menuItems) / sizeof(menuItems[0]);
 
 //===============================<Misc Helpers>===============================//
-sprite_t * mkSpriteEntry_makeSprite(sprite_t sprite) {
-    sprite_t * ptr = malloc(sizeof(sprite_t));
-    if(ptr == NULL) return NULL;
-    *ptr = sprite;
-    return ptr;
-}
 
-void freeSpriteEntry_makeSprite(void * data) {
-    if(data == NULL) return;
-    rmSprite(*(sprite_t *) data);
-    free(data);
-}
-
-FILE* getSpriteFile(bool loadFile) {
+FILE* promptFile(bool openRead, const char * prompt) {
     char buf[128];
 
     clear();
-    printText(kBlackPalette, (loadFile) ? "Enter the sprite sheet path" : "Enter the save path", 0, 0);
+    printText(kBlackPalette, (prompt == NULL) ? "Enter the file path" : prompt, 0, 0);
     getText(2, 0, buf, 128);
 
-    FILE* fp = fopen(buf, (loadFile) ? "r" : "w");
+    FILE* fp = fopen(buf, (openRead) ? "r" : "w");
     return fp;
 }
 
@@ -137,23 +125,43 @@ void printHelp(mode_t mode) {
 int main() {
     // Basic definitions
     int ret, ch;
+    int status = EXIT_FAILURE;
+    
     FILE* fp = NULL;
+    bool fileOpen = false;
+
     sprite_t sprite;
-    sprite_t * tile = NULL, * entry = NULL;
+    bool spriteLoaded = false;
+
+    sprite_t * background = NULL, * entry = NULL;
+    bool backgroundLoaded = false, entryLoaded = false;
+
     list_t spriteList = NULL;
+    bool listLoaded = false;
+
+    dispData_t data;
+    bool dispOpen = false;
 
     // Initialize the display
-    dispData_t data;
     ret = initDisp(&data);
     if(ret != 0) {
         fprintf(stderr, "*ERROR* in main: Failed to initialized display\n");
-        return EXIT_FAILURE;
+        goto main_cleanup;
     }
+    dispOpen = true;
 
     // Main loop
     unsigned int selX = 0, selY = 0;
-    mode_t mode = menu;
+    mode_t mode = menu, prevMode = mode;
+
     while(mode != quit) {
+        // Reset navigation values on mode change
+        if(prevMode != mode) {
+            selX = 0;
+            selY = 0;
+        }
+        prevMode = mode;
+
         switch(mode) {
             case menu:  // Main menu
                 addMenu(&data, "Make Sprite", menuItems, menuSize, selY);
@@ -173,16 +181,23 @@ int main() {
                     case '\n':
                     case ' ':
                         mode = menuModes[selY];
-                        selY = 0;
                         break;
                     case KEY_UP:
                         selY = (selY == 0) ? selY : selY - 1;
                         break;
                     case KEY_DOWN:
-                        selY = (selY + 1 == menuSize) ? selY : selY + 1;
+                        if(++selY == menuSize) {
+                            --selY;
+                        }
                         break;
                     case '?':
+                    case KEY_F(1):
                         printHelp(menu);
+                        break;
+                    case KEY_HOME:
+                    case '`':
+                    case '~':
+                        mode = quit;
                         break;
                 }
                 break;
@@ -354,9 +369,9 @@ int main() {
                 }
 
                 // Ensure that the tile is loaded for a background
-                if(tile == NULL) {
-                    tile = listGet(spriteList, 0);
-                    if(tile == NULL) {
+                if(background == NULL) {
+                    background = listGet(spriteList, 0);
+                    if(background == NULL) {
                         printError("*FATAL ERROR* Failed to extract blank tile from list");
                         mode = quit;
                         break;
@@ -365,13 +380,13 @@ int main() {
 
                 // Update the display
                 clearBuffer(&data);
-                addSprite(&data, *tile, 0, data.screenRows/2-tile->height/2, 
-                                        data.screenCols/2-tile->width/2);
-                addSprite(&data, *entry, 0, data.screenRows/2-tile->height/2, 
-                                          data.screenCols/2-tile->width/2);
+                addSprite(&data, *background, 0, data.screenRows/2-background->height/2, 
+                                        data.screenCols/2-background->width/2);
+                addSprite(&data, *entry, 0, data.screenRows/2-background->height/2, 
+                                          data.screenCols/2-background->width/2);
                 printBuffer(data);
-                move(data.screenRows/2 - tile->height/2 + entry->yOff + selY, 
-                     data.screenCols/2 - tile->width/2 + entry->xOff + selX);
+                move(data.screenRows/2 - background->height/2 + entry->yOff + selY, 
+                     data.screenCols/2 - background->width/2 + entry->xOff + selX);
 
                 // Handle input
                 ch = getch();
@@ -379,7 +394,7 @@ int main() {
                     // Misc keys
                     case KEY_ENTER:
                     case '\n':
-                        tile = NULL;
+                        background = NULL;
                         entry = NULL;
                         selY = 0;
                         mode = menu;
@@ -408,14 +423,14 @@ int main() {
                     // Offset keys
                     case KEY_HOME:
                         entry->yOff += 1;
-                        if(entry->height + entry->yOff > tile->height) entry->yOff -= 1;
+                        if(entry->height + entry->yOff > background->height) entry->yOff -= 1;
                         break;
                     case KEY_SHOME:
                         if(entry->yOff > 0) entry->yOff -= 1;
                         break;
                     case KEY_END:
                         entry->xOff += 1;
-                        if(entry->width + entry->xOff > tile->width) entry->xOff -= 1;
+                        if(entry->width + entry->xOff > background->width) entry->xOff -= 1;
                         break;
                     case KEY_SEND:
                         if(entry->xOff > 0) entry->xOff -= 1;
@@ -473,7 +488,7 @@ int main() {
 
             case load:  // Load a sprite sheet from file
                 // Open the sprite sheet
-                fp = getSpriteFile(true);
+                fp = promptFile(true);
                 if(fp == NULL) {
                     printError("Failed to open specified file");
                     mode = menu;
@@ -522,7 +537,7 @@ int main() {
                 }
 
                 // Open the save file
-                fp = getSpriteFile(false);
+                fp = promptFile(false);
 
                 // Write out all sprites
                 for(unsigned i = 0; i < listLen(spriteList); i++) {
@@ -544,9 +559,19 @@ int main() {
     }
 
     // Cleanup and exit
-    closeDisp(data);
-    rmList(spriteList, freeSpriteEntry_makeSprite);
-    freeSpriteEntry_makeSprite(entry);
-    freeSpriteEntry_makeSprite(tile);
-    return EXIT_SUCCESS;
+    status = EXIT_SUCCESS;
+main_cleanup:
+    if(dispOpen){
+        closeDisp(data);
+    }
+    if(listLoaded) {
+        rmList(spriteList, freeSpriteEntry);
+    }
+    if(backgroundLoaded) {
+        freeSpriteEntry(background);
+    }
+    if(entryLoaded) {
+        freeSpriteEntry(entry);
+    }
+    return status;
 }
