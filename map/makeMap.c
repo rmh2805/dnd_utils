@@ -126,7 +126,7 @@ int main(int argc, char** argv) {
 
     // Load the tile data
     if(loadTileData(&data)) {
-        printError("*FATAL ERROR* Failed to read tile data from file");
+        printError("*FATAL ERROR* Failed to load tile data");
         goto main_cleanup;
     }
 

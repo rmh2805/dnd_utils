@@ -34,7 +34,7 @@ int main(int argc, char** argv) {
     
     // Load in the tile data
     if(loadTileData(&data)) {
-        fprintf(stderr, "*FATAL ERROR* Failed to read tile data from file\n");
+        fprintf(stderr, "*FATAL ERROR* Failed to load tile data\n");
         goto main_cleanup;
     }
     tilesLoaded = true;
