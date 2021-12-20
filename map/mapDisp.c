@@ -155,7 +155,7 @@ void addTileSprite(tileData_t * data, tile_t tile, int scrX, int scrY, int x, in
         
         char ch = getCharSpriteChar(tile.sprite);
         if(ch == '\0') {
-            ch == ' ';
+            ch = ' ';
         }
         
         short palette = getCharSpritePalette(tile.sprite);
@@ -165,7 +165,7 @@ void addTileSprite(tileData_t * data, tile_t tile, int scrX, int scrY, int x, in
         sprite.defPalette = palette;
 
         sprite = data->charSprite;
-    } else {
+    } else {    // Get the proper list sprite
         sprite = *(sprite_t *) listGet(data->spriteList, tile.sprite);
     }
 
@@ -186,12 +186,9 @@ int addMap(tileData_t * data, map_t map, int x, int y) {
     int width, height;  // Width and height of the screen in tiles
     getScreenTileDim(*data, &width, &height);
 
-    // X & Y coords of the top-left tile
+    // X & Y coords of the top-left tile (try to center, but stop at map edge)
     int scrX = max(min(x - width/2, map.nCols-width), 0);
     int scrY = max(min(y - height/2, map.nRows-height), 0);
-
-    // X and Y offsets of the selected tile from the top-left of the screen
-    int dX = x - scrX, dY = y-scrY;
     
     // Draw all tiles on the screen
     for(int dRow = 0; dRow < height && dRow + scrY < map.nRows; dRow++) {
@@ -219,10 +216,6 @@ int addMap(tileData_t * data, map_t map, int x, int y) {
             addTileSprite(data, map.data[row][col], scrX, scrY, col, row);
         }
     }
-
-    // Retarget the selected tile
-    move(dY * data->emptyBase.height + data->emptyBase.height/2, 
-            dX * data->emptyBase.width + data->emptyBase.width/2);
 
     return 0;
 }
