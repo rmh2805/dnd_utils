@@ -123,6 +123,15 @@ int main(int argc, char** argv) {
                         break;
                 }
                 break;
+            //====================<Select a Sprite>===================//
+            case sel:
+                mode = menu;
+                break;
+            
+            //=================<Create a New Sprite>==================//
+            case new:
+                mode = menu;
+                break;
 
             //=======================<Default>========================//
             default:
