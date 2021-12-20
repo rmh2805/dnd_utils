@@ -176,16 +176,17 @@ floodRoomCleanup:
 }
 
 int doLoad(map_t * map, bool * isLoaded) {
-    if(*isLoaded) {
-        rmMap(*map);
-        *isLoaded = false;
-    }
-    
     FILE * fp = promptFile(true);
     if(fp == NULL) {
         printError("*ERROR* Unable to open map file");
         return -1;
     }
+
+    if(*isLoaded) {
+        rmMap(*map);
+        *isLoaded = false;
+    }
+
     if(loadMap(map, fp) < 0) {
         printError("*ERROR* Unable to read map from file");
     } else {
@@ -401,12 +402,15 @@ int main(int argc, char** argv) {
                         break;
                 }
                 break;
-            case load:  // Loads a saved map from file
+
+            //========================<Load Map>=========================//
+            case load:
                 doLoad(&map, &mapLoaded);
                 y = 0;
                 mode = menu;
                 break;
 
+            //========================<Save Map>=========================//
             case save:  // Saves a map to file
                 if(!mapLoaded) {
                     mode = menu;
