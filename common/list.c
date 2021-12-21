@@ -280,11 +280,19 @@ void * listRm(list_t list, unsigned int idx) {
     if(list == NULL) return NULL;
     if(idx >= list->length) return NULL;
 
-    node_t prev = seekNode(list, idx - 1);  // Get the previous node
-    node_t node = prev->next;               // Get the targeted node
-    prev->next = node->next;                // Unlink the target node
+    node_t node, prev;
+    if(idx == 0) {
+        prev = NULL;                    // There is no previous node
+        node = list->start;             // Get the first node
+        list->start = node->next;       // Set the list's start to the next node
+    } else {
+        prev = seekNode(list, idx - 1); // Get the previous node
+        node = prev->next;              // Get the targeted node
+        prev->next = node->next;        // Unlink the target node
+    }
+
     list->length -= 1;                      // Update list length
-    if(list->end == node) list->end = prev; // Update list if target was the end
+    if(list->end == node) list->end = prev; // Update list end if changed
 
     void * data = node->data;   //Grab the target's data
     rmNode(node, NULL);         // Free the node (but not its data)
