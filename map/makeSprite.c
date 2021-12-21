@@ -51,7 +51,7 @@ FILE* promptFile(bool openRead, const char * prompt);
 
 #define printError(msg) clear();printText(kRedPalette, msg, 0, 0); getch()
 void printHelp(mode_t mode);
-void addSpriteCenter(dispData_t * data, sprite_t * sprite);
+void addSpriteCenter(dispData_t * data, sprite_t * sprite, sprite_t bg);
 
 //==============================<Main Execution>==============================//
 int main(int argc, char** argv) {
@@ -237,7 +237,7 @@ int main(int argc, char** argv) {
                 addText(&dispData, kBlackPalette, "Use arrow keys to select a sprite", 0, 0);
                 sprintf(buf, "%d/%d", x + 1, ret);
                 addText(&dispData, kBlackPalette, buf, dispData.screenRows-1, 0);
-                addSpriteCenter(&dispData, entry);
+                addSpriteCenter(&dispData, entry, bg);
                 printBuffer(dispData);
                 curs_set(0);
 
@@ -273,7 +273,7 @@ int main(int argc, char** argv) {
                             mode = menu;
                             break;
                         }
-                        x = min(x, ch);
+                        x = min(x, ch-1);
                         break;
 
                     // Misc Controls
@@ -395,12 +395,12 @@ int main(int argc, char** argv) {
             // Draw the edit screen
             clearBuffer(&dispData);
             if(ret) {
-                addSpriteCenter(&dispData, &bg);
+                addSpriteCenter(&dispData, &bg, bg);
             }
-            addSpriteCenter(&dispData, entry);
+            addSpriteCenter(&dispData, entry, bg);
             printBuffer(dispData);
-            move((dispData.screenRows/2-entry->height/2+entry->yOff) + y,
-                    (dispData.screenCols/2-entry->width/2+entry->xOff) + x);
+            move((dispData.screenRows/2-bg.height/2+entry->yOff) + y,
+                    (dispData.screenCols/2-bg.width/2+entry->xOff) + x);
 
             // Get and act on input
             ch = getch();
@@ -635,8 +635,8 @@ void printHelp(mode_t mode) {
 }
 
 
-void addSpriteCenter(dispData_t * data, sprite_t * sprite) {
+void addSpriteCenter(dispData_t * data, sprite_t * sprite, sprite_t bg) {
     addSprite(data, *sprite, 0, 
-                data->screenRows/2 - sprite->height/2,
-                data->screenCols/2 - sprite->width/2);
+                data->screenRows/2 - bg.height/2,
+                data->screenCols/2 - bg.width/2);
 }
