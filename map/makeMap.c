@@ -62,7 +62,6 @@ void floodRoom(map_t * map, int x, int y);
 void printHelp(mode_t mode);
 
 FILE* promptFile(bool openRead);
-int doLoad(map_t * map, bool * isLoaded);
 
 //================================<Main Code>=================================//
 int main(int argc, char** argv) {
@@ -81,7 +80,15 @@ int main(int argc, char** argv) {
     bool tilesLoaded = false;
     tileData_t data;
 
-    //=========================<Argument Parsing>=========================//
+    //==========================<Initialization>==========================//
+    // Load the tile data
+    if(loadTileData(&data)) {
+        printError("*FATAL ERROR* Failed to load tile data");
+        goto main_cleanup;
+    }
+    tilesLoaded = true;
+
+    // Parse the Arguments 
     for(int i = 1; i < argc; i++) {
         if(strcmp(kUsageFlag, argv[i]) == 0) {  // Argument to print usage msg
             printf("Usage: %s [%s <Map File>]\n", argv[0], kMapFileFlag);
@@ -92,6 +99,12 @@ int main(int argc, char** argv) {
                 fprintf(stderr, "*FATAL ERROR* Attempted to load 2 maps by arg\n");
                 goto main_cleanup;
             }
+
+            if(data.spriteList != NULL) {
+                fprintf(stderr, "*FATAL ERROR* Attempted to load overload a sprite list\n");
+                goto main_cleanup;
+            }
+
             if(++i >= argc) {
                 fprintf(stderr, "*FATAL ERROR* No map file specified\n");
                 goto main_cleanup;
@@ -103,7 +116,7 @@ int main(int argc, char** argv) {
                 goto main_cleanup;
             }
 
-            if(loadMap(&map, fp) < 0) {
+            if(loadMap(&map, &data.spriteList, fp) < 0) {
                 fclose(fp);
                 fprintf(stderr, "*FATAL ERROR* Unable to read map file \"%s\"\n", argv[i]);
                 goto main_cleanup;
@@ -115,10 +128,8 @@ int main(int argc, char** argv) {
             fprintf(stderr, "*FATAL ERROR* Unkown argument \"%s\"\n", argv[i]);
             goto main_cleanup;
         }
-
     }
 
-    //==========================<Initialization>==========================//
     // Initialize the display
     if(initDisp(&data.dispData) != 0) {
         fprintf(stderr, "*FATAL ERROR* Failed to initialize the display\n");
@@ -126,24 +137,12 @@ int main(int argc, char** argv) {
     }
     dispOpen = true;
 
-    // Load the tile data
-    if(loadTileData(&data)) {
-        printError("*FATAL ERROR* Failed to load tile data");
-        goto main_cleanup;
-    }
-
-    tilesLoaded = true;
-
     // Set the initial mode and navigation
-    mode_t mode = menu;
+    mode_t mode = menu, prevMode = mode;
 
     if(mapLoaded) { // if map loaded, go to nav from center of map
         mode = nav;
-        x = map.nCols/2;
-        y = map.nRows/2;
     }
-
-    mode_t prevMode = mode;
     //============================<Main Loop>=============================//
     while(mode != quit) {
         // If the mode has changed, update the cursor coords to their default values
@@ -272,8 +271,33 @@ int main(int argc, char** argv) {
 
             //========================<Load Map>=========================//
             case load:
-                doLoad(&map, &mapLoaded);
-                y = 0;
+                // Prompt the user for the map file
+                fp = promptFile(true);
+                if(fp == NULL) {
+                    printError("*ERROR* Unable to open map file");
+                    mode = menu;
+                    break;
+                }
+
+                // If a map or sprite list are already loaded, free them
+                if(mapLoaded) {
+                    rmMap(map);
+                    mapLoaded = false;
+                }
+
+                if(data.spriteList != NULL) {
+                    rmList(data.spriteList, freeSpriteEntry);
+                    data.spriteList = NULL;
+                }
+
+                // Actually load the map
+                if(loadMap(&map, &data.spriteList, fp) < 0) {
+                    printError("*ERROR* Unable to read map from file");
+                } else {
+                    mapLoaded = true;
+                }
+                fclose(fp);
+
                 mode = menu;
                 break;
 
@@ -294,7 +318,7 @@ int main(int argc, char** argv) {
                 }
 
                 // Attempt to writhe the map to file and close it
-                if(writeMap(map, fp) < 0) {
+                if(writeMap(map, data.spriteList, fp) < 0) {
                     printError("*ERROR* Unable to write map to file");
                 }
                 fclose(fp);
@@ -593,28 +617,6 @@ FILE* promptFile(bool openRead) {
 
     FILE* fp = fopen(buf, (openRead) ? "r" : "w");
     return fp;
-}
-
-int doLoad(map_t * map, bool * isLoaded) {
-    FILE * fp = promptFile(true);
-    if(fp == NULL) {
-        printError("*ERROR* Unable to open map file");
-        return -1;
-    }
-
-    if(*isLoaded) {
-        rmMap(*map);
-        *isLoaded = false;
-    }
-
-    if(loadMap(map, fp) < 0) {
-        printError("*ERROR* Unable to read map from file");
-    } else {
-        *isLoaded = true;
-    }
-    fclose(fp);
-
-    return (*isLoaded) ? -1 : 0;
 }
 
 //===============================<Misc Helpers>===============================//
