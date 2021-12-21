@@ -382,6 +382,20 @@ int main() {
                     }
                     break;
 
+                // Offset Inputs
+                case KEY_PPAGE:
+                    if(entry->yOff > 0) --entry->yOff;
+                    break;
+                case KEY_NPAGE:
+                    ++entry->yOff;
+                    break;
+                case KEY_HOME:
+                    if(entry->xOff > 0) --entry->xOff;
+                    break;
+                case KEY_END:
+                    ++entry->xOff;
+                    break;
+
                 // Misc Inputs
                 case KEY_F(1):
                     printHelp(mode);
@@ -484,7 +498,10 @@ void printHelp(mode_t mode) {
             helpPrinter("Use the F10 key to cycle the background palette", 7);
             helpPrinter("Use the F12 key to cycle sprite palette", 8);
 
-            helpPrinter("Use the F2 key or enter to return to the menu", 10);
+            helpPrinter("Use PgUp and PgDn to change y offset", 10);
+            helpPrinter("Use Home and End to change x offset", 11);
+
+            helpPrinter("Use the F2 key or enter to return to the menu", 13);
 
             newRow = 12;
             break;
