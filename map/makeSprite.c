@@ -7,11 +7,13 @@
 
 #include "sprite.h"
 
+#include "wallSprites.h"
+
 #include "../common/list.h"
 #include "../common/dispBase.h"
 
 //==============================<Menu Handling>===============================//
-typedef enum mode_e {menu, sel, new, quit} mode_t;
+typedef enum mode_e {menu, sel, new, edit, quit} mode_t;
 
 const char * menuItems[] = {
     "1. Select a sprite to edit",
@@ -45,6 +47,7 @@ FILE* promptFile(bool openRead, const char * prompt);
 
 #define printError(msg) clear();printText(kRedPalette, msg, 0, 0); getch()
 void printHelp(mode_t mode);
+void addSpriteCenter(dispData_t * data, sprite_t * sprite);
 
 //==============================<Main Execution>==============================//
 int main() {
@@ -71,9 +74,32 @@ int main() {
     // Todo load each file provided as an arg in order
 
     //===========================<Initialization>=========================//
+    // Create the background sprite
+    bg = mkSprite(kDefPalette, kTileWidth, kTileHeight, 0, 0);
+    if(bg.data == NULL) {
+        fprintf(stderr, "*Fatal Error* Failed to initialize the BG sprite\n");
+        goto main_cleanup;
+    }
+    bgLoaded = true;
+
+    for(int row = 0; row < bg.height; ++row) {
+        for(int col = 0; col < bg.width; ++col) {
+            ch = ' ';
+            if(row == 0 && col == 0) {
+                ch = kCellCornerChar;
+            } else if (row == 0) {
+                ch = kCellHorizChar;
+            } else if (col == 0) {
+                ch = kCellVertiChar;
+            }
+
+            bg.data[row][col] = ch;
+        }
+    }
+
     // Initialize the display
     if((ret = initDisp(&dispData)) < 0) {
-        fprintf(stderr, "*Fatal Error: Failed to initialize the display (%d)\n", ret);
+        fprintf(stderr, "*Fatal Error* Failed to initialize the display (%d)\n", ret);
         goto main_cleanup;
     }
     dispOpen = true;
@@ -102,6 +128,7 @@ int main() {
         // Quickly cleanup before main "action"
         if(entryUnlisted) {
             freeSpriteEntry(entry);
+            entry = NULL;
             entryUnlisted = false;
         }
 
@@ -171,10 +198,9 @@ int main() {
                 addText(&dispData, kBlackPalette, "Use arrow keys to select a sprite", 0, 0);
                 sprintf(buf, "%d/%d", x + 1, ret);
                 addText(&dispData, kBlackPalette, buf, dispData.screenRows-1, 0);
-                addSprite(&dispData, *entry, 0, 
-                            dispData.screenRows/2 - entry->height/2,
-                            dispData.screenCols/2 - entry->width/2);
+                addSpriteCenter(&dispData, entry);
                 printBuffer(dispData);
+                curs_set(0);
 
                 // Handle inputs
                 ch = getch();
@@ -188,6 +214,10 @@ int main() {
                         break;
 
                     // Sprite manipulation
+                    case KEY_ENTER:
+                    case '\n':
+                        mode = edit;
+                        break;
 
                     // Misc Controls
                     case KEY_HOME:
@@ -201,7 +231,7 @@ int main() {
                         break;
                 }
                 break;
-            
+
             //=================<Create a New Sprite>==================//
             case new:
                 // Add a block with the same size as the sprite to the display
@@ -297,6 +327,58 @@ int main() {
                 }
                 break;
 
+            //==================== <Edit "entry">=====================//
+            case edit:
+            // Make sure that a listed entry is selected
+            if(entryUnlisted || entry == NULL || entry->data == NULL) {
+                mode = menu;
+                break;
+            }
+
+            // Draw the edit screen
+            clearBuffer(&dispData);
+            addSpriteCenter(&dispData, &bg);
+            addSpriteCenter(&dispData, entry);
+            printBuffer(dispData);
+            move((dispData.screenRows/2-entry->height/2+entry->yOff) + y,
+                    (dispData.screenCols/2-entry->width/2+entry->xOff) + x);
+
+            // Get and act on input
+            ch = getch();
+            switch(ch) {
+                // Navigation inputs
+                case KEY_UP:
+                    y = max(y-1, 0);
+                    break;
+                case KEY_DOWN:
+                    y = min(y+1, entry->height-1);
+                    break;
+                case KEY_LEFT:
+                    x = max(x-1, 0);
+                    break;
+                case KEY_RIGHT:
+                    x = min(x+1, entry->width-1);
+                    break;
+
+                // Control Inputs
+
+                // Misc Inputs
+                case KEY_F(1):
+                    printHelp(mode);
+                    break;
+                case KEY_F(2):
+                    mode = menu;
+                    break;
+                
+                // Actually add visible characters
+                default:
+                    if(ch >= 0x20 && ch <= 0x7E) {
+                        entry->data[y][x] = ch;
+                    }
+                    break;
+            }
+            break;
+
             //=======================<Default>========================//
             default:
                 mode = quit;
@@ -334,7 +416,7 @@ FILE* promptFile(bool openRead, const char * prompt) {
     return fp;
 }
 
-//===============================<Misc Helpers>===============================//
+//===============================<Display Helpers>===============================//
 #define helpPrinter(msg, row) printText(kBlackPalette, msg, row, 0)
 
 void printHelp(mode_t mode) {
@@ -365,6 +447,15 @@ void printHelp(mode_t mode) {
             newRow = 5;
             break;
         
+        case edit:
+            helpPrinter("Use the arrow keys to navigate", 2);
+            helpPrinter("Visible characters will be added to the sprite", 3);
+            helpPrinter("Backspace or Delete will put a hole in the sprite", 4);
+            helpPrinter("Use the F2 key to return to the menu", 5);
+
+            newRow = 7;
+            break;
+        
         default:
             newRow = 2;
             break;
@@ -372,4 +463,11 @@ void printHelp(mode_t mode) {
 
     printText(kBlackPalette, "Press enter to continue...", newRow, 0);
     getch();
+}
+
+
+void addSpriteCenter(dispData_t * data, sprite_t * sprite) {
+    addSprite(data, *sprite, 0, 
+                data->screenRows/2 - sprite->height/2,
+                data->screenCols/2 - sprite->width/2);
 }
