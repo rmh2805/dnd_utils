@@ -30,8 +30,8 @@ const mode_t menuModes[] = {
 const unsigned char menuSize = sizeof(menuItems) / sizeof(menuItems[0]);
 
 //===========================<Constant Definitions>===========================//
-#define kDefSpriteWidth     3
-#define kDefSpriteHeight    3
+#define kDefSpriteWidth     kTileWidth-1
+#define kDefSpriteHeight    kTileHeight-1
 
 //===========================<Helper Declarations>============================//
 
