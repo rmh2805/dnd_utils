@@ -13,19 +13,21 @@
 #include "../common/dispBase.h"
 
 //==============================<Menu Handling>===============================//
-typedef enum mode_e {menu, sel, new, edit, save, quit} mode_t;
+typedef enum mode_e {menu, sel, new, edit, save, load, quit} mode_t;
 
 const char * menuItems[] = {
     "1. Select a sprite to edit",
     "2. Create a new sprite",
-    "3. Save the sprite sheet to file",
-    "4. Exit Program"
+    "3. Save the sprite list to file",
+    "4. Load a sprite file into the current list",
+    "5. Exit Program"
 };
 
 const mode_t menuModes[] = {
     sel,
     new,
     save,
+    load,
     quit
 };
 
@@ -479,6 +481,39 @@ int main(int argc, char** argv) {
                 fileOpen = false;
 
                 // Return to the main menu
+                mode = menu;
+                break;
+            
+            //======================<Load Sheet>======================//
+            case load:
+                // If there is no current list, create one
+                if(!listLoaded) {
+                    list = mkList();
+                    if(list == NULL) {
+                        printError("*ERROR* Failed to create a new sprite list");
+                        mode = menu;
+                        break;
+                    }
+                    listLoaded = true;
+                }
+
+                // Open the sprite file
+                fp = promptFile(true, "Enter the name of the file to open");
+                if(fp == NULL) {
+                    printError("*ERROR* Failed to open the specified file");
+                    mode = menu;
+                    break;
+                }
+                fileOpen = true;
+
+                // Load sprites from the file
+                if(loadSpriteList(fp, &list) < 0) {
+                    printError("*ERROR* Failed to load sprites from file");
+                }
+                fclose(fp);
+                fileOpen = false;
+
+                // Return to main menu
                 mode = menu;
                 break;
 
