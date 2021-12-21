@@ -99,6 +99,12 @@ int main() {
         prevMode = mode;
         curs_set(1);
 
+        // Quickly cleanup before main "action"
+        if(entryUnlisted) {
+            freeSpriteEntry(entry);
+            entryUnlisted = false;
+        }
+
         switch(mode) {
             //=======================<Main Menu>======================//
             case menu:
@@ -139,19 +145,61 @@ int main() {
                         break;
                     case '`':
                     case '~':
+                    case KEY_HOME:
                         mode = quit;
                         break;
                 }
                 break;
             //====================<Select a Sprite>===================//
             case sel:
-                // Ensure that a list is loaded
-                if(!listLoaded) {
+                // Ensure that a list is loaded and has entries
+                if(!listLoaded || (ret = listLen(list)) <= 0) {
                     mode = menu;
                     break;
                 }
 
-                mode = menu;
+                // Get the currently selected entry
+                entry = listGet(list, x);
+                if(entry == NULL) {
+                    printError("*ERROR* Unable to grab the selected list entry");
+                    mode = menu;
+                    break;
+                }
+
+                // Print the currently selected sprite
+                clearBuffer(&dispData);
+                addText(&dispData, kBlackPalette, "Use arrow keys to select a sprite", 0, 0);
+                sprintf(buf, "%d/%d", x + 1, ret);
+                addText(&dispData, kBlackPalette, buf, dispData.screenRows-1, 0);
+                addSprite(&dispData, *entry, 0, 
+                            dispData.screenRows/2 - entry->height/2,
+                            dispData.screenCols/2 - entry->width/2);
+                printBuffer(dispData);
+
+                // Handle inputs
+                ch = getch();
+                switch(ch) {
+                    // Handle navigation
+                    case KEY_LEFT:
+                        x = max(x-1, 0);
+                        break;
+                    case KEY_RIGHT:
+                        x = min(x+1, ret - 1);
+                        break;
+
+                    // Sprite manipulation
+
+                    // Misc Controls
+                    case KEY_HOME:
+                    case '`':
+                    case '~':
+                        mode = menu;
+                        break;
+                    case '?':
+                    case KEY_F(1):
+                        printHelp(mode);
+                        break;
+                }
                 break;
             
             //=================<Create a New Sprite>==================//
@@ -200,13 +248,6 @@ int main() {
                                 break;
                             }
                             listLoaded = true;
-                        }
-
-
-                        // Ensure that the entry variable is available
-                        if(entry != NULL && entryUnlisted) {
-                            freeSpriteEntry(entry);
-                            entryUnlisted = false;
                         }
 
                         // Create a new sprite on the heap
@@ -272,7 +313,7 @@ main_cleanup:
     if(listLoaded) {
         rmList(list, freeSpriteEntry);
     }
-    if(entry != NULL && entryUnlisted) {
+    if(entryUnlisted) {
         freeSpriteEntry(entry);
     }
     if(bgLoaded) {
@@ -315,6 +356,13 @@ void printHelp(mode_t mode) {
             helpPrinter("Use the home or '~' keys to return to main menu", 4);
 
             newRow = 6;
+            break;
+
+        case sel:
+            helpPrinter("Use the arrow keys to select an option", 2);
+            helpPrinter("Use the home or '~' keys to return to the main menu", 3);
+
+            newRow = 5;
             break;
         
         default:

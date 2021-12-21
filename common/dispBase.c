@@ -1,12 +1,7 @@
 #include "dispBase.h"
 
 //=============================<Init and Cleanup>=============================//
-/**
- * Core display initialization
- * 
- * @param data A return pointer for a display data struct
- * @return 0 iff display was initialized correctly
- */
+
 int initDisp(dispData_t* data) {
     // Initialize curses mode
     initscr();
@@ -62,11 +57,6 @@ int initDisp(dispData_t* data) {
     return 0;
 }
 
-/**
- * Core display close
- * 
- * @return 0 iff display was closed correctly
- */
 int closeDisp(dispData_t data) {
     curs_set(1);
     endwin();
@@ -86,15 +76,7 @@ int closeDisp(dispData_t data) {
 }
 
 //=============================<Buffer Handling>==============================//
-/**
- * Adds text to the frame buffer
- * 
- * @param data The display data struct
- * @param palette The pallette to print the text in
- * @param text The text to print to screen
- * @param row The starting row for text
- * @param col The starting col for text
- */
+
 void addText(dispData_t * data, short palette, const char * text, int row, int col) {
     if(data == NULL || data->data == NULL || 
             row < 0 || row > data->screenRows || 
@@ -107,15 +89,6 @@ void addText(dispData_t * data, short palette, const char * text, int row, int c
     }
 }
 
-/**
- * Clears the fame buffer and adds a menu to it
- * 
- * @param data The display data struct
- * @param prompt The menu prompt
- * @param items A list of menu item strings
- * @param nItems The number of items in the menu list
- * @param selected The menu item selected for highlight (<0 to disable)
- */
 void addMenu(dispData_t * data, const char * prompt, const char ** items, 
                 int nItems, int selected) {
     if(data == NULL || prompt == NULL || items == NULL || nItems <= 0) {
@@ -131,11 +104,19 @@ void addMenu(dispData_t * data, const char * prompt, const char ** items,
     }
 }
 
-/**
- * Clears the screen and prints out the data stored in the buffer
- * 
- * @param data The display data struct
- */
+void addBackground(dispData_t * data, short palette) {
+    if(data == NULL || data->data == NULL) {
+        return;
+    }
+
+    for(int row = 0; row < data->screenRows; ++row) {
+        for(int col = 0; col < data->screenCols; ++col) {
+            data->data[row][col].ch = ' ';
+            data->data[row][col].palette = palette;
+        }
+    }
+}
+
 void printBuffer(dispData_t data) {
     if(data.data == NULL) return;
 
@@ -162,11 +143,6 @@ void printBuffer(dispData_t data) {
     }
 }
 
-/**
- * Clears out any data already in the buffer
- * 
- * @param data The display data struct
- */
 void clearBuffer(dispData_t * data) {
     if(data == NULL || data->data == NULL) {
         return;
@@ -180,14 +156,7 @@ void clearBuffer(dispData_t * data) {
 }
 
 //=============================<Buffer Handling>==============================//
-/**
- * Prints the provided text to terminal
- * 
- * @param palette The pallette to print the text in
- * @param text The text to print to screen
- * @param row The starting row for text
- * @param col The starting col for text
- */
+
 void printText(short palette, const char * text, int row, int col) {
     wmove(stdscr, row, col);
     wattron(stdscr, COLOR_PAIR(palette));
@@ -196,14 +165,6 @@ void printText(short palette, const char * text, int row, int col) {
     wattroff(stdscr, COLOR_PAIR(palette));
 }
 
-/**
- * Gets text from the terminal
- * 
- * @param row The starting row for the cursor
- * @param col The starting col for the cursor
- * @param buf The string return buffer
- * @param nBuf The length of the return buffer
- */
 void getText(int row, int col, char* buf, unsigned int nBuf) {
     curs_set(1);
     echo();

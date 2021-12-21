@@ -72,6 +72,14 @@ void addText(dispData_t * data, short palette, const char * text, int row, int c
 void addMenu(dispData_t * data, const char * prompt, const char ** items, int nItems, int selected);
 
 /**
+ * Fills the display buffer with a solid color
+ * 
+ * @param data The display data struct
+ * @param palette The color to fill the background with
+ */
+void addBackground(dispData_t * data, short palette);
+
+/**
  * Clears the screen and prints out the data stored in the buffer
  * 
  * @param data The display data struct
