@@ -64,15 +64,24 @@ int writeMap(map_t map, list_t sprites, FILE* fp) {
 
     fprintf(fp, "%d %d\n", map.nRows, map.nCols);
 
+    int len = 0;
+    if(sprites != NULL) {
+        len = listLen(sprites);
+    }
+
     for(int row = 0; row < map.nRows; row++) {
         for(int col = 0; col < map.nCols; col++) {
-            int ret = writeTile(map.data[row][col], fp);
-            if(ret < 0) return -2;
+            tile_t tile = map.data[row][col];
+            if(tile.sprite >= len) {    // Cull any illegal sprites
+                tile.sprite = kNoSprite;
+            }
+
+            if(writeTile(tile, fp) < 0) return -2;
         }
     }
 
     if(sprites != NULL) {
-        saveSpriteList(fp, sprites);
+        if(saveSpriteList(fp, sprites) < 0) return -2;
     }
     
     return 0;
