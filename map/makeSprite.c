@@ -191,6 +191,53 @@ int main() {
                     // Dimension accept
                     case KEY_ENTER:
                     case '\n':
+                        // If there is no list yet, create one
+                        if(!listLoaded) {
+                            list = mkList();
+                            if(list == NULL) {
+                                printError("*ERROR* Unable to allocate a new list");
+                                mode = menu;
+                                break;
+                            }
+                            listLoaded = true;
+                        }
+
+
+                        // Ensure that the entry variable is available
+                        if(entry != NULL && entryUnlisted) {
+                            freeSpriteEntry(entry);
+                            entryUnlisted = false;
+                        }
+
+                        // Create a new sprite on the heap
+                        entry = mkSpriteEntry(kEmptySprite);
+                        if(entry == NULL) {
+                            printError("*ERROR* unable to put a new sprite on the heap");
+                            mode = menu;
+                            break;
+                        }
+                        entryUnlisted = true;
+
+                        // Create a new sprite with the given dimensions
+                        sprite = mkSprite(kDefPalette, x, y, 0, 0);
+                        if(sprite.data == NULL) {
+                            printError("*ERROR* Unable to allocate a new sprite");
+                            mode = menu;
+                            break;
+                        }
+
+                        // Copy that sprite onto the heap
+                        *entry = sprite;
+
+                        // Append that entry onto the list
+                        ret = listAppend(list, entry);
+                        if(ret < 0) {
+                            printError("*ERROR* Failed to place entry on list");
+                            mode = menu;
+                            break;
+                        }
+                        entryUnlisted = false;
+
                         mode = menu;
                         break;
 
