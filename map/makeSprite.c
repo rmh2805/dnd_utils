@@ -13,21 +13,23 @@
 #include "../common/dispBase.h"
 
 //==============================<Menu Handling>===============================//
-typedef enum mode_e {menu, sel, new, edit, quit} mode_t;
+typedef enum mode_e {menu, sel, new, edit, save, quit} mode_t;
 
 const char * menuItems[] = {
     "1. Select a sprite to edit",
     "2. Create a new sprite",
-    "3. Exit Program"
+    "3. Save the sprite sheet to file",
+    "4. Exit Program"
 };
 
 const mode_t menuModes[] = {
     sel,
     new,
+    save,
     quit
 };
 
-const unsigned char menuSize = sizeof(menuItems) / sizeof(menuItems[0]);
+const unsigned char menuSize = sizeof(menuModes) / sizeof(menuModes[0]);
 
 //===========================<Constant Definitions>===========================//
 #define kDefSpriteWidth     kTileWidth-1
@@ -69,6 +71,9 @@ int main() {
 
     sprite_t * entry = NULL;    // A variable to hold a single sprite from heap
     bool entryUnlisted = false; // Set to true iff the entry is not in the list
+
+    FILE* fp = NULL;
+    bool fileOpen = false;
 
     //=========================<Argument Parsing>=========================//
     // Todo load each file provided as an arg in order
@@ -420,6 +425,34 @@ int main() {
             }
             break;
 
+            //======================<Save Sheet>======================//
+            case save:
+                // Make sure the list is open
+                if(!listLoaded) {
+                    mode = menu;
+                    break;
+                }
+
+                // Open the save file
+                fp = promptFile(false, "Enter a name for the save file");
+                if(fp == NULL) {
+                    printError("*ERROR* Unable to open file for save");
+                    mode = menu;
+                    break;
+                }
+                fileOpen = true;
+
+                // Write the sprites in the list out to the file
+                if(saveSpriteList(fp, list) < 0) {
+                    printError("*ERROR* Failed to save the sprite list");
+                }
+                fclose(fp);
+                fileOpen = false;
+
+                // Return to the main menu
+                mode = menu;
+                break;
+
             //=======================<Default>========================//
             default:
                 mode = quit;
@@ -441,6 +474,9 @@ main_cleanup:
     }
     if(bgLoaded) {
         rmSprite(bg);
+    }
+    if(fileOpen) {
+        fclose(fp);
     }
     return status;
 }

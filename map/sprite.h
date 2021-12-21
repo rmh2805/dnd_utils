@@ -80,6 +80,16 @@ int writeSprite(FILE* file, sprite_t sprite);
 int loadSpriteList(FILE* file, list_t * list);
 
 /**
+ * Writes all sprites in the given list out to the provided file
+ * 
+ * @param file The file to save the sprites to
+ * @param list The sprite list to save from
+ * 
+ * @return The number of sprites saved (<0 on failure)
+ */
+int saveSpriteList(FILE* file, list_t list);
+
+/**
  * Copies the contents of a sprite onto the heap for entry into a list
  * 
  * @param sprite The sprite to copy onto the heap

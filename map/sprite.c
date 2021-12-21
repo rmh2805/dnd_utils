@@ -205,6 +205,28 @@ int loadSpriteList(FILE* file, list_t * list) {
     return nRead;
 }
 
+int saveSpriteList(FILE* file, list_t list) {
+    if(file == NULL || list == NULL) {
+        return -1;
+    }
+
+    int len = listLen(list), ret = 0, nWritten = 0;
+
+    for(int i = 0; i < len; ++i) {
+        sprite_t * entry = listGet(list, i);
+        if(entry == NULL) {
+            continue;
+        }
+        ret = writeSprite(file, *entry);
+        if(ret < 0) {
+            continue;
+        }
+        nWritten += 1;
+    }
+
+    return nWritten;
+}
+
 sprite_t * mkSpriteEntry(sprite_t sprite) {
     sprite_t * ptr = calloc(1, sizeof(sprite_t));
     if(ptr == NULL) {
