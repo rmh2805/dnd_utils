@@ -15,8 +15,8 @@ map/makeMap
 map/randMap
 map/dispMap
 
-map/spriteSheets/*
-!map/spriteSheets/sprites.out
+map/sprites/*
+!map/sprites/sprites.out
 
 map/maps/*
 !map/maps/FirstDungeon*.out
