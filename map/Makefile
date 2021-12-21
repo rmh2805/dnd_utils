@@ -19,7 +19,7 @@ CFLAGS=-Wall -std=c99 -Wextra -pedantic -ggdb
 #
 #	Main Target
 #
-main: makeSprite
+main: makeSprite makeMap
 
 #
 #	Multiple Targets
@@ -39,7 +39,7 @@ randMap: randMap.o sprite.o tile.o map.o list.o
 	$(CC) $(CFLAGS) $(CDEBUGFLAGS) -o $@ $^ $(CLIBS)
 	$(ECHO)
 
-makeSprite: makeSprite.o sprite.o tile.o map.o list.o dispBase.o mapDisp.o 
+makeSprite: makeSprite.o sprite.o tile.o list.o dispBase.o mapDisp.o 
 	$(CC) $(CFLAGS) $(CDEBUGFLAGS) -o $@ $^ $(CLIBS)
 	$(ECHO)
 
