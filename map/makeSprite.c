@@ -502,7 +502,7 @@ void printHelp(mode_t mode) {
 
             helpPrinter("Use the F2 key or enter to return to the menu", 13);
 
-            newRow = 12;
+            newRow = 15;
             break;
         
         default:
