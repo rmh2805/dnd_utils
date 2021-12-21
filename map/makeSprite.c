@@ -253,9 +253,27 @@ int main(int argc, char** argv) {
                         break;
 
                     // Sprite manipulation
-                    case KEY_ENTER:
+                    case KEY_ENTER:     // Select the sprite for edit
                     case '\n':
                         mode = edit;
+                        break;
+                    
+                    case KEY_DC:        // Delete the sprite from the list
+                    case 27:
+                    case KEY_BACKSPACE:
+                    case '\b':
+                        entry = listRm(list, x);
+                        if(entry != NULL) {
+                            freeSpriteEntry(entry);
+                            entry = NULL;
+                        }
+
+                        ch = listLen(list);
+                        if(ch == 0) {
+                            mode = menu;
+                            break;
+                        }
+                        x = min(x, ch);
                         break;
 
                     // Misc Controls
@@ -584,8 +602,10 @@ void printHelp(mode_t mode) {
         case sel:
             helpPrinter("Use the arrow keys to select an option", 2);
             helpPrinter("Use the home or '~' keys to return to the main menu", 3);
+            helpPrinter("Use the enter key to select a sprite to edit", 4);
+            helpPrinter("Use delete or backspace to delete a sprite", 5);
 
-            newRow = 5;
+            newRow = 7;
             break;
         
         case edit:
