@@ -21,7 +21,7 @@
 
 //===============================<Menu Helpers>===============================//
 typedef enum mode_e {
-    menu, quit, new, load, save, nav, file, loadSprite
+    menu, quit, new, load, save, nav, file, loadSprite, saveSprite
 } mode_t;
 
 const char * menuItems[] = {
@@ -31,7 +31,8 @@ const char * menuItems[] = {
     "4. Edit Map",
     "5. Make Printable",
     "6. Load Sprite List",
-    "7. Quit"
+    "7. Save Sprite List",
+    "8. Quit"
 };
 
 mode_t menuModes[] = {
@@ -41,6 +42,7 @@ mode_t menuModes[] = {
     nav,
     file,
     loadSprite,
+    saveSprite,
     quit
 };
 
@@ -531,7 +533,34 @@ int main(int argc, char** argv) {
                 // Quit back to the main menu
                 mode = menu;
                 break;
-            
+
+            //======================<Save Sprites>=======================//
+            case saveSprite:
+                // Ensure that there is a sprite list
+                if(data.spriteList == NULL) {
+                    mode = menu;
+                    break;
+                }
+
+                // Open the sprite file
+                if((fp = promptFile(false)) == NULL) {
+                    printError("*ERROR* Failed to open sprite file");
+                    mode = menu;
+                    break;
+                }
+
+                // Save sprites out to the list
+                if(saveSpriteList(fp, data.spriteList) < 0) {
+                    printError("*ERROR* Failed to save sprites from list");
+                }
+
+                // Close the file
+                fclose(fp);
+
+                // Quit back to main menu
+                mode = menu;
+                break;
+
             //=========================<Default>=========================//
             default:    // All other modes should simply quit
                 mode = quit;
