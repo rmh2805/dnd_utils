@@ -114,17 +114,6 @@ loadTileDataFail:
 }
 
 /**
- * (Internal Helper) Free function for sprite list entries
- * 
- * @param data The sprite entry to free
- */
-void freeSpriteEntry_tile(void * data) {
-    if(data == NULL) return;
-    rmSprite(*(sprite_t *) data);
-    free(data);
-}
-
-/**
  * Frees all of the allocated data from the tileData struct
  * 
  * @param tileData The tileData struct to free from
@@ -141,7 +130,7 @@ void rmTileData(tileData_t data) {
     rmSprite(data.uDoor);
     rmSprite(data.dDoor);
 
-    rmList(data.spriteList, freeSpriteEntry_tile);
+    rmList(data.spriteList, freeSpriteEntry);
 
     rmSprite(data.charSprite);
 }

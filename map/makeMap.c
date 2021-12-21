@@ -21,7 +21,7 @@
 
 //===============================<Menu Helpers>===============================//
 typedef enum mode_e {
-    menu, quit, new, load, save, nav, file
+    menu, quit, new, load, save, nav, file, loadSprite
 } mode_t;
 
 const char * menuItems[] = {
@@ -30,7 +30,8 @@ const char * menuItems[] = {
     "3. Save Map",
     "4. Edit Map",
     "5. Make Printable",
-    "6. Quit"
+    "6. Load Sprite List",
+    "7. Quit"
 };
 
 mode_t menuModes[] = {
@@ -39,6 +40,7 @@ mode_t menuModes[] = {
     save,
     nav,
     file,
+    loadSprite,
     quit
 };
 
@@ -73,9 +75,9 @@ int main(int argc, char** argv) {
     FILE * fp;
 
     bool mapLoaded = false;
-    bool dispOpen = false;
     map_t map;
 
+    bool dispOpen = false;
     bool tilesLoaded = false;
     tileData_t data;
 
@@ -462,6 +464,36 @@ int main(int argc, char** argv) {
                 fclose(fp);
                 mode = menu;
                 break;
+
+            //======================<Load Sprites>=======================//
+            case loadSprite:
+                // Ensure that there is a sprite list
+                if(data.spriteList == NULL) {
+                    if((data.spriteList = mkList()) == NULL) {
+                        printError("*ERROR* Failed to create a new sprite list");
+                        mode = menu;
+                        break;
+                    }
+                }
+
+                // Open the list file
+                if((fp = promptFile(true)) == NULL) {
+                    printError("*ERROR* Failed to open sprite file");
+                    mode = menu;
+                    break;
+                }
+
+                // Load sprites into the list
+                if(loadSpriteList(fp, &data.spriteList) < 0) {
+                    printError("*ERROR* Failed to load sprites from list");
+                }
+
+                // Close the file
+                fclose(fp);
+
+                // Quit back to the main menu
+                mode = menu;
+                break;
             
             //=========================<Default>=========================//
             default:    // All other modes should simply quit
@@ -595,6 +627,7 @@ void printHelp(mode_t mode) {
             helpPrinter("Save Map will prmopt you for a filename to save out the current map", 7);
             helpPrinter("Edit map will allow you to edit the loaded map", 8);
             helpPrinter("Make Printable will generate a map to be printed as plaintext", 9);
+            helpPrinter("Load Sprite list will load a file into the active sprite list", 10);
             helpPrinter("Quit... quits (real original, I know)", 10);
 
             helpPrinter("Worth noting, attempting to backspace in text entry currently results in", 12);
