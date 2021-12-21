@@ -367,6 +367,8 @@ int main() {
                     printHelp(mode);
                     break;
                 case KEY_F(2):
+                case KEY_ENTER:
+                case '\n':
                     mode = menu;
                     break;
                 
@@ -457,7 +459,7 @@ void printHelp(mode_t mode) {
             helpPrinter("Use the arrow keys to navigate", 2);
             helpPrinter("Visible characters will be added to the sprite", 3);
             helpPrinter("Backspace or Delete will put a hole in the sprite", 4);
-            helpPrinter("Use the F2 key to return to the menu", 5);
+            helpPrinter("Use the F2 key or enter to return to the menu", 5);
 
             newRow = 7;
             break;
