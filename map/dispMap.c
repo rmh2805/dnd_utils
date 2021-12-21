@@ -47,7 +47,7 @@ int main(int argc, char** argv) {
     }
     fileOpen = true;
 
-    if(loadMap(&map, fp) != 0) {
+    if(loadMap(&map, &data.spriteList, fp) != 0) {
         fprintf(stderr, "*FATAL ERROR* Failed to load map from file\n");
         goto main_cleanup;
     }

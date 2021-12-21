@@ -252,7 +252,7 @@ room_t rotRoom(room_t room) {
 }
 
 /**
- * Returns a randomly generated room
+ * Returns a omly generated room
  * 
  * @param isDeadEnd Set true if generating the room as a dead end
  * 
@@ -845,7 +845,7 @@ int main(int argc, char** argv) {
     int status = EXIT_SUCCESS;
     // Write the generated map to file
     FILE* file = fopen(outFileLoc, "w");
-    if(file == NULL || writeMap(map, file) != 0) {
+    if(file == NULL || writeMap(map, NULL, file) != 0) {
         fprintf(stderr, "*FATAL ERROR* Failed to open the output file\n");
         status = EXIT_FAILURE;
     } else {
