@@ -117,6 +117,9 @@ int main() {
                     x = kDefSpriteWidth;
                     y = kDefSpriteHeight;
                     break;
+                case edit:
+                    ret = false;
+                    // fall through
                 default:
                     x = 0;
                     y = 0;
@@ -337,7 +340,9 @@ int main() {
 
             // Draw the edit screen
             clearBuffer(&dispData);
-            addSpriteCenter(&dispData, &bg);
+            if(ret) {
+                addSpriteCenter(&dispData, &bg);
+            }
             addSpriteCenter(&dispData, entry);
             printBuffer(dispData);
             move((dispData.screenRows/2-entry->height/2+entry->yOff) + y,
@@ -361,6 +366,21 @@ int main() {
                     break;
 
                 // Control Inputs
+                case '\t':
+                    ret = !ret;
+                    break;
+                case KEY_F(10):
+                    bg.defPalette = max(bg.defPalette+1, kMinPalette);
+                    if(bg.defPalette >= kMaxPalette) {
+                        bg.defPalette = kMinPalette;
+                    }
+                    break;
+                case KEY_F(12):
+                    entry->defPalette = max(entry->defPalette+1, kMinPalette);
+                    if(entry->defPalette >= kMaxPalette) {
+                        entry->defPalette = kMinPalette;
+                    }
+                    break;
 
                 // Misc Inputs
                 case KEY_F(1):
@@ -459,9 +479,14 @@ void printHelp(mode_t mode) {
             helpPrinter("Use the arrow keys to navigate", 2);
             helpPrinter("Visible characters will be added to the sprite", 3);
             helpPrinter("Backspace or Delete will put a hole in the sprite", 4);
-            helpPrinter("Use the F2 key or enter to return to the menu", 5);
 
-            newRow = 7;
+            helpPrinter("Use the tab key to tobble background visibility", 6);
+            helpPrinter("Use the F10 key to cycle the background palette", 7);
+            helpPrinter("Use the F12 key to cycle sprite palette", 8);
+
+            helpPrinter("Use the F2 key or enter to return to the menu", 10);
+
+            newRow = 12;
             break;
         
         default:
