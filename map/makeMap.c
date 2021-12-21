@@ -172,6 +172,12 @@ int main(int argc, char** argv) {
                 // Print the menu text
                 addMenu(&data.dispData, "Make Map", menuItems, menuSize, y);
                 addText(&data.dispData, kBlackPalette, (mapLoaded) ? "A map is loaded" : "No map loaded", menuSize+3, 0);
+                if(data.spriteList == NULL) {
+                    addText(&data.dispData, kBlackPalette, "No sprite list loaded", menuSize+4, 0);
+                } else {
+                    sprintf(buf, "%d sprites in list", listLen(data.spriteList));
+                    addText(&data.dispData, kBlackPalette, buf, menuSize+4, 0);
+                }
                 printBuffer(data.dispData);
                 curs_set(0);
 
