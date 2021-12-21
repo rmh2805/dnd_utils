@@ -174,6 +174,7 @@ int main(int argc, char** argv) {
                 addMenu(&data.dispData, "Make Map", menuItems, menuSize, y);
                 addText(&data.dispData, kBlackPalette, (mapLoaded) ? "A map is loaded" : "No map loaded", menuSize+3, 0);
                 printBuffer(data.dispData);
+                curs_set(0);
 
                 // Get the next input
                 ch = getch();
@@ -218,13 +219,13 @@ int main(int argc, char** argv) {
             case new:
                 // Update the display
                 clear();
-                curs_set(1);
                 printText(kBlackPalette, "Use Arrow keys to resize the map and enter to confirm (home or '`' to quit)", 
                             data.dispData.screenRows/3, data.dispData.screenCols/2-34);
                 
                 sprintf(buf, "rows: %2d     cols: %2d", y, x);
                 printText(kBlackPalette, buf, 2 * data.dispData.screenRows / 3, 
                             data.dispData.screenCols / 2 - strlen(buf)/2);
+                curs_set(0);
 
                 // Get and act on input
                 ch = getch();
@@ -315,6 +316,7 @@ int main(int argc, char** argv) {
                 clear();
                 printBuffer(data.dispData);
                 setCursor(data, map, x, y);
+                curs_set(1);
 
                 // Get and act on input
                 ch = getch();
@@ -417,6 +419,11 @@ int main(int argc, char** argv) {
                     
                     case 'r':   // Next loaded sprite
                     case 'R':
+                        if(data.spriteList == NULL || (ret = listLen(data.spriteList)) <= 0) {
+                            break;
+                        }
+                        ch = max(getSpriteIdx(map.data[y][x]), -1);
+                        setSpriteIdx(data, &map.data[y][x], (ch + 1) % ret);
                         break;
 
                     case 'g':   // Character sprite
@@ -642,7 +649,7 @@ void printHelp(mode_t mode) {
             helpPrinter("Home or '`' will return you to the main menu", 6);
             helpPrinter("'c' cycles the color palette of the tile ", 7);
             helpPrinter("'v' cycles the color palette of the tile's sprite", 8);
-            helpPrinter("'r' cycles to the next loaded sprite (not currently implemented)", 9);
+            helpPrinter("'r' cycles to the next loaded sprite", 9);
             helpPrinter("'g' places a char sprite of your chosing", 10);
             helpPrinter("'z' removes any sprite from the selected cell", 11);
             helpPrinter("'p' fills the selected room with the current color", 13);
