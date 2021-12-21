@@ -70,6 +70,7 @@ int main(int argc, char** argv) {
 
     sprite_t bg;                // A variable to hold a bacground sprite on stack
     bool bgLoaded = false;      // Set true iff bg is loaded & not cleaned
+    bool useBg = false;          // A flag set to render the bg tile in sel and edit modes
 
     sprite_t * entry = NULL;    // A variable to hold a single sprite from heap
     bool entryUnlisted = false; // Set to true iff the entry is not in the list
@@ -153,8 +154,14 @@ int main(int argc, char** argv) {
                     x = kDefSpriteWidth;
                     y = kDefSpriteHeight;
                     break;
-                case edit:
-                    ret = false;
+                case sel:
+                    if(prevMode == edit) {      // Return from edit to the proper entry on sel
+                        x = listFind(list, entry);
+                        y = 0;
+                        if(x >= 0) {
+                            break;
+                        }
+                    }
                     // fall through
                 default:
                     x = 0;
@@ -235,9 +242,15 @@ int main(int argc, char** argv) {
                 // Print the currently selected sprite
                 clearBuffer(&dispData);
                 addText(&dispData, kBlackPalette, "Use arrow keys to select a sprite", 0, 0);
+
                 sprintf(buf, "%d/%d", x + 1, ret);
                 addText(&dispData, kBlackPalette, buf, dispData.screenRows-1, 0);
+
+                if(useBg) {
+                    addSpriteCenter(&dispData, &bg, bg);
+                }
                 addSpriteCenter(&dispData, entry, bg);
+
                 printBuffer(dispData);
                 curs_set(0);
 
@@ -281,6 +294,9 @@ int main(int argc, char** argv) {
                     case '`':
                     case '~':
                         mode = menu;
+                        break;
+                    case '\t':
+                        useBg = !useBg;
                         break;
                     case '?':
                     case KEY_F(1):
@@ -394,7 +410,7 @@ int main(int argc, char** argv) {
 
             // Draw the edit screen
             clearBuffer(&dispData);
-            if(ret) {
+            if(useBg) {
                 addSpriteCenter(&dispData, &bg, bg);
             }
             addSpriteCenter(&dispData, entry, bg);
@@ -421,7 +437,7 @@ int main(int argc, char** argv) {
 
                 // Control Inputs
                 case '\t':
-                    ret = !ret;
+                    useBg = !useBg;
                     break;
                 case KEY_F(10):
                     bg.defPalette = max(bg.defPalette+1, kMinPalette);
@@ -458,7 +474,7 @@ int main(int argc, char** argv) {
                 case KEY_F(2):
                 case KEY_ENTER:
                 case '\n':
-                    mode = menu;
+                    mode = sel;
                     break;
                 
                 // Character entry
@@ -604,8 +620,9 @@ void printHelp(mode_t mode) {
             helpPrinter("Use the home or '~' keys to return to the main menu", 3);
             helpPrinter("Use the enter key to select a sprite to edit", 4);
             helpPrinter("Use delete or backspace to delete a sprite", 5);
+            helpPrinter("Use tab to toggle a background tile", 6);
 
-            newRow = 7;
+            newRow = 8;
             break;
         
         case edit:
