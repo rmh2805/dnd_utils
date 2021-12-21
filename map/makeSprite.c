@@ -52,7 +52,7 @@ void printHelp(mode_t mode);
 void addSpriteCenter(dispData_t * data, sprite_t * sprite);
 
 //==============================<Main Execution>==============================//
-int main() {
+int main(int argc, char** argv) {
     int status = EXIT_FAILURE;  // The exit status to return
 
     int ch, ret;    // Ints to hold input data and return values respectively
@@ -76,7 +76,36 @@ int main() {
     bool fileOpen = false;
 
     //=========================<Argument Parsing>=========================//
-    // Todo load each file provided as an arg in order
+    for(int i = 1; i < argc; ++i) {
+        // Ensure that there is a sprite list
+        if(!listLoaded) {
+            list = mkList();
+            if(list == NULL) {
+                fprintf(stderr, "*FATAL ERROR* Unable to allocate a list to store arg sprites\n");
+                goto main_cleanup;
+            }
+            listLoaded = true;
+        }
+
+        // Open the file specified in the argument
+        fp = fopen(argv[i], "r");
+        if(fp == NULL) {
+            fprintf(stderr, "*FATAL ERROR* Failed to open sprite file \"%s\"\n", argv[i]);
+            goto main_cleanup;
+        }
+        fileOpen = true;
+
+        // Load the sprites from that file
+        ret = loadSpriteList(fp, &list);
+        if(ret < 0) {
+            fprintf(stderr, "*FATAL ERROR* Failed to load sprite file \"%s\"\n", argv[i]);
+            goto main_cleanup;
+        }
+
+        // Close that sprite file
+        fclose(fp);
+        fileOpen = false;
+    }
 
     //===========================<Initialization>=========================//
     // Create the background sprite
