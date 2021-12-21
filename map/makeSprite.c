@@ -10,8 +10,6 @@
 #include "../common/list.h"
 #include "../common/dispBase.h"
 
-// todo This whole program needs an overhaul. It builds, but it's old
-
 //==============================<Menu Handling>===============================//
 typedef enum mode_e {menu, sel, new, quit} mode_t;
 
@@ -29,6 +27,10 @@ const mode_t menuModes[] = {
 
 const unsigned char menuSize = sizeof(menuItems) / sizeof(menuItems[0]);
 
+//===========================<Constant Definitions>===========================//
+#define kDefSpriteWidth     3
+#define kDefSpriteHeight    3
+
 //===========================<Helper Declarations>============================//
 
 #ifndef min
@@ -45,17 +47,25 @@ FILE* promptFile(bool openRead, const char * prompt);
 void printHelp(mode_t mode);
 
 //==============================<Main Execution>==============================//
-int main(int argc, char** argv) {
+int main() {
     int status = EXIT_FAILURE;  // The exit status to return
 
     int ch, ret;    // Ints to hold input data and return values respectively
     char buf[80];   // A character buffer
 
-    dispData_t dispData;
-    bool dispOpen = false;
+    dispData_t dispData;        // Display Data store
+    bool dispOpen = false;      // Set to true only between disp open and close
 
-    list_t spriteList = NULL;
-    bool listLoaded = false;
+    list_t list = NULL;         // A list to store all sprites
+    bool listLoaded = false;    // Set true iff the list is loaded & not cleaned
+
+    sprite_t sprite;            // A variable to hold a single sprite on stack
+
+    sprite_t bg;                // A variable to hold a bacground sprite on stack
+    bool bgLoaded = false;      // Set true iff bg is loaded & not cleaned
+
+    sprite_t * entry = NULL;    // A variable to hold a single sprite from heap
+    bool entryUnlisted = false; // Set to true iff the entry is not in the list
 
     //=========================<Argument Parsing>=========================//
     // Todo load each file provided as an arg in order
@@ -76,10 +86,18 @@ int main(int argc, char** argv) {
     while(mode != quit) {
         // Reset navigation on change
         if(prevMode != mode) {
-            x = 0;
-            y = 0;
+            switch(mode) {
+                case new:
+                    x = kDefSpriteWidth;
+                    y = kDefSpriteHeight;
+                    break;
+                default:
+                    x = 0;
+                    y = 0;
+            }
         }
         prevMode = mode;
+        curs_set(1);
 
         switch(mode) {
             //=======================<Main Menu>======================//
@@ -87,7 +105,7 @@ int main(int argc, char** argv) {
                 // Display the menu
                 clearBuffer(&dispData);
                 addMenu(&dispData, "MakeSprite", menuItems, menuSize, y);
-                sprintf(buf, "%d sprites in the list", (spriteList == NULL) ? 0 : listLen(spriteList));
+                sprintf(buf, "%d sprites in the list", (list == NULL) ? 0 : listLen(list));
                 addText(&dispData, kBlackPalette, buf, menuSize + 3, 0);
                 printBuffer(dispData);
 
@@ -95,7 +113,7 @@ int main(int argc, char** argv) {
                 ch = getch();
 
                 // If the input was a number on the menu, select it and treat input as enter
-                if(ch >= '1' && ch < min('9', '0' + menuSize)) {
+                if(ch >= '1' && ch <= min('9', '0' + menuSize)) {
                     y = ch - '1';
                     ch = '\n';
                 }
@@ -127,12 +145,68 @@ int main(int argc, char** argv) {
                 break;
             //====================<Select a Sprite>===================//
             case sel:
+                // Ensure that a list is loaded
+                if(!listLoaded) {
+                    mode = menu;
+                    break;
+                }
+
                 mode = menu;
                 break;
             
             //=================<Create a New Sprite>==================//
             case new:
-                mode = menu;
+                // Add a block with the same size as the sprite to the display
+                clearBuffer(&dispData);
+                addText(&dispData, kBlackPalette, "Use arrow keys to resize, enter to confirm", 0, 0);
+
+                for(int dRow = 0; dRow < y; ++dRow) {
+                    int row = (dispData.screenRows/2 - y/2) + dRow;
+                    for(int dCol = 0; dCol < x; ++dCol) {
+                        int col = (dispData.screenCols/2 - x/2) + dCol;
+                        addText(&dispData, kWhitePalette, " ", row, col);
+                    }
+                }
+
+                printBuffer(dispData);
+                curs_set(0);
+
+                // Handle input
+                ch = getch();
+                switch(ch) {
+                    // Dimension modification
+                    case KEY_DOWN:
+                        y = min(y+1, dispData.screenRows);
+                        break;
+                    case KEY_UP:
+                        y = max(y-1, 1);
+                        break;
+                    case KEY_RIGHT:
+                        x = min(x+1, dispData.screenCols);
+                        break;
+                    case KEY_LEFT:
+                        x = max(x-1, 1);
+                        break;
+
+                    // Dimension accept
+                    case KEY_ENTER:
+                    case '\n':
+                        mode = menu;
+                        break;
+
+                    // Misc Controls
+                    case '?':
+                    case KEY_F(1):
+                        printHelp(mode);
+                        break;
+                    
+                    case KEY_HOME:
+                    case '`':
+                    case '~':
+                        mode = menu;
+                        break;
+
+                }
                 break;
 
             //=======================<Default>========================//
@@ -149,7 +223,13 @@ main_cleanup:
         closeDisp(dispData);
     }
     if(listLoaded) {
-        rmList(spriteList, freeSpriteEntry);
+        rmList(list, freeSpriteEntry);
+    }
+    if(entry != NULL && entryUnlisted) {
+        freeSpriteEntry(entry);
+    }
+    if(bgLoaded) {
+        rmSprite(bg);
     }
     return status;
 }
@@ -179,7 +259,15 @@ void printHelp(mode_t mode) {
             helpPrinter("Use the arrow keys and enter to select an option", 2);
             helpPrinter("Alternatively, you can select the numbered options with their keys", 3);
 
-            newRow = 12;
+            newRow = 5;
+            break;
+        
+        case new:
+            helpPrinter("Use the arrow keys to resize the sprite", 2);
+            helpPrinter("Use enter to accept the current dimensions", 3);
+            helpPrinter("Use the home or '~' keys to return to main menu", 4);
+
+            newRow = 6;
             break;
         
         default:
