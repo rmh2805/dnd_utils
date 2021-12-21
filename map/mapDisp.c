@@ -294,16 +294,25 @@ int mapSectionToFile(tileData_t data, map_t map, FILE* file,
                         // There is some sprite...
 
                         int spriteNr = map.data[row][col].sprite;
-                        if(spriteNr < 0 && data.charSprite.data != NULL && 
-                                line >= data.charSprite.yOff && line < data.charSprite.yOff + data.charSprite.height &&
-                                i >= data.charSprite.xOff && i < data.charSprite.xOff + data.charSprite.width) {
-                            // Check for char sprite data
-                            int y = line-data.charSprite.yOff, x = i-data.charSprite.xOff;
-                            
-                            mapFileNextChar(file,(x==1 && y==1) ? (char)(-1 * spriteNr) & 0xFF : data.charSprite.data[y][x]);
-                            continue;
+                        sprite_t * sprite = NULL;
+                        if(spriteNr < 0 && data.charSprite.data != NULL) {
+                            // Set the active sprite to the character sprite
+                            sprite = &data.charSprite;
+                            sprite->data[1][1] = getCharSpriteChar(spriteNr);
+                        } else {
+                            sprite = listGet(data.spriteList, spriteNr);
                         }
-                        //todo Check for real sprites, as well
+
+                        // If you got a sprite, try to print its next character
+                        if(sprite != NULL && line >= sprite->yOff && line < sprite->yOff + sprite->height &&
+                                i >= sprite->xOff && i < sprite->xOff + sprite->width) {
+                                int y = line-sprite->yOff, x = i-sprite->xOff;
+
+                                char ch = sprite->data[y][x];
+                                mapFileNextChar(file, (ch == 0) ? ' ' : ch);
+
+                                continue;
+                        }
 
                     }
 
