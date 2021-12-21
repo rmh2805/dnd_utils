@@ -11,7 +11,7 @@ typedef struct sprite_s {
     short defPalette;               // The default palette for this sprite
 
     unsigned char width, height;    // Width and height of the sprite
-    unsigned char xOff, yOff;       // X and Y offsets from top left of tile
+    char xOff, yOff;                // X and Y offsets from top left of tile
     char** data;                    // The actual characters to display as text
 
 } sprite_t;
