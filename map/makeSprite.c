@@ -309,7 +309,7 @@ int main() {
                         }
                         entryUnlisted = false;
 
-                        mode = menu;
+                        mode = edit;
                         break;
 
                     // Misc Controls
@@ -370,7 +370,13 @@ int main() {
                     mode = menu;
                     break;
                 
-                // Actually add visible characters
+                // Character entry
+                case KEY_DC:
+                case KEY_BACKSPACE:
+                case 27:
+                case '\b':
+                    entry->data[y][x] = '\0';
+                    break;
                 default:
                     if(ch >= 0x20 && ch <= 0x7E) {
                         entry->data[y][x] = ch;
