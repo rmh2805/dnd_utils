@@ -17,14 +17,16 @@
 #define kMapArg "-m"
 
 //=============================<Menu Definitions>=============================//
-typedef enum mode_e {menu, mapLoad, quit} mode_t;
+typedef enum mode_e {menu, mapLoad, nav, quit} mode_t;
 
 const char * menuItems[] = {
-    "1. Load a map",
-    "2. Quit"
+    "1. Navigate around the map",
+    "2. Load a map",
+    "3. Quit"
 };
 
 mode_t menuModes[] = {
+    nav,
     mapLoad,
     quit
 };
@@ -131,13 +133,18 @@ int main(int argc, char** argv) {
     // Set the initial mode value
     int x = 0, y = 0;
 
-    mode_t mode = menu, prevMode = mode;
+    mode_t mode = menu, prevMode = quit;
     //============================<Main Loop>=============================//
 
     while(mode != quit) {
         if(mode != prevMode) {
-            x = 0;
-            y = 0;
+            if(mode == menu && !mapLoaded) {
+                for(y = 0; menuModes[y] != mapLoad && y < menuSize; ++y);
+                y = y % menuSize;
+            } else {
+                x = 0;
+                y = 0;
+            }
         }
 
         prevMode = mode;
@@ -167,10 +174,10 @@ int main(int argc, char** argv) {
                 switch(ch) {
                     // Navigation
                     case KEY_UP:
-                        y = min(y+1, 0);
+                        y = max(y-1, 0);
                         break;
                     case KEY_DOWN:
-                        y = max(y-1, menuSize-1);
+                        y = min(y+1, menuSize-1);
                         break;
 
                     // Selection
