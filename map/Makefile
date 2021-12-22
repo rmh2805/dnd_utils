@@ -47,6 +47,10 @@ dispMap: dispMap.o sprite.o tile.o map.o list.o dispBase.o mapDisp.o
 	$(CC) $(CFLAGS) $(CDEBUGFLAGS) -o $@ $^ $(CLIBS)
 	$(ECHO)
 
+playMap: playMap.o sprite.o tile.o map.o list.o dispBase.o mapDisp.o
+	$(CC) $(CFLAGS) $(CDEBUGFLAGS) -o $@ $^ $(CLIBS)
+	$(ECHO)
+
 testSprite: testSprite.o sprite.o list.o
 	$(CC) $(CFLAGS) $(CDEBUGFLAGS) -o $@ $^ $(CLIBS)
 	$(ECHO)
