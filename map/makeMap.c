@@ -21,28 +21,30 @@
 
 //===============================<Menu Helpers>===============================//
 typedef enum mode_e {
-    menu, quit, new, load, save, nav, file, loadSprite, saveSprite
+    menu, quit, new, load, save, nav, file, loadSprite, saveSprite, purgeSprites
 } mode_t;
 
 const char * menuItems[] = {
-    "1. New Map",
-    "2. Load Map",
-    "3. Save Map",
-    "4. Edit Map",
+    "1. Edit Map",
+    "2. Save Map",
+    "3. New Map",
+    "4. Load Map",
     "5. Make Printable",
     "6. Load Sprite List",
     "7. Save Sprite List",
-    "8. Quit"
+    "8. Purge Sprites",
+    "9. Quit"
 };
 
 mode_t menuModes[] = {
+    nav,
+    save,
     new,
     load,
-    save,
-    nav,
     file,
     loadSprite,
     saveSprite,
+    purgeSprites,
     quit
 };
 
@@ -558,6 +560,18 @@ int main(int argc, char** argv) {
                 fclose(fp);
 
                 // Quit back to main menu
+                mode = menu;
+                break;
+            
+            //====================<Purge Sprite List>====================//
+            case purgeSprites:
+                if(data.spriteList == NULL) {
+                    break;
+                }
+
+                rmList(data.spriteList, freeSpriteEntry);
+                data.spriteList = NULL;
+
                 mode = menu;
                 break;
 
