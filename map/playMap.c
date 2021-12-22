@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
 
 #include <ncurses.h>
 #include "mapDisp.h"
@@ -10,6 +11,10 @@
 #include "map.h"
 
 //==============================<Misc Constants>==============================//
+
+// Argument definitions
+#define kUsageArg "-?"
+#define kMapArg "-m"
 
 //=============================<Menu Definitions>=============================//
 typedef enum mode_e {menu, mapLoad, quit} mode_t;
@@ -37,12 +42,15 @@ const int menuSize = sizeof(menuItems) / sizeof(menuItems[0]);
 #define max(a, b) ((a > b) ? a : b)
 #endif
 
+#define streq(a, b) (strcmp(a, b) == 0)
+
 void printHelp(mode_t mode);
+void printUsage(const char * firstArg);
 
 FILE* promptFile(bool readable, const char * prompt); 
 
 //================================<Main Code>=================================//
-int main() {
+int main(int argc, char** argv) {
     //=======================<Variable Declaration>=======================//
     int status = EXIT_FAILURE;
     int ret, ch;
@@ -64,6 +72,18 @@ int main() {
         goto main_cleanup;
     }
     dataLoaded = true;
+
+    // Parse all arguments
+    for(int i = 1; i < argc; ++i) {
+        if(srteq(kUsageArg, argv[i])) {
+            printf("Usage: ");
+            printUsage(argv[0]);
+            status = EXIT_SUCCESS;
+            goto main_cleanup;
+        }
+        //todo Parse map load args
+        //todo catch unrecognized args
+    }
 
     // Initialize the display
     if((ret = initDisp(&data.dispData)) < 0) {
@@ -224,4 +244,8 @@ void printHelp(mode_t mode) {
 
     printText(kBlackPalette, "Press enter to continue...", newRow, 0);
     getch();
+}
+
+void printUsage(const char * firstArg) {
+    printf("%s [%s <mapFile>]\n", firstArg, kMapArg);
 }
