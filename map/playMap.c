@@ -41,6 +41,8 @@ void printHelp(mode_t mode);
 int main() {
     //=======================<Variable Declaration>=======================//
     int status = EXIT_FAILURE;
+    int ret, ch;
+    char buf[128];
 
     tileData_t data;
     bool dataLoaded = false;
@@ -50,6 +52,19 @@ int main() {
     bool mapLoaded = false;
 
     //==========================<Initialization>==========================//
+    // Load in the tile data
+    if((ret = loadTileData(&data)) < 0) {
+        fprintf(stderr, "*FATAL ERROR* Failed to load the tile data (%d)\n", ret);
+        goto main_cleanup;
+    }
+    dataLoaded = true;
+
+    // Initialize the display
+    if((ret = initDisp(&data.dispData)) < 0) {
+        fprintf(stderr, "*FATAL ERROR* Failed to open the display (%d)\n", ret);
+        goto main_cleanup;
+    }
+    displayOpen = true;
 
     // Set the initial mode value
     int x = 0, y = 0;
@@ -67,7 +82,53 @@ int main() {
 
         switch(mode) {
             case menu:
+                // Update the display
+                clearBuffer(&data.dispData);
+                addMenu(&data.dispData, "Play Map", menuItems, menuSize, y);
+
+                sprintf(buf, "%sMap Loaded", (mapLoaded) ? "" : "No ");
+                addText(&data.dispData, kBlackPalette, buf, menuSize+3, 0);
                 
+                printBuffer(data.dispData);
+
+                // Get and input
+                ch = getch();
+
+                // If a menu item's number was entered, select it and queue enter
+                if(ch >= '1' && ch <= '0' + min(menuSize, 9)) {
+                    y = ch - '0';
+                    ch = '\n';
+                }
+
+                // Act on input
+                switch(ch) {
+                    // Navigation
+                    case KEY_UP:
+                        y = min(y+1, 0);
+                        break;
+                    case KEY_DOWN:
+                        y = max(y-1, 0);
+                        break;
+
+                    // Selection
+                    case '\n':
+                    case KEY_ENTER:
+                        mode = menuModes[y];
+                        break;
+
+                    // Misc inputs
+                    case KEY_F(1):
+                    case '?':
+                        printHelp(mode);
+                        break;
+
+                    case KEY_HOME:
+                    case '`':
+                    case '~':
+                        mode = quit;
+                        break;
+                }
+                break;
             default:
                 mode = quit;
                 break;

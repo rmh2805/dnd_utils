@@ -19,7 +19,7 @@ CFLAGS=-Wall -std=c99 -Wextra -pedantic -ggdb
 #
 #	Main Target
 #
-main: makeSprite makeMap
+main: playMap
 
 #
 #	Multiple Targets
