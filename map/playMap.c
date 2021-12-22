@@ -12,13 +12,15 @@
 //==============================<Misc Constants>==============================//
 
 //=============================<Menu Definitions>=============================//
-typedef enum mode_e {menu, quit} mode_t;
+typedef enum mode_e {menu, mapLoad, quit} mode_t;
 
 const char * menuItems[] = {
-    "1. Quit"
+    "1. Load a map",
+    "2. Quit"
 };
 
 mode_t menuModes[] = {
+    mapLoad,
     quit
 };
 
@@ -37,6 +39,8 @@ const int menuSize = sizeof(menuItems) / sizeof(menuItems[0]);
 
 void printHelp(mode_t mode);
 
+FILE* promptFile(bool readable, const char * prompt); 
+
 //================================<Main Code>=================================//
 int main() {
     //=======================<Variable Declaration>=======================//
@@ -50,6 +54,8 @@ int main() {
 
     map_t map;
     bool mapLoaded = false;
+
+    FILE* fp;
 
     //==========================<Initialization>==========================//
     // Load in the tile data
@@ -81,6 +87,7 @@ int main() {
         prevMode = mode;
 
         switch(mode) {
+            //======================<Main Menu>=======================//
             case menu:
                 // Update the display
                 clearBuffer(&data.dispData);
@@ -96,7 +103,7 @@ int main() {
 
                 // If a menu item's number was entered, select it and queue enter
                 if(ch >= '1' && ch <= '0' + min(menuSize, 9)) {
-                    y = ch - '0';
+                    y = ch - '1';
                     ch = '\n';
                 }
 
@@ -107,7 +114,7 @@ int main() {
                         y = min(y+1, 0);
                         break;
                     case KEY_DOWN:
-                        y = max(y-1, 0);
+                        y = max(y-1, menuSize-1);
                         break;
 
                     // Selection
@@ -129,6 +136,40 @@ int main() {
                         break;
                 }
                 break;
+
+            //======================<Load a Map>======================//
+            case mapLoad:
+                // Prompt the user for the map file location
+                if((fp = promptFile(true, "Enter the map file location")) == NULL) {
+                    printError("*ERROR* Failed to open the map file");
+                    mode = menu;
+                    break;
+                }
+
+                // If a map or sprites are loaded, unload them
+                if(mapLoaded) {
+                    rmMap(map);
+                    mapLoaded = false;
+                }
+
+                if(data.spriteList != NULL) {
+                    rmList(data.spriteList, freeSpriteEntry);
+                    data.spriteList = NULL;
+                }
+
+                // Perform the map load
+                if(loadMap(&map, &data.spriteList, fp) < 0) {
+                    printError("*ERROR* Failed to load map from file");
+                } else {
+                    mapLoaded = true;
+                }
+
+                // Close the map file and return to main menu
+                fclose(fp);
+                mode = menu;
+                break;
+
+            //=====================<Other States>=====================//
             default:
                 mode = quit;
                 break;
@@ -148,6 +189,17 @@ main_cleanup:
         rmMap(map);
     }
     return status;
+}
+
+//===============================<File Helpers>===============================//
+FILE* promptFile(bool openRead, const char * prompt) {
+    char buf[128];
+
+    clear();
+    printText(kBlackPalette, (prompt == NULL) ? "Enter the file path" : prompt, 0, 0);
+    getText(2, 0, buf, 128);
+
+    return fopen(buf, (openRead) ? "r" : "w");
 }
 
 //===============================<Misc Helpers>===============================//
