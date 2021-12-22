@@ -75,14 +75,50 @@ int main(int argc, char** argv) {
 
     // Parse all arguments
     for(int i = 1; i < argc; ++i) {
-        if(srteq(kUsageArg, argv[i])) {
-            printf("Usage: ");
+        if(streq(kUsageArg, argv[i])) {         //Usage arg
             printUsage(argv[0]);
             status = EXIT_SUCCESS;
             goto main_cleanup;
+
+        } else if(streq(kMapArg, argv[i])) {    // Map arg
+            // Ensure that only one map file is loaded
+            if(mapLoaded) {
+                fprintf(stderr, "*FATAL ERROR* in argument %d: Can load only one map by argument\n", i);
+                printUsage(argv[0]);
+                goto main_cleanup;
+            }
+
+            // Ensure that a map file was specified
+            if(++i >= argc) {
+                fprintf(stderr, "*FATAL ERROR* in argument %d: No map file specified\n", i-1);
+                printUsage(argv[0]);
+                goto main_cleanup;
+            }
+
+            // Open the specified map file
+            fp = fopen(argv[i], "r");
+            if(fp == NULL) {
+                fprintf(stderr, "*FATAL ERROR* in argument %d: Unable to open map file \"%s\"", i, argv[i]);
+                printUsage(argv[0]);
+                goto main_cleanup;
+            }
+
+            // Attempt to load the map from file
+            if((ret = loadMap(&map, &data.spriteList, fp)) < 0) {
+                fclose(fp);
+                fprintf(stderr, "*FATAL ERROR* in argument %d: Failed to load map from \"%s\"", i, argv[i]);
+                printUsage(argv[0]);
+                goto main_cleanup;
+            }
+            mapLoaded = true;
+
+            // Close the map file
+            fclose(fp);
+        } else {
+            fprintf(stderr, "*FATAL ERROR* in argument %d: Unrecongized argument \"%s\"\n", i, argv[i]);
+            printUsage(argv[0]);
+            goto main_cleanup;
         }
-        //todo Parse map load args
-        //todo catch unrecognized args
     }
 
     // Initialize the display
@@ -247,5 +283,5 @@ void printHelp(mode_t mode) {
 }
 
 void printUsage(const char * firstArg) {
-    printf("%s [%s <mapFile>]\n", firstArg, kMapArg);
+    printf("Usage: %s [%s <mapFile>]\n", firstArg, kMapArg);
 }
