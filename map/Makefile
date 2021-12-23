@@ -47,7 +47,7 @@ dispMap: dispMap.o sprite.o tile.o map.o list.o dispBase.o mapDisp.o
 	$(CC) $(CFLAGS) $(CDEBUGFLAGS) -o $@ $^ $(CLIBS)
 	$(ECHO)
 
-playMap: playMap.o sprite.o tile.o map.o list.o dispBase.o mapDisp.o
+playMap: playMap.o sprite.o tile.o map.o list.o dispBase.o mapDisp.o actor.o
 	$(CC) $(CFLAGS) $(CDEBUGFLAGS) -o $@ $^ $(CLIBS)
 	$(ECHO)
 
