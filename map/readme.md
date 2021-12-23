@@ -1,8 +1,12 @@
 # DnD Utils Mapping Tool
 
-Currently, the primary tool in this module is `makeMap`. While I do intend to 
-further incorporate spritesets into the mapping util, at the moment the only 
-loaded sprites are the tiles used to build up the maps.
+Currently, the primary tools in this module are `makeMap` and `makeSprite`. 
+These can be used together to create maps and to generate sprites to place 
+within them (as decoration).
+
+In addition, I am currently working to develop a new `playMap` executable which 
+will allow the placement of actors (primarily PCs and NPCs/enemies) onto those 
+maps for use as a game aid.
 
 This program requires ncurses 5 (instructions to do this on ubuntu can be found 
 [here](https://askubuntu.com/questions/270381/how-do-i-install-ncurses-header-files))
