@@ -141,6 +141,9 @@ int main(int argc, char** argv) {
             if(mode == menu && !mapLoaded) {
                 for(y = 0; menuModes[y] != mapLoad && y < menuSize; ++y);
                 y = y % menuSize;
+            } else if (mode == nav && mapLoaded) {
+                x = map.nCols/2;
+                y = map.nRows/2;
             } else {
                 x = 0;
                 y = 0;
@@ -231,6 +234,51 @@ int main(int argc, char** argv) {
                 fclose(fp);
                 mode = menu;
                 break;
+            //=====================<Navigate Map>=====================//
+            case nav:
+                // Ensure the map is loaded
+                if(!mapLoaded) {
+                    mode = menu;
+                    break;
+                }
+                
+                // Add the map to the buffer and print
+                clearBuffer(&data.dispData);
+                addMap(&data, map, x, y);
+                printBuffer(data.dispData);
+                setCursor(data, map, x, y);
+                curs_set(1);
+
+                // Handle inputs
+                ch = getch();
+
+                switch(ch) {
+                    // Navigation controls
+                    case KEY_UP:
+                        y = max(y-1, 0);
+                        break;
+                    case KEY_DOWN:
+                        y = min(y+1, map.nRows-1);
+                        break;
+                    case KEY_LEFT:
+                        x = max(x-1, 0);
+                        break;
+                    case KEY_RIGHT:
+                        x = min(x+1, map.nCols-1);
+                        break;
+
+                    // Misc controls
+                    case '?':
+                    case KEY_F(1):
+                        printHelp(mode);
+                        break;
+                    case KEY_HOME:
+                    case '`':
+                    case '~':
+                        mode = quit;
+                        break;
+                }
+                break;
 
             //=====================<Other States>=====================//
             default:
@@ -277,6 +325,13 @@ void printHelp(mode_t mode) {
         case menu:
             helpPrinter("Use the arrow keys and enter to select an option", 2);
             helpPrinter("Alternatively, you can select the numbered options with their keys", 3);
+
+            newRow = 5;
+            break;
+
+        case nav:
+            helpPrinter("Use the arrow keys to navigate", 2);
+            helpPrinter("Use the '~' key to return to the menu", 3);
 
             newRow = 5;
             break;
