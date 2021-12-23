@@ -94,3 +94,27 @@ void freeActorEntry(void * data) {
     rmActor(*(actor_t *)data);
     free(data);
 }
+
+actorData_t mkActorData() {
+    actorData_t data;
+    for(size_t i = 0; i < sizeof(data); ++i) {
+        ((char*)(&data))[i] = '\0';
+    }
+
+    return data;
+}
+
+void rmActorData(actorData_t data) {
+    if(data.actorSprites != NULL) {
+        rmList(data.actorSprites, freeSpriteEntry);
+    }
+    if(data.pcActors != NULL) {
+        rmList(data.pcActors, freeActorEntry);
+    }
+    if(data.npcActors != NULL) {
+        rmList(data.npcActors, freeActorEntry);
+    }
+    if(data.enemyActors != NULL) {
+        rmList(data.enemyActors, freeActorEntry);
+    }
+}
