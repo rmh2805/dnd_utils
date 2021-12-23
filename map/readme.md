@@ -9,12 +9,12 @@ This program requires ncurses 5 (instructions to do this on ubuntu can be found
 and uses gnu make to automate the build process.
 
 Once all required libraries are installed, simply run `make` in this directory 
-to generate the `makeMap` executable, which can then be run from the command 
-line with the command `./makeMap`.
+to generate the `makeMap` and `makeSprite` executables, which can then be run 
+from the command line with the command `./<executable name>`.
 
 If you are initially unable to run the executable, you may need to enable 
 execution priveleges on it, which can be done with the bash command 
-`chmod u+x makeMap`, and try again.
+`chmod u+x <executable name>`, and try again.
 
-The makemap program contains help prompts in both its main menu and edit screens
-which can be accessed by entering `?` into the program.
+These programs contain help prompts in many of their modes which can be accessed
+through the F1 key.
