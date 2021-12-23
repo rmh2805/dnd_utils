@@ -2,6 +2,7 @@
 #define _ACTOR_H_
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "../common/list.h"
@@ -84,5 +85,27 @@ actorData_t mkActorData();
  * @param data The actor struct to release
  */
 void rmActorData(actorData_t data);
+
+//===============================<File Access>================================//
+
+/**
+ * Writes an actor out to file
+ * 
+ * @param actor The actor to write to file
+ * @param fp The file to write the actor to
+ * 
+ * @return 0 on success, <0 on failure
+ */
+int writeActor(actor_t actor, FILE* fp);
+
+/**
+ * Reads an actor from file
+ * 
+ * @param actor A pointer to the actor to read in to
+ * @param fp The file to read the actor from
+ * 
+ * @return 0 on success, <0 on failure
+ */
+int readActor(actor_t* actor, FILE* fp);
 
 #endif

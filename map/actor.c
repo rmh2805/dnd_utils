@@ -118,3 +118,71 @@ void rmActorData(actorData_t data) {
         rmList(data.enemyActors, freeActorEntry);
     }
 }
+
+//===============================<File Access>================================//
+
+#define writeActorHelper_str(str) fprintf(fp, "%lu |%s\n", (str == NULL) ? 0 : strlen(str), (str == NULL) ? "" : str)
+
+int writeActor(actor_t actor, FILE* fp) {
+    if(fp == NULL) {
+        return -1;
+    }
+
+    writeActorHelper_str(actor.name);
+    writeActorHelper_str(actor.status);
+
+    fprintf(fp, "%d %d %d %d %d %hd %hd\n", actor.maxHP, actor.damage, 
+                actor.spriteIdx, actor.x, actor.y, actor.palette, 
+                actor.paletteOverride);
+
+    return 0;
+}
+
+int readActorHelper_str(FILE* fp, char** str) {
+    if(fp == NULL || str == NULL) {
+        return -1;
+    }
+
+    int ret = 0;
+    size_t bufSize = 0;
+
+    ret = fscanf(fp, "%lu |", &bufSize);
+    if(ret != 1) {
+        return -1;
+    }
+
+    *str = calloc(bufSize + 1, sizeof(char));
+    if(*str == NULL) {
+        return -1;
+    }
+
+    fread(*str, sizeof(char), bufSize, fp);
+    return 0;
+}
+
+int readActor(actor_t* actor, FILE* fp) {
+    if(actor == NULL || fp == NULL) {
+        return -1;
+    }
+
+    if(readActorHelper_str(fp, &actor->name) < 0) {
+        rmActor(*actor);
+        return -1;
+    }
+    if(readActorHelper_str(fp, &actor->status) < 0) {
+        rmActor(*actor);
+        return -1;
+    }
+
+    int ret = fscanf(fp, "%d %d %d %d %d %hd %hd\n", &actor->maxHP, &actor->damage, 
+                        &actor->spriteIdx, &actor->x, &actor->y, &actor->palette, 
+                        &actor->paletteOverride);
+
+    if(ret != 7) {
+        rmActor(*actor);
+        return -1;
+    }
+
+    return 0;
+}
+
