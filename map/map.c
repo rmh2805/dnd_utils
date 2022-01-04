@@ -99,8 +99,10 @@ int writeMapOverrides(map_t map, list_t sprites, FILE* fp) {
     return writeMapHelper(map, sprites, fp, true);
 }
 
-int loadMap(map_t* map, list_t * sprites, FILE* fp) {
+int loadMapHelper(map_t* map, list_t* sprites, FILE* fp, bool doOverrides) {
     if(fp == NULL || map == NULL || sprites == NULL) return -1;
+
+    int (* tileReader)(tile_t*, FILE*) = (doOverrides) ? readTile : readTileOverrides;
 
     int rows, cols;
     int ret = fscanf(fp, "%d %d", &rows, &cols);
@@ -118,7 +120,7 @@ int loadMap(map_t* map, list_t * sprites, FILE* fp) {
 
     for(int row = 0; row < rows; row++) {
         for(int col = 0; col < cols; col++) {
-            ret = readTile(&map->data[row][col], fp);
+            ret = tileReader(&map->data[row][col], fp);
             if(ret < 0) {
                 rmMap(*map);
                 rmList(*sprites, freeSpriteEntry);
@@ -136,4 +138,12 @@ int loadMap(map_t* map, list_t * sprites, FILE* fp) {
     }
 
     return 0;
+}
+
+int loadMap(map_t* map, list_t * sprites, FILE* fp) {
+    return loadMapHelper(map, sprites, fp, false);
+}
+
+int loadMapOverrides(map_t* map, list_t* sprites, FILE* fp) {
+    return loadMapHelper(map, sprites, fp, true);
 }

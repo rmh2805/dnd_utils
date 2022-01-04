@@ -89,6 +89,17 @@ void rmTileData(tileData_t tileData);
  */
 int readTile(tile_t * tile, FILE* fp);
 
+
+/**
+ * Reads a tile written to the current line of the file along with its overrides
+ * 
+ * @param tile A return pointer for the tile read in
+ * @param fp The file pointer to read from
+ * 
+ * @return 0 on success, < 0 on failure
+ */
+int readTileOverrides(tile_t* tile, FILE* fp);
+
 /**
  * Writes a tile to a line in the provided file
  * 

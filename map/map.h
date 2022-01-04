@@ -81,4 +81,18 @@ int writeMapOverrides(map_t map, list_t sprites, FILE* fp);
  */
 int loadMap(map_t* map, list_t * sprites, FILE* fp);
 
+/**
+ * Load a map from a file with its overrides
+ * 
+ * @param map A return pointer for the map read from file
+ * @param sprites A return pointer for the sprite list used in this map (destructive)
+ * @param fp The file to read from
+ * 
+ * @return 0 on success, < 0 on failure
+ *          -1 on null param, 
+ *          -2 on failure to read from file,
+ *          -3 if unable to allocate the new map or sprite list
+ */
+int loadMapOverrides(map_t* map, list_t* sprites, FILE* fp);
+
 #endif
