@@ -117,7 +117,10 @@ int loadList(list_t * list, FILE* fp, int (*readEntry)(void**, FILE*)) {
         return -1;
     }
 
-    *list = mkList();
+    if(*list == NULL) {
+        *list = mkList();
+    }
+
     for(unsigned i = 0; i < len; i++) {
         void* ent;
         if(readEntry(&ent, fp) < 0) {
