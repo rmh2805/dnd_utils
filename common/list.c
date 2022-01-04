@@ -122,7 +122,7 @@ int loadList(list_t * list, FILE* fp, int (*readEntry)(void**, FILE*)) {
     }
 
     for(unsigned i = 0; i < len; i++) {
-        void* ent;
+        void* ent = NULL;
         if(readEntry(&ent, fp) < 0) {
             return -1;
         }

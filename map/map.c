@@ -81,7 +81,9 @@ int writeMap(map_t map, list_t sprites, FILE* fp) {
     }
 
     if(sprites != NULL) {
-        if(saveSpriteList(fp, sprites) < 0) return -2;
+        if(saveList(sprites, fp, writeSpriteEntry) < 0) return -2;
+    } else {
+        fprintf(fp, "0\n");
     }
     
     return 0;
@@ -116,7 +118,7 @@ int loadMap(map_t* map, list_t * sprites, FILE* fp) {
         }
     }
 
-    if(loadSpriteList(fp, sprites) < 0) {
+    if(loadList(sprites, fp, readSpriteEntry) < 0) {
         rmMap(*map);
         rmList(*sprites, freeSpriteEntry);
         *sprites = NULL;

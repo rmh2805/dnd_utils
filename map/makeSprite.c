@@ -99,7 +99,7 @@ int main(int argc, char** argv) {
         fileOpen = true;
 
         // Load the sprites from that file
-        ret = loadSpriteList(fp, &list);
+        ret = loadList(&list, fp, readSpriteEntry);
         if(ret < 0) {
             fprintf(stderr, "*FATAL ERROR* Failed to load sprite file \"%s\"\n", argv[i]);
             goto main_cleanup;
@@ -508,7 +508,7 @@ int main(int argc, char** argv) {
                 fileOpen = true;
 
                 // Write the sprites in the list out to the file
-                if(saveSpriteList(fp, list) < 0) {
+                if(saveList(list, fp, writeSpriteEntry) < 0) {
                     printError("*ERROR* Failed to save the sprite list");
                 }
                 fclose(fp);
@@ -541,7 +541,7 @@ int main(int argc, char** argv) {
                 fileOpen = true;
 
                 // Load sprites from the file
-                if(loadSpriteList(fp, &list) < 0) {
+                if(loadList(&list, fp, readSpriteEntry) < 0) {
                     printError("*ERROR* Failed to load sprites from file");
                 }
                 fclose(fp);

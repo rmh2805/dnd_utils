@@ -525,7 +525,7 @@ int main(int argc, char** argv) {
                 }
 
                 // Load sprites into the list
-                if(loadSpriteList(fp, &data.spriteList) < 0) {
+                if(loadList(&data.spriteList, fp, readSpriteEntry) < 0) {
                     printError("*ERROR* Failed to load sprites from list");
                 }
 
@@ -552,7 +552,7 @@ int main(int argc, char** argv) {
                 }
 
                 // Save sprites out to the list
-                if(saveSpriteList(fp, data.spriteList) < 0) {
+                if(saveList(data.spriteList, fp, writeSpriteEntry) < 0) {
                     printError("*ERROR* Failed to save sprites from list");
                 }
 
