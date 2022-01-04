@@ -186,24 +186,30 @@ int readActor(actor_t* actor, FILE* fp) {
     return 0;
 }
 
-int writeActorEntry(actor_t* actor, FILE* fp) {
-    return writeActor(*actor, fp);
+int writeActorEntry(actor_t* entry, FILE* fp) {
+    return writeActor(*entry, fp);
 }
 
-int readActorEntry(actor_t** actor, FILE* fp) {
-    if(actor == NULL) return -1;
+int readActorEntry(actor_t** entry, FILE* fp) {
+    if(entry == NULL) return -1;
 
-    // Allocate a new actor entry to feed in to the read actor struct
-    if(*actor == NULL) {
-        actor_t tmp;
-        if(mkActor(&tmp, NULL, NULL, 0, 0, -1) < 0) {
-            return -1;
-        }
-        if((*actor = mkActorEntry(tmp)) == NULL) {
-            rmActor(tmp);
-            return -1;
-        }
+    // Free any pre-existing actor
+    if(*entry != NULL) {
+        freeActorEntry(*entry);
     }
 
-    return readActor(*actor, fp);
+    // Read the actor in to the stack
+    actor_t actor;
+    if(readActor(&actor, fp) < 0) {
+        return -1;
+    }
+
+    // Move the actor from stack to heap
+    if((*entry = mkActorEntry(actor)) == NULL) {
+        rmActor(actor);
+        return -1;
+    }
+
+    // Return success
+    return 0;
 }
