@@ -1,12 +1,6 @@
 #include "tile.h"
 //=============================<Data Allocation>==============================//
-/** 
- * Makes a blank tile with no walls or sprite and default palettes
- * 
- * @param x The grid position x value
- * @param y The grid position y value
- * @return A blank tile with the provided positions
- */
+
 tile_t mkTile() {
     tile_t tile;
     for(size_t i = 0; i < sizeof(tile); i++) {
@@ -28,14 +22,6 @@ tile_t mkEmptyTile() {
     return tile;
 }
 
-
-/**
- * Loads a tile data struct's sprites from file
- * 
- * @param fileName The sprite file to load tiles from
- * @param data A return pointer for the tile data struct
- * @return 0 on success, <0 on failure
- */
 int loadTileData(tileData_t * data) {
     data->spriteList = NULL;
 
@@ -113,11 +99,6 @@ loadTileDataFail:
     return -1;
 }
 
-/**
- * Frees all of the allocated data from the tileData struct
- * 
- * @param tileData The tileData struct to free from
- */
 void rmTileData(tileData_t data) {
     rmSprite(data.emptyBase);
     rmSprite(data.tileBase);
@@ -135,20 +116,14 @@ void rmTileData(tileData_t data) {
     rmSprite(data.charSprite);
 }
 
-/**
- * Reads a tile written to the current line of the file
- * 
- * @param tile A return pointer for the tile read in
- * @param fp The file pointer to read from
- * 
- * @return 0 on success, < 0 on failure
- */
-int readTile(tile_t * tile, FILE* fp) {
+int readTileHelper(tile_t * tile, FILE* fp, bool doOverrides) {
     unsigned char walls;
 
     // Read in the raw data from the next line
-    int ret = fscanf(fp, "%hd %hhu %hhd %d %hd", &tile->bgPalette, &walls, 
-                        &tile->isEmpty, &tile->sprite, &tile->spritePalette);
+    int ret = fscanf(fp, "%hd %hd %hhu %hhd %d %hd %hd", &tile->bgPalette, 
+                        &tile->bgOverride, &walls, &tile->isEmpty, 
+                        &tile->sprite, &tile->spritePalette, 
+                        &tile->spriteOverride);
     
     // If any field was missed, return failure
     if(ret < 3) {
@@ -168,49 +143,50 @@ int readTile(tile_t * tile, FILE* fp) {
     tile->uWall = (walls >> 2) & 0x03;
     tile->dWall = walls & 0x03;
 
+    if(!doOverrides) {
+        tile->bgOverride = 0;
+        tile->spriteOverride = 0;
+    }
+
     return 0;
 }
 
-/**
- * Writes a tile to a line in the provided file
- * 
- * @param tile The tile to write out
- * @param fp The file pointer to write to
- * 
- * @return 0 on success, < 0 on failure
- */
-int writeTile(tile_t tile, FILE* fp) {
+int readTile(tile_t * tile, FILE* fp) {
+    return readTileHelper(tile, fp, false);
+}
+
+int readTileOverrides(tile_t * tile, FILE* fp) {
+    return readTileHelper(tile, fp, true);
+}
+
+int writeTileHelper(tile_t tile, FILE* fp, bool doOverrides) {
     if(fp == NULL) return -1;
 
     unsigned char walls = (tile.lWall << 6) | (tile.rWall << 4) | 
                             (tile.uWall << 2) | (tile.dWall);
 
-    fprintf(fp, "%hd %hhu %hhd %d %hd\n", tile.bgPalette, walls, tile.isEmpty, 
-                tile.sprite, tile.spritePalette);
+    fprintf(fp, "%hd %hd %hhu %hhd %d %hd %hd", tile.bgPalette, 
+                (doOverrides) ? tile.bgOverride : 0, walls, tile.isEmpty, 
+                tile.sprite, tile.spritePalette, 
+                (doOverrides) ? tile.spriteOverride : 0);
+
+    fprintf(fp, "\n");
     return 0;
 }
+
+int writeTile(tile_t tile, FILE* fp) {
+    return writeTileHelper(tile, fp, false);
+}
+
+int writeTileOverrides(tile_t tile, FILE* fp) {
+    return writeTileHelper(tile, fp, true);
+}
+
 //===========================<Sprite Manipulation>============================//
-/**
- * Returns the sprite index of the tile
- * 
- * @param tile The tile to get the sprite index from
- * 
- * @return A sprite index (>= 0) if one exists, -1 if no sprite is set, -2 if 
- *         a character sprite is set
- */
 int getSpriteIdx(tile_t tile) {
     return (tile.sprite < -1) ? -2 : tile.sprite;
 }
 
-/**
- * Sets a sprite index in the tile
- * 
- * @param data The data structure defining tile sprites
- * @param tile The tile to modify
- * @param idx The sprite index to set
- * 
- * @return 0 on success, < 0 on failure
- */
 int setSpriteIdx(tileData_t data, tile_t* tile, int idx) {
     if(data.spriteList == NULL || idx < 0 || 
             (unsigned) idx >= listLen(data.spriteList)) {
@@ -221,22 +197,10 @@ int setSpriteIdx(tileData_t data, tile_t* tile, int idx) {
     return 0;
 }
 
-/**
- * Removes any sprite from the provided tile
- * 
- * @param tile The tile to modify
- */
 void clearTileSprite(tile_t* tile) {
     tile->sprite = kNoSprite;
 }
 
-/**
- * Sets a character sprite on the provided tile
- * 
- * @param tile The tile to modify
- * @param ch The character to set
- * @param palette The palette to set
- */
 void setCharSprite(tile_t* tile, char ch, short palette) {
     if(ch >= 0x20 && ch <= 0x7e) {
         tile->sprite = -1 * (palette << 8 | ch);

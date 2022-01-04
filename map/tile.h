@@ -99,6 +99,17 @@ int readTile(tile_t * tile, FILE* fp);
  */
 int writeTile(tile_t tile, FILE* fp);
 
+/**
+ * Writes a tile to a line in the provided file, along with its palette 
+ * overrides
+ * 
+ * @param tile The tile to write out
+ * @param fp The file pointer to write to
+ * 
+ * @return 0 on success, < 0 on failure
+ */
+int writeTileOverrides(tile_t tile, FILE* fp);
+
 //===========================<Sprite Manipulation>============================//
 
 /**
