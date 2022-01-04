@@ -89,26 +89,6 @@ sprite_t readSprite(FILE* file);
 int writeSprite(FILE* file, sprite_t sprite);
 
 /**
- * Loads all sprites from the provided file and appends them to the provided list
- * 
- * @param file The file to load sprites from
- * @param list The sprite list to load into
- * 
- * @return The number of sprites read (<0 on failure)
- */
-int loadSpriteList(FILE* file, list_t * list);
-
-/**
- * Writes all sprites in the given list out to the provided file
- * 
- * @param file The file to save the sprites to
- * @param list The sprite list to save from
- * 
- * @return The number of sprites saved (<0 on failure)
- */
-int saveSpriteList(FILE* file, list_t list);
-
-/**
  * Reads a sprite from file into the referenced sprite
  * 
  * @param entry A double pointer to read in to

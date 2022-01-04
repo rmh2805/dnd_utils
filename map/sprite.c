@@ -176,63 +176,6 @@ int writeSprite(FILE* file, sprite_t sprite) {
     return 0;
 }
 
-int loadSpriteList(FILE* file, list_t * list) {
-    // Ensure that the file and sprite list both exist
-    if(list == NULL || file == NULL) {
-        return -1;
-    }
-
-    // Prepare internal files
-    int nRead = 0, ret = 0;
-    sprite_t sprite, * entry;
-
-    // While valid sprites are being returned from the file...
-    while((sprite = readSprite(file)).data != NULL) {
-        ret = -1;
-        // Turn the sprite into an entry
-        entry = mkSpriteEntry(sprite);
-        if(entry == NULL) {
-            break;
-        }
-
-        ret = listAppend(*list, entry);
-        if(ret < 0) {
-            freeSpriteEntry(entry);
-            break;
-        }
-
-        ++nRead;
-    }
-
-    if(nRead == 0 && ret < 0) { // If we failed to create or append the first entry...
-        return -1;
-    }
-
-    return nRead;
-}
-
-int saveSpriteList(FILE* file, list_t list) {
-    if(file == NULL || list == NULL) {
-        return -1;
-    }
-
-    int len = listLen(list), ret = 0, nWritten = 0;
-
-    for(int i = 0; i < len; ++i) {
-        sprite_t * entry = listGet(list, i);
-        if(entry == NULL) {
-            continue;
-        }
-        ret = writeSprite(file, *entry);
-        if(ret < 0) {
-            continue;
-        }
-        nWritten += 1;
-    }
-
-    return nWritten;
-}
-
 int readSpriteEntry(void** entry, FILE* fp) {
     if(entry == NULL) return -1;
 
