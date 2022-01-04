@@ -1,6 +1,8 @@
 #include "sprite.h"
 
 
+//============================<Memory Management>=============================//
+
 /**
  * Allocates data for a sprite with the specified dimensions
  * 
@@ -80,13 +82,25 @@ void rmSprite(sprite_t sprite) {
     free(sprite.data);
 }
 
-/**
- * Reads a sprite from file
- * 
- * @param file The file to read from
- * 
- * @return The sprite read from file
- */
+sprite_t * mkSpriteEntry(sprite_t sprite) {
+    sprite_t * ptr = calloc(1, sizeof(sprite_t));
+    if(ptr == NULL) {
+        return NULL;
+    }
+    *ptr = sprite;
+    return ptr;
+}
+
+void freeSpriteEntry(void * entry) {
+    if(entry == NULL) {
+        return;
+    }
+    rmSprite(*(sprite_t *) entry);
+    free(entry);
+}
+
+//===============================<File Access>================================//
+
 sprite_t readSprite(FILE* file) {
     short palette;
     unsigned char width, height;
@@ -138,14 +152,6 @@ sprite_t readSprite(FILE* file) {
     return sprite;
 }
 
-/**
- * Writes a sprite out to the file
- * 
- * @param file The file to write to
- * @param sprite The sprite to write out
- * 
- * @return 0 iff successful
- */
 int writeSprite(FILE* file, sprite_t sprite) {
     if(file == NULL || sprite.data == NULL) return -1;
 
@@ -227,19 +233,30 @@ int saveSpriteList(FILE* file, list_t list) {
     return nWritten;
 }
 
-sprite_t * mkSpriteEntry(sprite_t sprite) {
-    sprite_t * ptr = calloc(1, sizeof(sprite_t));
-    if(ptr == NULL) {
-        return NULL;
+int readSpriteEntry(sprite_t** entry, FILE* fp) {
+    if(entry == NULL) return -1;
+
+    // Free any existing sprite entries
+    if(*entry != NULL) {
+        freeSpriteEntry(*entry);
     }
-    *ptr = sprite;
-    return ptr;
+
+    // Read a sprite onto the stack
+    sprite_t sprite = readSprite(fp);
+    if(sprite.data == NULL) {
+        return -1;
+    }
+
+    // Move the sprite from stack to heap
+    if((*entry = mkSpriteEntry(sprite)) == NULL) {
+        rmSprite(sprite);
+        return -1;
+    }
+
+    // Return success
+    return 0;
 }
 
-void freeSpriteEntry(void * entry) {
-    if(entry == NULL) {
-        return;
-    }
-    rmSprite(*(sprite_t *) entry);
-    free(entry);
+int writeSpriteEntry(sprite_t* entry, FILE* fp) {
+    return writeSprite(fp, *entry);
 }

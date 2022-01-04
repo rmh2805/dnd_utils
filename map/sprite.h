@@ -18,6 +18,9 @@ typedef struct sprite_s {
 
 #define kEmptySprite (sprite_t) {0, 0, 0, 0, 0, NULL}
 
+
+//============================<Memory Management>=============================//
+
 /**
  * Allocates data for a sprite with the specified dimensions
  * 
@@ -50,6 +53,22 @@ sprite_t mkBlankTile(short palette, unsigned char width, unsigned char height);
  */
 void rmSprite(sprite_t sprite);
 
+/**
+ * Copies the contents of a sprite onto the heap for entry into a list
+ * 
+ * @param sprite The sprite to copy onto the heap
+ * @return The pointer to the new heap sprite
+ */
+sprite_t * mkSpriteEntry(sprite_t sprite);
+
+/**
+ * Free function for sprite list entries
+ * 
+ * @param entry The sprite list entry to free
+ */
+void freeSpriteEntry(void * entry);
+
+//===============================<File Access>================================//
 /**
  * Reads a sprite from file
  * 
@@ -90,18 +109,23 @@ int loadSpriteList(FILE* file, list_t * list);
 int saveSpriteList(FILE* file, list_t list);
 
 /**
- * Copies the contents of a sprite onto the heap for entry into a list
+ * Reads a sprite from file into the referenced sprite
  * 
- * @param sprite The sprite to copy onto the heap
- * @return The pointer to the new heap sprite
+ * @param entry A double pointer to read in to
+ * @param fp The file to read the actor from
+ * 
+ * @return 0 on success, <0 on failure
  */
-sprite_t * mkSpriteEntry(sprite_t sprite);
+int readSpriteEntry(sprite_t** entry, FILE* fp);
 
 /**
- * Free function for sprite list entries
+ * Writes the referand of an entry pointer out to file
  * 
- * @param entry The sprite list entry to free
+ * @param entry A pointer to the sprite to write out
+ * @param fp The file to write the sprite to
+ * 
+ * @return 0 on success, <0 on failure
  */
-void freeSpriteEntry(void * entry);
+int writeSpriteEntry(sprite_t* entry, FILE* fp);
 
 #endif
