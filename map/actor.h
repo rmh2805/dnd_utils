@@ -108,4 +108,25 @@ int writeActor(actor_t actor, FILE* fp);
  */
 int readActor(actor_t* actor, FILE* fp);
 
+/**
+ * Writes the referand of an actor pointer out to file
+ * 
+ * @param actor A pointer to the actor to write out
+ * @param fp The file to write the actor to
+ * 
+ * @return 0 on success, <0 on failure
+ */
+int writeActorEntry(actor_t* actor, FILE* fp);
+
+
+/**
+ * Reads an actor from file into the referenced actor
+ * 
+ * @param actor A double pointer to read in to
+ * @param fp The file to read the actor from
+ * 
+ * @return 0 on success, <0 on failure
+ */
+int readActorEntry(actor_t** actor, FILE* fp);
+
 #endif

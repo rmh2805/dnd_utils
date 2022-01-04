@@ -42,7 +42,7 @@ int mkActor(actor_t * actor, const char * name, const char * status, int maxHP, 
 
     // Zero-fill the actor struct
     for(size_t i = 0; i < sizeof(*actor); ++i) {
-        ((char *) actor)[i] = '\0';
+        ((char *) actor)[i] = 0;
     }
 
     // Copy the name and status into the actor
@@ -186,3 +186,24 @@ int readActor(actor_t* actor, FILE* fp) {
     return 0;
 }
 
+int writeActorEntry(actor_t* actor, FILE* fp) {
+    return writeActor(*actor, fp);
+}
+
+int readActorEntry(actor_t** actor, FILE* fp) {
+    if(actor == NULL) return -1;
+
+    // Allocate a new actor entry to feed in to the read actor struct
+    if(*actor == NULL) {
+        actor_t tmp;
+        if(mkActor(&tmp, NULL, NULL, 0, 0, -1) < 0) {
+            return -1;
+        }
+        if((*actor = mkActorEntry(tmp)) == NULL) {
+            rmActor(tmp);
+            return -1;
+        }
+    }
+
+    return readActor(*actor, fp);
+}
