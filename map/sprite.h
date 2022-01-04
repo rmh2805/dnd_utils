@@ -116,7 +116,7 @@ int saveSpriteList(FILE* file, list_t list);
  * 
  * @return 0 on success, <0 on failure
  */
-int readSpriteEntry(sprite_t** entry, FILE* fp);
+int readSpriteEntry(void** entry, FILE* fp);
 
 /**
  * Writes the referand of an entry pointer out to file
@@ -126,6 +126,6 @@ int readSpriteEntry(sprite_t** entry, FILE* fp);
  * 
  * @return 0 on success, <0 on failure
  */
-int writeSpriteEntry(sprite_t* entry, FILE* fp);
+int writeSpriteEntry(void* entry, FILE* fp);
 
 #endif

@@ -233,12 +233,12 @@ int saveSpriteList(FILE* file, list_t list) {
     return nWritten;
 }
 
-int readSpriteEntry(sprite_t** entry, FILE* fp) {
+int readSpriteEntry(void** entry, FILE* fp) {
     if(entry == NULL) return -1;
 
     // Free any existing sprite entries
     if(*entry != NULL) {
-        freeSpriteEntry(*entry);
+        freeSpriteEntry(*(sprite_t**)entry);
     }
 
     // Read a sprite onto the stack
@@ -257,6 +257,6 @@ int readSpriteEntry(sprite_t** entry, FILE* fp) {
     return 0;
 }
 
-int writeSpriteEntry(sprite_t* entry, FILE* fp) {
-    return writeSprite(fp, *entry);
+int writeSpriteEntry(void* entry, FILE* fp) {
+    return writeSprite(fp, *(sprite_t *)entry);
 }
