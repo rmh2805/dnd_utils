@@ -59,8 +59,10 @@ void freeTiles(tile_t** tiles, int nRows) {
 
 //==============================<Serialization>===============================//
 
-int writeMap(map_t map, list_t sprites, FILE* fp) {
+int writeMapHelper(map_t map, list_t sprites, FILE* fp, bool doOverrides) {
     if(fp == NULL) return -1;
+
+    int (* tileWriter)(tile_t, FILE*) = (doOverrides) ? writeTile : writeTileOverrides;
 
     fprintf(fp, "%d %d\n", map.nRows, map.nCols);
 
@@ -76,7 +78,7 @@ int writeMap(map_t map, list_t sprites, FILE* fp) {
                 tile.sprite = kNoSprite;
             }
 
-            if(writeTile(tile, fp) < 0) return -2;
+            if(tileWriter(tile, fp) < 0) return -2;
         }
     }
 
@@ -87,6 +89,14 @@ int writeMap(map_t map, list_t sprites, FILE* fp) {
     }
     
     return 0;
+}
+
+int writeMap(map_t map, list_t sprites, FILE* fp) {
+    return writeMapHelper(map, sprites, fp, false);
+}
+
+int writeMapOverrides(map_t map, list_t sprites, FILE* fp) {
+    return writeMapHelper(map, sprites, fp, true);
 }
 
 int loadMap(map_t* map, list_t * sprites, FILE* fp) {

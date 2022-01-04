@@ -57,6 +57,17 @@ void rmMap(map_t map);
 int writeMap(map_t map, list_t sprites, FILE* fp);
 
 /**
+ * Writes a map and its overrides out to file
+ * 
+ * @param map the map to write to file
+ * @param sprites The sprite list used with this map
+ * @param fp The file to write out to
+ * 
+ * @return 0 on success, <0 on failure
+ */
+int writeMapOverrides(map_t map, list_t sprites, FILE* fp);
+
+/**
  * Load a map from a file
  * 
  * @param map A return pointer for the map read from file
