@@ -16,7 +16,7 @@ typedef struct actor_s {
 
     // HP Tracking
     int maxHP;      // If <0, unknown
-    int damage;     // The ammount of damage taken so far
+    int deltaHP;    // The current change from max HP so far
 
     // Display Information
     int spriteIdx;      // This actor's sprite index (<0 for default)
@@ -43,12 +43,12 @@ typedef struct actorData_s {
  * @param name To be copied into this actor
  * @param status To be copied into this actor
  * @param maxHP The max HP to set (<0 if unknown)
- * @param damage The differency between this actor's max and current HP (negative for damage, positive for temp HP)
+ * @param deltaHP The differency between this actor's max and current HP (negative for damage, positive for temp HP)
  * @param sprite The sprite to use for this actor (<0 for a default sprite)
  * 
  * @return 0 on success, <0 on failure
  */
-int mkActor(actor_t * actor, const char * name, const char * status, int maxHP, int damage, int sprite);
+int mkActor(actor_t * actor, const char * name, const char * status, int maxHP, int deltaHP, int sprite);
 
 /**
  * Frees an actor and its allocated data (does not directly free its sprite)

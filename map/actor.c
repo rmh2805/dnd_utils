@@ -34,7 +34,7 @@ int cpyName(char** dst, const char * name) {
 }
 
 //============================<Memory Management>=============================//
-int mkActor(actor_t * actor, const char * name, const char * status, int maxHP, int damage, int spriteIdx) {
+int mkActor(actor_t * actor, const char * name, const char * status, int maxHP, int deltaHP, int spriteIdx) {
     // Ensure that the actor pointer is not null
     if(actor == NULL) {
         return -1;
@@ -58,9 +58,9 @@ int mkActor(actor_t * actor, const char * name, const char * status, int maxHP, 
     // Set the actor's sprite
     actor->spriteIdx = spriteIdx;
 
-    // Set the actor's max HP and damage
+    // Set the actor's max HP and deltaHP
     actor->maxHP = maxHP;
-    actor->damage = damage;
+    actor->deltaHP = deltaHP;
 
     return 0;
 }
@@ -131,7 +131,7 @@ int writeActor(actor_t actor, FILE* fp) {
     writeActorHelper_str(actor.name);
     writeActorHelper_str(actor.status);
 
-    fprintf(fp, "%d %d %d %d %d %hd %hd\n", actor.maxHP, actor.damage, 
+    fprintf(fp, "%d %d %d %d %d %hd %hd\n", actor.maxHP, actor.deltaHP, 
                 actor.spriteIdx, actor.x, actor.y, actor.palette, 
                 actor.paletteOverride);
 
@@ -174,7 +174,7 @@ int readActor(actor_t* actor, FILE* fp) {
         return -1;
     }
 
-    int ret = fscanf(fp, "%d %d %d %d %d %hd %hd\n", &actor->maxHP, &actor->damage, 
+    int ret = fscanf(fp, "%d %d %d %d %d %hd %hd\n", &actor->maxHP, &actor->deltaHP, 
                         &actor->spriteIdx, &actor->x, &actor->y, &actor->palette, 
                         &actor->paletteOverride);
 
