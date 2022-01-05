@@ -89,9 +89,7 @@ int mkActor(actor_t * actor, const char * name, const char * status, int maxHP, 
     }
 
     // Zero-fill the actor struct
-    for(size_t i = 0; i < sizeof(*actor); ++i) {
-        ((char *) actor)[i] = 0;
-    }
+    memset(actor, 0, sizeof(actor_t));
 
     // Copy the name and status into the actor
     if(cpyName(&actor->name, name) < 0) {

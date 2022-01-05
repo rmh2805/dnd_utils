@@ -8,6 +8,10 @@
 #define max(a, b) ((a > b) ? a : b)
 #endif
 
+#ifndef abs
+#define abs(a) (((a < 0) ? -1 : 1) * a)
+#endif
+
 //==================================<Helpers>=================================//
 /**
  * Returns the screen position of a tile
@@ -151,16 +155,53 @@ void addTileWalls(tileData_t * data, tile_t tile, int scrX, int scrY, int x, int
 
 }
 
-void addActorSprite(tileData_t * data, list_t actorSprites, actor_t actor, int scrX, int scrY) {
+
+void addActorSprite(tileData_t * data, actorData_t actorData, actor_t actor, int scrX, int scrY) {
     if(data == NULL) {
         return;
     }
 
+    list_t actorSprites = actorData.actorSprites;
+
     // Get the proper sprite
     sprite_t sprite;
     if(actor.spriteIdx < 0) {           // Get the default sprite
-        // TODO: Handle the default sprite
-        return; 
+        sprite = actorData.defActorSprite;
+        if(sprite.data == NULL) return;
+
+        // Clear out the default sprite
+        for(int row = 0; row < sprite.height; ++row) {
+            memset(sprite.data[row], ' ', sprite.width);
+        }
+
+        // Copy across name
+        if(actor.name != NULL && sprite.height >= 1) {
+            memcpy(sprite.data[0], actor.name, min(strlen(actor.name), sprite.width));
+        }
+
+        // Copy across status
+        if(actor.status != NULL && sprite.height >= 2) {
+            memcpy(sprite.data[1], actor.status, min(srlen(actor.status), sprite.width));
+        }
+
+        // Copy across current hp (or change in hp)
+        if(sprite.height >= 3) {
+            // Create a buffer to fit the max size hp, a sign, and a null char
+            char buf[kActorMaxHPDigits + 2];
+
+            // Get the current (or delta if max is unknown) HP of the actor
+            int val = ((actor.maxHP < 0) ? 0 : actor.maxHP) + actor.deltaHP;
+
+            // Ensure that the val will fit the buffer
+            val = min(kActorMaxHP, max(-1*kActorMaxHP, val));
+
+            // Copy the val to the buffer
+            sprintf(buf, "%c%d", (val == 0) ? ' ' : ((val < 0) ? '-' : '+'), abs(val));
+
+            // Copy the generated string from the buffer to the sprite
+            memcpy(sprite.data[sprite.height-1], buf, 
+                    min(strlen(buf), min(sprite.width, kActorMaxHPDigits+2)));
+        }
     } else if(actorSprites == NULL ||   // Get the sprite from list
             (unsigned int) actor.spriteIdx >= listLen(actorSprites)) {
         sprite = *(sprite_t*) listGet(actorSprites, actor.spriteIdx);
@@ -422,8 +463,12 @@ int mapSectionToFile(tileData_t data, map_t map, FILE* file,
 
 //==============================<Actor Display>===============================//
 
-void addActorsHelper(tileData_t* data, list_t actorList, list_t actorSprites, 
+void addActorsHelper(tileData_t* data, list_t actorList, actorData_t actorData, 
                     int scrX, int scrY, int maxX, int maxY) {
+    if(actorList == NULL) {
+        return;
+    }
+
     unsigned int len = listLen(actorList);
     for(unsigned int i = 0; i < len; ++i) {
         actor_t actor = *(actor_t*) listGet(actorList, i);
@@ -432,7 +477,7 @@ void addActorsHelper(tileData_t* data, list_t actorList, list_t actorSprites,
             continue;
         }
 
-        addActorSprite(data, actorSprites, actor, scrX, scrY);
+        addActorSprite(data, actorData, actor, scrX, scrY);
     }
 }
 
@@ -450,9 +495,9 @@ int addActors(tileData_t* data, map_t map, actorData_t actors, int x, int y) {
     maxY = min(map.nRows, scrY + height);
 
     // Try to put each actor on screen
-    addActorsHelper(data, actors.npcActors, actors.actorSprites, scrX, scrY, maxX, maxY);
-    addActorsHelper(data, actors.enemyActors, actors.actorSprites, scrX, scrY, maxX, maxY);
-    addActorsHelper(data, actors.pcActors, actors.actorSprites, scrX, scrY, maxX, maxY);
+    addActorsHelper(data, actors.npcActors, actors, scrX, scrY, maxX, maxY);
+    addActorsHelper(data, actors.enemyActors, actors, scrX, scrY, maxX, maxY);
+    addActorsHelper(data, actors.pcActors, actors, scrX, scrY, maxX, maxY);
 
     return 0;
 }

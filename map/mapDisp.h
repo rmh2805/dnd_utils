@@ -8,6 +8,8 @@
 #include "map.h"
 #include "actor.h"
 
+#define kActorMaxHPDigits 4
+#define kActorMaxHP    9999
 
 //==============================<Sprite Display>==============================//
 /**
