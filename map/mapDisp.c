@@ -285,7 +285,6 @@ void setCursor(tileData_t data, map_t map, int x, int y) {
 }
 
 //todo Consider replacing this with a general buffer to file function
-
 int mapSectionToFile(tileData_t data, map_t map, FILE* file, 
         int startRow, int startCol, int endRow, int endCol, bool doSprites);
 
@@ -425,7 +424,6 @@ int mapSectionToFile(tileData_t data, map_t map, FILE* file,
 
 void addActorsHelper(tileData_t* data, list_t actorList, list_t actorSprites, 
                     int scrX, int scrY, int maxX, int maxY) {
-
     unsigned int len = listLen(actorList);
     for(unsigned int i = 0; i < len; ++i) {
         actor_t actor = *(actor_t*) listGet(actorList, i);
