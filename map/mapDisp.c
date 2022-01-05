@@ -45,6 +45,26 @@ int getScreenRowCol(tileData_t * data, int scrX, int scrY, int x, int y, int * c
     return 0;
 }
 
+/**
+ * Returns the coordinates of the upper-left visible tile of the given map and 
+ * tile data
+ * 
+ * @param data The tile data struct used in display
+ * @param map The map used in display
+ * @param x The x coordinate of the focussed tile
+ * @param y The y coordinate of the focussed tile
+ * 
+ * @param scrX A return pointer for the x of the upper-left tile of the screen
+ * @param scrY A return pointer for the y of the upper-left tile of the screen
+ */
+void getScreenXY(tileData_t data, map_t map, int x, int y, int* scrX, int*scrY) {
+    int width, height;
+    getScreenTileDim(data, &width, &height);
+
+    *scrX = max(min(x - width/2, map.nCols-width), 0);
+    *scrY = max(min(y - height/2, map.nRows-height), 0);
+}
+
 //==============================<Sprite Display>==============================//
 void addSprite(dispData_t * data, sprite_t sprite, short palette, int screenRow, int screenCol) {
     if(data == NULL || data->data == NULL || sprite.data == NULL) return;
@@ -131,6 +151,35 @@ void addTileWalls(tileData_t * data, tile_t tile, int scrX, int scrY, int x, int
 
 }
 
+void addActorSprite(tileData_t * data, list_t actorSprites, actor_t actor, int scrX, int scrY) {
+    if(data == NULL) {
+        return;
+    }
+
+    // Get the proper sprite
+    sprite_t sprite;
+    if(actor.spriteIdx < 0) {           // Get the default sprite
+        // TODO: Handle the default sprite
+        return; 
+    } else if(actorSprites == NULL ||   // Get the sprite from list
+            (unsigned int) actor.spriteIdx >= listLen(actorSprites)) {
+        sprite = *(sprite_t*) listGet(actorSprites, actor.spriteIdx);
+    } else {                            // Illegal sprite idx, just return
+        return;
+    }
+
+    // Get the row and column of the actor's tile
+    int row, col;
+    if(getScreenRowCol(data, scrX, scrY, actor.x, actor.y, &col, &row) != 0) {
+        return;
+    }
+
+    // Add in the sprite itself with the correct palette
+    short palette = (actor.paletteOverride != 0) ? actor.paletteOverride : actor.palette;
+    addSprite(&data->dispData, sprite, palette, row, col);
+
+}
+
 void addTileSprite(tileData_t * data, tile_t tile, int scrX, int scrY, int x, int y) {
     if(data == NULL) return;
     
@@ -184,12 +233,10 @@ void getScreenTileDim(tileData_t data, int * width, int * height) {
 int addMap(tileData_t * data, map_t map, int x, int y) {
     // Determine the position of the screen
     int width, height;  // Width and height of the screen in tiles
+    int scrX, scrY;     // The X & Y coords of the top-left tile 
     getScreenTileDim(*data, &width, &height);
+    getScreenXY(*data, map, x, y, &scrX, &scrY);
 
-    // X & Y coords of the top-left tile (try to center, but stop at map edge)
-    int scrX = max(min(x - width/2, map.nCols-width), 0);
-    int scrY = max(min(y - height/2, map.nRows-height), 0);
-    
     // Draw all tiles on the screen
     for(int dRow = 0; dRow < height && dRow + scrY < map.nRows; dRow++) {
         int row = dRow + scrY;
@@ -370,6 +417,44 @@ int mapSectionToFile(tileData_t data, map_t map, FILE* file,
             fprintf(file, "\n");
         }
     }
+
+    return 0;
+}
+
+//==============================<Actor Display>===============================//
+
+void addActorsHelper(tileData_t* data, list_t actorList, list_t actorSprites, 
+                    int scrX, int scrY, int maxX, int maxY) {
+
+    unsigned int len = listLen(actorList);
+    for(unsigned int i = 0; i < len; ++i) {
+        actor_t actor = *(actor_t*) listGet(actorList, i);
+        
+        if(actor.x < scrX || actor.x >= maxX || actor.y < scrY || actor.y >= maxY) {
+            continue;
+        }
+
+        addActorSprite(data, actorSprites, actor, scrX, scrY);
+    }
+}
+
+int addActors(tileData_t* data, map_t map, actorData_t actors, int x, int y) {
+    if(data == NULL || map.data == NULL) {
+        return -1;
+    }
+    // Determine the position of the screen
+    int width, height;  // Width and height of the screen in tiles
+    int scrX, scrY;     // The X & Y coords of the top-left tile
+    int maxX, maxY;     // The max X and Y coords on screen
+    getScreenTileDim(*data, &width, &height);
+    getScreenXY(*data, map, x, y, &scrX, &scrY);
+    maxX = min(map.nCols, scrX + width);
+    maxY = min(map.nRows, scrY + height);
+
+    // Try to put each actor on screen
+    addActorsHelper(data, actors.npcActors, actors.actorSprites, scrX, scrY, maxX, maxY);
+    addActorsHelper(data, actors.enemyActors, actors.actorSprites, scrX, scrY, maxX, maxY);
+    addActorsHelper(data, actors.pcActors, actors.actorSprites, scrX, scrY, maxX, maxY);
 
     return 0;
 }

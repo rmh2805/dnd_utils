@@ -6,6 +6,7 @@
 #include "sprite.h"
 #include "tile.h"
 #include "map.h"
+#include "actor.h"
 
 
 //==============================<Sprite Display>==============================//
@@ -114,5 +115,20 @@ int mapToFile(tileData_t data, map_t map, FILE* file);
  * @return 0 on success, <0 on failure
  */
 int mapToSections(tileData_t data, map_t map, FILE* file, int pgWidth, int pgHeight, bool doSprites);
+
+//==============================<Actor Display>===============================//
+/**
+ * Buffers actors in the section of the map in view, with focus on the tile at 
+ * position (x,y)
+ * 
+ * @param data The tile data struct to use for display
+ * @param map The map to display atop (for view computation)
+ * @param actors The struct of actor data to display
+ * @param x The x coordinate of the selected tile
+ * @param y The y coordinate of the selected cell
+ * 
+ * @return 0 on success, <0 on failure
+ */
+int addActors(tileData_t* data, map_t map, actorData_t actors, int x, int y);
 
 #endif
