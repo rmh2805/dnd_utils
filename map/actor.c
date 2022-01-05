@@ -34,6 +34,54 @@ int cpyName(char** dst, const char * name) {
 }
 
 //============================<Memory Management>=============================//
+
+int loadActorData(actorData_t* data) {
+    if(data == NULL) {
+        return -1;
+    }
+
+    memset(data, 0, sizeof(actorData_t));
+
+    // Allocate the lists
+    if((data->pcActors = mkList()) == NULL) goto loadActorData_fail;
+    if((data->npcActors = mkList()) == NULL) goto loadActorData_fail;
+    if((data->enemyActors = mkList()) == NULL) goto loadActorData_fail;
+    if((data->actorSprites = mkList()) == NULL) goto loadActorData_fail;
+
+    // Allocate the default sprite
+    data->defActorSprite = mkSprite(kDefPalette, kTileWidth-1, kTileHeight-1, 1, 1);
+    if(data->defActorSprite.data == NULL) goto loadActorData_fail;
+
+    // Initialize the default sprite with whitespace
+    for(int row = 0; row < data->defActorSprite.height; ++row) {
+        memset(data->defActorSprite.data[row], ' ', data->defActorSprite.width);
+    }
+
+    return 0;
+
+loadActorData_fail:
+    rmActorData(*data);
+    return -1;
+}
+
+void rmActorData(actorData_t data) {
+    if(data.actorSprites != NULL) {
+        rmList(data.actorSprites, freeSpriteEntry);
+    }
+    if(data.pcActors != NULL) {
+        rmList(data.pcActors, freeActorEntry);
+    }
+    if(data.npcActors != NULL) {
+        rmList(data.npcActors, freeActorEntry);
+    }
+    if(data.enemyActors != NULL) {
+        rmList(data.enemyActors, freeActorEntry);
+    }
+    if(data.defActorSprite.data != NULL) {
+        rmSprite(data.defActorSprite);
+    }
+}
+
 int mkActor(actor_t * actor, const char * name, const char * status, int maxHP, int deltaHP, int spriteIdx) {
     // Ensure that the actor pointer is not null
     if(actor == NULL) {
@@ -93,30 +141,6 @@ void freeActorEntry(void * data) {
 
     rmActor(*(actor_t *)data);
     free(data);
-}
-
-actorData_t mkActorData() {
-    actorData_t data;
-    for(size_t i = 0; i < sizeof(data); ++i) {
-        ((char*)(&data))[i] = '\0';
-    }
-
-    return data;
-}
-
-void rmActorData(actorData_t data) {
-    if(data.actorSprites != NULL) {
-        rmList(data.actorSprites, freeSpriteEntry);
-    }
-    if(data.pcActors != NULL) {
-        rmList(data.pcActors, freeActorEntry);
-    }
-    if(data.npcActors != NULL) {
-        rmList(data.npcActors, freeActorEntry);
-    }
-    if(data.enemyActors != NULL) {
-        rmList(data.enemyActors, freeActorEntry);
-    }
 }
 
 //===============================<File Access>================================//

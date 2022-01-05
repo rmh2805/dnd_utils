@@ -8,6 +8,7 @@
 #include "../common/list.h"
 
 #include "sprite.h"
+#include "wallSprites.h"
 
 typedef struct actor_s {
     // Strings
@@ -33,9 +34,29 @@ typedef struct actorData_s {
     list_t enemyActors;
 
     list_t actorSprites;
+
+    sprite_t defActorSprite;
 } actorData_t;
 
 //============================<Memory Management>=============================//
+
+/**
+ * Allocates and initializes an empty actorData struct
+ * 
+ * @param data A return pointer for the actor data struct
+ * 
+ * @return 0 on success, <0 on failure
+ */
+int loadActorData(actorData_t* data);
+
+
+/**
+ * Frees all data allocated for an actor data struct
+ * 
+ * @param data The actor data struct to free
+ */
+void rmActorData(actorData_t data);
+
 /**
  * Allocates data for a new actor
  * 
@@ -71,20 +92,6 @@ actor_t* mkActorEntry(actor_t actor);
  * @param data A pointer to an actor on the heap
  */
 void freeActorEntry(void * data);
-
-/**
- * Creates a new actor data struct
- * 
- * @return A nulled-out actor data
- */
-actorData_t mkActorData();
-
-/**
- * Frees all data associated with an actor data struct
- * 
- * @param data The actor struct to release
- */
-void rmActorData(actorData_t data);
 
 //===============================<File Access>================================//
 
