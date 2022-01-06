@@ -10,6 +10,8 @@
 #include "sprite.h"
 #include "wallSprites.h"
 
+#include "map.h"
+
 typedef struct actor_s {
     // Strings
     char * name;    // The name of the character
@@ -135,5 +137,25 @@ int writeActorEntry(actor_t* entry, FILE* fp);
  * @return 0 on success, <0 on failure
  */
 int readActorEntry(actor_t** entry, FILE* fp);
+
+/**
+ * Writes out an actor data struct to file
+ * 
+ * @param data The actor data file to write to file
+ * @param fp The file to write to
+ * 
+ * @return 0 on success, <0 on failure
+ */
+int writeActorData(actorData_t data, FILE* fp);
+
+/**
+ * Creates a new actor data struct and initializes it from file
+ * 
+ * @param data A return pointer for the actor data struct
+ * @param fp The file to read from
+ * 
+ * @return 0 on success, <0 on failure
+ */
+int readActorData(actorData_t* data, FILE* fp);
 
 #endif

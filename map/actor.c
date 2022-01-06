@@ -235,3 +235,33 @@ int readActorEntry(actor_t** entry, FILE* fp) {
     // Return success
     return 0;
 }
+
+int writeActorData(actorData_t data, FILE* fp) {
+    if(fp == NULL) return -1;
+
+    if(saveList(data.pcActors, fp, writeActorEntry) < 0) return -1;
+    if(saveList(data.enemyActors, fp, writeActorEntry) < 0) return -1;
+    if(saveList(data.npcActors, fp, writeActorEntry) < 0) return -1;
+    if(saveList(data.actorSprites, fp, writeSpriteEntry) < 0) return -1;
+
+    return 0;
+}
+
+int readActorData(actorData_t* data, FILE* fp) {
+    if(data == NULL || fp == NULL) return -1;
+
+    // Initialize the actor data struct
+    if(loadActorData(data) < 0) return -1;
+
+    // Load in the lists from file
+    if(loadList(&data->pcActors, fp, readActorEntry) < 0) goto readActorData_fail;
+    if(loadList(&data->enemyActors, fp, readActorEntry) < 0) goto readActorData_fail;
+    if(loadList(&data->npcActors, fp, readActorEntry) < 0) goto readActorData_fail;
+    if(loadList(&data->actorSprites, fp, readSpriteEntry) < 0) goto readActorData_fail;
+
+    return 0;
+
+readActorData_fail:
+    rmActorData(*data);
+    return -1;
+}

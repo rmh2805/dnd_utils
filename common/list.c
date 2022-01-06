@@ -84,6 +84,11 @@ void rmList(list_t list, freeFxn_t freeFxn) {
 int saveList(list_t list, FILE* fp, int (* writeEntry)(void*, FILE*)) {
     if(fp == NULL || writeEntry == NULL) return -1;
 
+    if(list == NULL) {
+        fprintf(fp, "0\n");
+        return 0;
+    }
+
     fprintf(fp, "%u\n", list->length);
 
     node_t node = list->start;
