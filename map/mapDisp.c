@@ -181,7 +181,7 @@ void addActorSprite(tileData_t * data, actorData_t actorData, actor_t actor, int
 
         // Copy across status
         if(actor.status != NULL && sprite.height >= 2) {
-            memcpy(sprite.data[1], actor.status, min(srlen(actor.status), sprite.width));
+            memcpy(sprite.data[1], actor.status, min(strlen(actor.status), sprite.width));
         }
 
         // Copy across current hp (or change in hp)
