@@ -19,12 +19,12 @@ CFLAGS=-Wall -std=c99 -Wextra -pedantic -ggdb
 #
 #	Main Target
 #
-main: playMap
+main: makeCast
 
 #
 #	Multiple Targets
 #
-all: tests makeSprite makeMap randMap dispMap
+all: tests makeSprite makeMap randMap dispMap playMap makeCast
 
 tests: testSprite
 
@@ -48,6 +48,10 @@ dispMap: dispMap.o sprite.o tile.o map.o list.o dispBase.o mapDisp.o
 	$(ECHO)
 
 playMap: playMap.o sprite.o tile.o map.o list.o dispBase.o mapDisp.o actor.o
+	$(CC) $(CFLAGS) $(CDEBUGFLAGS) -o $@ $^ $(CLIBS)
+	$(ECHO)
+
+makeCast: makeCast.o sprite.o tile.o map.o list.o dispBase.o mapDisp.o actor.o
 	$(CC) $(CFLAGS) $(CDEBUGFLAGS) -o $@ $^ $(CLIBS)
 	$(ECHO)
 

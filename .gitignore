@@ -15,6 +15,7 @@ map/makeMap
 map/randMap
 map/dispMap
 map/playMap
+map/makeCast
 
 map/sprites/*
 !map/sprites/sprites.out
