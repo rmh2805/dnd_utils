@@ -125,7 +125,7 @@ int readActor(actor_t* actor, FILE* fp);
  * 
  * @return 0 on success, <0 on failure
  */
-int writeActorEntry(actor_t* entry, FILE* fp);
+int writeActorEntry(void* entry, FILE* fp);
 
 
 /**
@@ -136,7 +136,7 @@ int writeActorEntry(actor_t* entry, FILE* fp);
  * 
  * @return 0 on success, <0 on failure
  */
-int readActorEntry(actor_t** entry, FILE* fp);
+int readActorEntry(void** entry, FILE* fp);
 
 /**
  * Writes out an actor data struct to file
@@ -157,5 +157,29 @@ int writeActorData(actorData_t data, FILE* fp);
  * @return 0 on success, <0 on failure
  */
 int readActorData(actorData_t* data, FILE* fp);
+
+/**
+ * Writes out a play session (map w/ overrides and actor w/ overrides) to file
+ * 
+ * @param data The actor data struct to write out
+ * @param map The map to write out
+ * @param mapSprites The list of map sprites to write out
+ * @param fp The file to write to
+ * 
+ * @return 0 on success, <0 on failure
+ */
+int writePlaySession(actorData_t data, map_t map, list_t mapSprites, FILE* fp);
+
+/**
+ * Allocates data structs for and reads in a play session's data from file
+ * 
+ * @param data A return pointer for actor data struct read in
+ * @param map A return pointer for map read in
+ * @param mapSprites A return pointer for the map sprite list to read in
+ * @param fp The file to read from
+ * 
+ * @return 0 on success, <0 on failure
+ */
+int readPlaySession(actorData_t* data, map_t* map, list_t* mapSprites, FILE* fp);
 
 #endif

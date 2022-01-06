@@ -208,16 +208,16 @@ int readActor(actor_t* actor, FILE* fp) {
     return 0;
 }
 
-int writeActorEntry(actor_t* entry, FILE* fp) {
-    return writeActor(*entry, fp);
+int writeActorEntry(void* entry, FILE* fp) {
+    return writeActor(*(actor_t*)entry, fp);
 }
 
-int readActorEntry(actor_t** entry, FILE* fp) {
+int readActorEntry(void** entry, FILE* fp) {
     if(entry == NULL) return -1;
 
     // Free any pre-existing actor
     if(*entry != NULL) {
-        freeActorEntry(*entry);
+        freeActorEntry(*(actor_t**)entry);
     }
 
     // Read the actor in to the stack
@@ -227,7 +227,7 @@ int readActorEntry(actor_t** entry, FILE* fp) {
     }
 
     // Move the actor from stack to heap
-    if((*entry = mkActorEntry(actor)) == NULL) {
+    if((*(actor_t**)entry = mkActorEntry(actor)) == NULL) {
         rmActor(actor);
         return -1;
     }
@@ -264,4 +264,42 @@ int readActorData(actorData_t* data, FILE* fp) {
 readActorData_fail:
     rmActorData(*data);
     return -1;
+}
+
+int writePlaySession(actorData_t data, map_t map, list_t mapSprites, FILE* fp) {
+    if(fp == NULL) return -1;
+
+    // Write the actor data to file
+    if(writeActorData(data, fp) < 0) return -1;
+    if(writeMapOverrides(map, mapSprites, fp) < 0) return -1;
+
+    // Return succes
+    return 0;
+}
+
+
+int readPlaySession(actorData_t* data, map_t* map, list_t* mapSprites, FILE* fp) {
+    if(data == NULL || map == NULL || mapSprites == NULL || fp == NULL) {
+        return -1;
+    }
+
+    // First allocate the basic sprite list
+    if((*mapSprites = mkList()) == NULL) {
+        return -1;
+    }
+
+    // Read in the actor data from file (read fxn does allocation)
+    if(readActorData(data, fp) < 0) {
+        rmList(*mapSprites, freeSpriteEntry);
+        return -1;
+    }
+
+    // Read in the map from file
+    if(loadMapOverrides(map, mapSprites, fp) < 0) {
+        rmActorData(*data);
+        return -1;
+    }
+
+    // Return success
+    return 0;
 }
