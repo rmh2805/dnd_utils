@@ -283,18 +283,12 @@ int readPlaySession(actorData_t* data, map_t* map, list_t* mapSprites, FILE* fp)
         return -1;
     }
 
-    // First allocate the basic sprite list
-    if((*mapSprites = mkList()) == NULL) {
-        return -1;
-    }
-
     // Read in the actor data from file (read fxn does allocation)
     if(readActorData(data, fp) < 0) {
-        rmList(*mapSprites, freeSpriteEntry);
         return -1;
     }
 
-    // Read in the map from file
+    // Read in the map and sprites from file
     if(loadMapOverrides(map, mapSprites, fp) < 0) {
         rmActorData(*data);
         return -1;
