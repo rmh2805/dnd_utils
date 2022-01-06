@@ -260,6 +260,42 @@ void * listPut(list_t list, unsigned int idx, void * data) {
     return oldData;
 }
 
+int listCat(list_t dst, list_t src) {
+    if(dst == NULL || src == NULL) {
+        return -1;
+    }
+
+    // Check that there are valid entries
+    if(src->length == 0) return 0;
+
+    // Check that the src nodes are valid
+    if(src->start == NULL || src->end == NULL) return -2;
+
+    // Branch b/n empty and non-empty dst
+    if(dst->length == 0) {
+        // Copy across src's start node
+        dst->start = src->start;
+    } else {
+        // Ensure that dst's references are valid
+        if(dst->start == NULL || dst->end == NULL) return -3;
+
+        // Append src's node chain to src's
+        dst->end->next = src->start;
+    }
+
+    // Update dst's end node to src's
+    dst->end = src->end;
+
+    // Update dst's length
+    dst->length += src->length;
+
+    // Free src (but not its nodes)
+    free(src);
+
+    // Return success
+    return 0;
+}
+
 //=================================<Getters>==================================//
 /**
  * Gets the element at the provided index

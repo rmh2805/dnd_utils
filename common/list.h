@@ -99,6 +99,17 @@ int listInsert(list_t list, unsigned int idx, void * data);
  */
 void * listPut(list_t list, unsigned int idx, void * data);
 
+/**
+ * Appends the entries of src onto dst and frees the src list 
+ * (but not its entries)
+ * 
+ * @param dst The destination list (has entries appended)
+ * @param src The source list (gets freed)
+ * 
+ * @return 0 on success, <0 on failure
+ */
+int listCat(list_t dst, list_t src);
+
 //=================================<Getters>==================================//
 /**
  * Gets the element at the provided index
