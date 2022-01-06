@@ -141,7 +141,7 @@ int main(int argc, char** argv) {
             if(mode == menu && !mapLoaded) {
                 for(y = 0; menuModes[y] != mapLoad && y < menuSize; ++y);
                 y = y % menuSize;
-            } else if (mode == nav && mapLoaded) {
+            } else if (mode == nav) {
                 x = map.nCols/2;
                 y = map.nRows/2;
             } else {
@@ -275,7 +275,7 @@ int main(int argc, char** argv) {
                     case KEY_HOME:
                     case '`':
                     case '~':
-                        mode = quit;
+                        mode = menu;
                         break;
                 }
                 break;
